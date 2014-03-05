@@ -1,0 +1,106 @@
+#!/usr/bin/python2
+# ppaml -- top-level PPAML tool launcher        -*- coding: us-ascii -*-
+# Copyright (C) 2014  Galois, Inc.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or (at
+# your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# To contact Galois, complete the Web form at
+# <http://corp.galois.com/contact/> or write to Galois, Inc., 421
+# Southwest 6th Avenue, Suite 300, Portland, Oregon, 97204-1622.
+
+"""Top-level PPAML launcher.
+
+This script dispatches to the appropriate PPAML subcommand (a la git).
+
+"""
+
+# Well, not exactly.  This script would dispatch to the appropriate
+# PPAML subcommand, but at this point in execution, it has no guarantee
+# that the PPAML library is even installed.
+#
+# Some may shudder at this evident user distrust.  After all, the script
+# is distributed as part of a Distutils package!  However, users will
+# inevitably copy the script around without regard to properly running
+# setup.py, and eventually, somebody is going to try to run this script
+# without  the ppaml_client library installed.
+#
+# One can argue that if users fail to correctly install the ppaml_client
+# library, they deserve the stack trace they'll indubitably receive.  In
+# this project, though, it is essential that users never see stack
+# traces for user errors; only programmer errors are grounds for a stack
+# trace.
+#
+# Consequentially, this script really does exactly one thing: checks
+# dependencies so ppaml_client can make reasonable assumptions about its
+# environment.  This may seem like a violation of the
+# easier-to-ask-forgiveness-than-permission principle, but asking for
+# forgiveness in this case (e.g., by not checking dependencies until
+# they are actually required) could cause the script to work for several
+# minutes before terminating with a frustrating "Required library not
+# found" message.  No, it is better in this case to ask permission and
+# fail fast if the environmental requirements are unsatisfied.
+
+
+__version__ = "0.1.0"
+
+
+import sys
+
+
+if __name__ != '__main__':
+    raise ImportError("ppaml is a script; the library is ppaml_client")
+
+
+if sys.version < '2.6':
+    print >> sys.stderr, "ppaml requires Python 2.6 or 2.7"
+    sys.exit(1)
+
+
+def missing_dependency(description):
+    """Report a missing dependency and exits with exit status 2."""
+    print >> sys.stderr, "ppaml requires " + description
+    sys.exit(2)
+
+
+def require(module, version=None):
+    """Attempts to import a module, exiting if it fails."""
+    module_description = (module +
+                          ("" if version is None
+                              else " >={0}".format(version)))
+    try:
+        exec 'import ' + module
+    except ImportError:
+        missing_dependency(module_description)
+    else:
+        if version is not None and eval(module).__version__ < version:
+            missing_dependency(module_description)
+
+
+require('argparse', '1.1')
+require('configobj', '4.7')
+require('lockfile')
+require('psutil', '0.5')
+require('validate', '1.0')
+
+
+# With dependencies checked, dispatch off to the ppaml_client main
+# script.
+#
+# In an ideal world, the contents of that script would simply live here.
+# But I'd like to use some __future__ imports, which must be the first
+# code in a module.  At the start of this module, we had no guarantee
+# that __future__ was even available (Python 2.0 did not include it)!
+
+import ppaml_client.main
+ppaml_client.main.main(__version__)
