@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html$if(lang)$ lang="$lang$"$endif$>
+<head>
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+$for(author-meta)$
+<meta name="author" content="$author-meta$">
+$endfor$
+$if(date-meta)$
+<meta name="dcterms.date" content="$date-meta$">
+$endif$
+
+<title>$if(title-prefix)$$title-prefix$ - $endif$$if(pagetitle)$$pagetitle$$endif$</title>
+<!--[if lt IE 9]>
+<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<style type="text/css">
+q { quotes: "“" "”" "‘" "’"; }
+</style>
+
+$for(css)$
+<link rel="stylesheet" href="$css$">
+$endfor$
+
+<style type="text/css">
+body {
+  max-width: 36em;
+  margin-left: 10em;
+  font-size: 12pt;
+  text-align: justify;
+  font-family: sans-serif;
+}
+
+.title, .author, .date {
+  font-weight: normal;
+  text-align: center;
+}
+.title {
+  font-size: 18pt;
+  margin-bottom: 1.2em;
+}
+.author, .date {
+  font-size: 14pt;
+  margin-bottom: 1em;
+}
+.date {
+  margin-bottom: 3em;
+}
+
+nav {
+  margin-bottom: 3em;
+}
+
+pre {
+  margin-left: 2em;
+  margin-right: 2em;
+  background-color: hsl(0, 0%, 96%);
+  border-radius: 3px;
+  /* Force wrapping */
+  /*
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  */
+}
+
+code {
+  background-color: hsl(0, 0%, 96%);
+  border-radius: 3px;
+}
+
+h2 {
+  font-size: 16pt;
+}
+
+h3 {
+  font-size: 14pt;
+}
+
+table {
+  margin-left: 2em;
+  border-spacing: 8px 2px;
+}
+
+footer {
+  font-size: 11pt;
+}
+
+span.A {
+  position: relative;
+  bottom: 0.25em;
+  font-size: 0.75em;
+  margin-left: -0.4em;
+  margin-right: -0.1em;
+  text-transform: uppercase;
+}
+  span.E {
+  position: relative;
+  top: 0.2em;
+  margin-left: -0.15em;
+  margin-right: -0.1em;
+  text-transform: uppercase;
+}
+</style>
+
+</head>
+
+<body>
+$for(include-before)$
+$include-before$
+$endfor$
+
+$if(title)$
+<header>
+<h1 class="title">$title$</h1>
+$for(author)$
+<p class="author">$author$</p>
+$endfor$
+$if(date)$
+<p class="date">$date$</p>
+$endif$
+</header>
+$endif$
+
+$if(toc)$
+<h2>Contents</h2>
+<nav id="$idprefix$TOC">
+$toc$
+</nav>
+$endif$
+
+$body$
+
+$for(include-after)$
+$include-after$
+$endfor$
+</body>
+</html>

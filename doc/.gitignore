@@ -1,0 +1,4 @@
+# .gitignore for PPAML client script documentation                  -*- conf -*-
+
+# Generated documentation
+getting-started.html

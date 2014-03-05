@@ -1,0 +1,13 @@
+# .gitignore for the PPAML client scripts                           -*- conf -*-
+
+# Editor backup files
+*~
+\#*
+.\#*
+
+# Python
+*.pyc
+
+# Distutils
+MANIFEST
+dist/
