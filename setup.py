@@ -76,7 +76,7 @@ require('validate', '1.0')
 # Run the setup program.
 setup(
     name='ppaml_client',
-    version='0.1.0',
+    version='0.1.1',
     description="PPAML client scripts",
     author="Benjamin Barenblat",
     author_email="bbarenblat@galois.com",
