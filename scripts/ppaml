@@ -57,7 +57,7 @@ This script dispatches to the appropriate PPAML subcommand (a la git).
 # fail fast if the environmental requirements are unsatisfied.
 
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 import sys
