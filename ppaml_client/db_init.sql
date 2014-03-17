@@ -39,14 +39,14 @@ PRAGMA user_version = 4;
 CREATE TABLE challenge_problem (
 	id INTEGER PRIMARY KEY,
 
+	description VARCHAR(255) NOT NULL,
+	revision SMALLINT NOT NULL CHECK (revision > 0),
+	url VARCHAR(255) NOT NULL,
+
 	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
 	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP,
-
-	description VARCHAR(255) NOT NULL,
-	revision SMALLINT NOT NULL CHECK (revision > 0),
-	url VARCHAR(255) NOT NULL);
+		DEFAULT CURRENT_TIMESTAMP);
 
 -- Ideally, we'd have a trigger to update meta_updated whenever somebody
 -- changes a row.  Unfortunately, SQLite and PostgreSQL each implements a
@@ -56,14 +56,14 @@ CREATE TABLE challenge_problem (
 CREATE TABLE team (
 	id INTEGER PRIMARY KEY,
 
+	institution VARCHAR(255) NOT NULL,
+	contact_name VARCHAR(255) NOT NULL,
+	contact_email VARCHAR(255) NOT NULL,
+
 	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
 	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP,
-
-	institution VARCHAR(255) NOT NULL,
-	contact_name VARCHAR(255) NOT NULL,
-	contact_email VARCHAR(255) NOT NULL);
+		DEFAULT CURRENT_TIMESTAMP);
 
 CREATE TABLE challenge_problem_and_pps(
 	challenge_problem_id INTEGER NOT NULL
@@ -85,13 +85,13 @@ CREATE TABLE pps (
 		REFERENCES team ON DELETE CASCADE
 		DEFERRABLE INITIALLY DEFERRED,
 
+	description VARCHAR(255),
+	version VARCHAR(255),
+
 	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
 	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP,
-
-	description VARCHAR(255),
-	version VARCHAR(255));
+		DEFAULT CURRENT_TIMESTAMP);
 
 CREATE TABLE artifact (
 	id CHAR(32) PRIMARY KEY,
@@ -109,11 +109,6 @@ CREATE TABLE artifact (
 		REFERENCES pps ON DELETE CASCADE
 		DEFERRABLE INITIALLY DEFERRED,
 
-	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP,
-	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP,
-
 	description VARCHAR(255),
 	version VARCHAR(255),
 	source VARCHAR(255) NOT NULL,
@@ -127,7 +122,12 @@ CREATE TABLE artifact (
 	compiler_ram_average BIGINT CHECK (compiler_ram_average >= 0),
 	compiler_ram_max BIGINT CHECK (compiler_ram_max >= 0),
 	binary VARCHAR(255) NOT NULL,
-	
+
+	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+
 	CHECK (compiler_load_average <= compiler_load_max),
 	CHECK (compiler_ram_average <= compiler_ram_max));
 
@@ -150,11 +150,6 @@ CREATE TABLE run (
 		REFERENCES team ON DELETE CASCADE
 		DEFERRABLE INITIALLY DEFERRED,
 
-	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP,
-	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP,
-
 	started TIMESTAMP WITH TIME ZONE,
 	artifact_configuration VARCHAR(255),
 	output VARCHAR(255),
@@ -166,6 +161,11 @@ CREATE TABLE run (
 	load_max REAL CHECK (load_max >= 0),
 	ram_average BIGINT CHECK (ram_average >= 0),
 	ram_max BIGINT CHECK (ram_max >= 0),
+
+	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
 
 	CHECK (load_average <= load_max),
 	CHECK (ram_average <= ram_max));
@@ -188,11 +188,6 @@ CREATE TABLE environment (
 CREATE TABLE hardware (
 	id INTEGER PRIMARY KEY,
 
-	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP,
-	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP,
-
 	cpu_family INTEGER,
 	cpu_model INTEGER,
 	cpu_model_name VARCHAR(63),
@@ -203,17 +198,22 @@ CREATE TABLE hardware (
 	cpu_cache BIGINT CHECK (cpu_cache > 0),
 	cpu_clock REAL CHECK (cpu_clock > 0),
 
-	ram BIGINT CHECK (ram > 0));
-
-CREATE TABLE software (
-	id INTEGER PRIMARY KEY,
+	ram BIGINT CHECK (ram > 0),
 
 	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
 	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP,
+		DEFAULT CURRENT_TIMESTAMP);
+
+CREATE TABLE software (
+	id INTEGER PRIMARY KEY,
 
 	kernel VARCHAR(31) NOT NULL,
 	kernel_version VARCHAR(63),
 	userland VARCHAR(31),
-	hostname VARCHAR(255) NOT NULL);
+	hostname VARCHAR(255) NOT NULL,
+
+	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
+		DEFAULT CURRENT_TIMESTAMP);
