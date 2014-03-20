@@ -96,8 +96,6 @@ setup(
         ('example', [
                 'example/csv_helper.py',
                 'example/README',
-                'example/run.conf.1',
-                'example/run.conf.2',
                 'example/run_slam',
                 'example/slam_eval',
                 'example/slam.py',
