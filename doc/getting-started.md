@@ -131,9 +131,15 @@ The following python packages are required by the PPAML tools:
  - sqlalchemy
  - validate
 
-These can be installed via:
+These can be installed via pip, such as:
 
-    % pip install --user argparse configobj lockfile procfs psutil sqlalchemy validate
+    % pip install --user argparse
+    % pip install --user configobj
+
+If any of these fail, please check the error message to determine whether or not your
+system is missing a dependency outside of python, such as a C or C++ library.
+Contact the TA1 PPAML team if you run into problems installing the Python dependencies
+and cannot resolve errors on your own.
 
 ## `ppaml` ##
 
@@ -163,7 +169,7 @@ You must also obtain the PPAMLtracer library, which is built on top of libotf an
 convenient bindings to a number of languages that are used by various teams on the PPAML
 project.  This code can be found here:
 
-    URL for PPAML tracer
+    https://github.com/GaloisInc/ppamltracer
 
 The first step is to build and install libotf.  We highly recommend that you follow the
 directions in this guide and avoid installing the library in a system directory like
@@ -196,6 +202,32 @@ these variables:
 
 These will need to be set each time you run the PPAML tools, so be sure to add them
 to your ~/.bashrc or other script that is used to set up your environment.
+
+Now, unpack and configure the ppamltracer library.  
+
+    % cd ~/ppaml/tracer
+    % tar xzvf ~/Downloads/tracer.tar.gz
+    % cd tracer
+
+We will install to the same place we installed libotf, and must
+indicate where the configure script can find the otfconfig program.
+
+    % OTFCONFIG=$HOME/ppaml/installTree/bin/otfconfig ./configure --prefix=$HOME/ppaml/installTree
+
+Now we can build and install:
+
+    % make
+    % make install
+
+At this point, we will need to also install the ppamltracer python bindings.  All language 
+bindings are provided in the bindings subdirectory of the ppamltracer archive.  These can
+be installed via pip:
+
+    % cd bindings/python
+    % pip install --user .
+
+We now have all of the pre-requisite software installed for both the PPAML toolchain as well
+as the example solution to Challenge Problem 1.
 
 # Basic usage #
 
@@ -235,54 +267,33 @@ for challenge problem 1: a Kalman filter.  All the files used in this example
 `example` directory of this distribution.
 
 
-## Installing dependencies ##
-
-Our example requires a couple dependencies beyond what got installed earlier.
-Notably, it needs [SciPy][].  If you installed Anaconda earlier, you have
-SciPy; otherwise, fire up your operating system package manager and install it,
-or download and install it manually.
-
-The example also requires [libotf][] and [ppamltracer][], which you should
-install in that order.  If you’re on GNU/Linux, there’s a good chance libotf is
-packaged for your system (on Debian, install libopen-trace-format-dev); in any
-case, though, both libraries follow the standard `./configure; make; make
-install` procedure.  If you choose to install them into a prefix, make sure you
-set `PATH`, `LIBRARY_PATH`, `LD_LIBRARY_PATH` (or `DYLD_LIBRARY_PATH`), and
-`C_INCLUDE_PATH` to pick up the files installed by the libraries.
-
-Finally, the example requires the Python bindings for ppamltracer, located in
-the `bindings/python` subdirectory of the ppamltracer distribution.  You can
-install the bindings with pip.
-
-    % cd bindings/python
-    % pip install --user .
-
-
 ## Data collection ##
 
-With the dependencies in place, you can proceed to the example.  Like `ppaml`
-and the associated library, the example is a Python script compatible with
-Python 2.6 or 2.7.  Running it yields a nice usage message.
+The evaluation process is best performed by creating a working directory where
+you place the artifact to evaluate and any related data files.
 
-    % cd wherever_you_unpacked/ppaml-*
-    % example="`pwd`"/example
-    % mkdir sandbox
-    % cd sandbox
+    % mkdir ~/ppaml-sandbox
+    % cd ~/ppaml-sandbox
 
-    % cp -a "$example"/{csv_helper,slam,slamutil,test-slamutil}.py .
+In this document, we will work through the CP1 solution that is included with the
+PPAML tools distribution.  Copy the files from the example/ subdirectory of the
+tools distribution to your sandbox:
+
+    % cp -a (location of PPAML tools)/example/{csv_helper,slam,slamutil,test-slamutil}.py .
     % python slam.py
     USAGE: slam.py END_TIME INPUT_DATA_DIR OUTPUT_DATA_DIR
 
-Unfortunately, the usage message doesn’t have quite all the documentation we
-need, for `slam.py` uses the [ppamltracer][] tracing library, which expects an
-environment variable with a trace destination.  Fortunately, that’s easy to
-specify, and so we can pretty easily try out `slam.py` on ten seconds of data.
-The data, [1_straight.tar.bz2](http://ppaml.kitware.com/midas/item/4388), come
+This example is instrumented with the PPAML tracing library, so
+invocation requires us to indicate where traces are to be stored when
+the code is run.  Before we can try it out, download one of the data
+sets that are provided for Challenge Problem 1, such as the basic
+straight path set.  The data,
+[1_straight.tar.bz2](http://ppaml.kitware.com/midas/item/4388), come
 from MIDAS.
 
-    % tar xvf 1_straight.tar.bz2
+    % tar xvf ~/Downloads/1_straight.tar.bz2
     1_straight/
-    [… other output elided …]
+    [... other output elided ...]
     % mkdir /tmp/slam_out
     % PPAMLTRACER_TRACE_BASE=/tmp/slam_out/trace python slam.py 10 1_straight/data/ground /tmp/slam_out
     % ls /tmp/slam_out
@@ -296,19 +307,24 @@ from MIDAS.
     9.720175,-5.39463311078,0.684530275571
     9.93518,-5.38026736461,0.666373478798
 
-Looks good.
+The interface that slam.py presents is not the interface that `ppaml`
+expects.  This is likely to be true with most challenge problem solutions, as
+each solution likely adopts its own parameter set and parameter passing
+style.  To solve this, each solution must be wrapped with a small layer of
+shell or Python code that translates the argument set that the PPAML tools
+present to those that are used by the specific probabalistic program.  The
+SLAM example used here is a good model for how to approach this problem.
 
-Unfortunately, the interface slam.py presents is not the interface that `ppaml`
-expects.  When the time comes, `ppaml` will execute the artifact executable as
+The basic calling pattern that PPAML assumes is:
 
     /path/to/artifact_executable config_file input_dir output_path log_path
 
-Furthermore, `ppaml` does not create `output_path` and `log_path`; it merely
-reserves the names.  The executable itself is responsible for creating either
+`ppaml` does not create `output_path` and `log_path`; it merely
+reserves the names.  The user or executable itself is responsible for creating either
 files or directories at those paths.  However, a bit of shell can easily bridge
-the gap between `ppaml` and slam.py.
+the gap between `ppaml` and slam.py.  We can create a shell script called "run_slam"
+that contains the following:
 
-    % tee <"$example"/run_slam run_slam
     #!/bin/bash -eu
     if (( $# != 4 )); then
         printf "Usage: %s config_file input_dir output_path log_path\n" "$0" >&2
@@ -316,7 +332,8 @@ the gap between `ppaml` and slam.py.
     fi
     mkdir "$3"
     exec python "$(dirname "$0")"/slam.py 10 "$2" "$3"
-    % chmod +x run_slam
+
+Be sure to make this file executable using chmod.
 
 Now it’s time to write a run configuration file.  This master configuration
 file drives all the client tools.  To get a configuration file skeleton, go
