@@ -28,19 +28,51 @@ only become apparent later.
 Your goal is to set up your system such that
 
   - Python 2.6 or 2.7; 
-  - the [PyPI][]-hosted packages [argparse][], [configobj][], [lockfile][],
-    [procfs][], [psutil][], [sqlalchemy][], and [validate][]; and
-  - the `ppaml` tool
+  - the PyPI-hosted packages argparse, configobj, lockfile,
+    procfs, psutil, sqlalchemy, pyxdg, and validate;
+  - the `ppaml` tool; and
+  - the `ppamltracer` library
 
-are all installed and accessible.  Many ways of doing so exist – far too many
-for me to cover in a simple installation document.  We'll cover the most common
-procedure, but you should feel free to deviate from it.  If you get stuck,
-[send us mail](mailto:ppaml-tools@galois.com), and we will assist you in
-identifying the problem and working through it.
+are all installed and accessible.  
 
-## System Pre-requisites ##
+If you get stuck, send us mail (ppaml-support@community.galois.com),
+and we will assist you in identifying the problem and working through
+it.
 
-In order to start, you must have a set of pre-requisites installed on your
+## Download Software ##
+
+Before starting, please make sure you have the following tar archives
+downloaded:
+
+  - OTF-1.12.4salmon.tar.gz
+
+    This can be downloaded from the OTF web page at http://bit.ly/PZ32Eg
+
+  - ppamltracer-X.tar.gz 
+
+    This can be downloaded from the PPAML-Tracer web page at http://FILLMEIN/
+
+  - ppamltools-X.tar.gz
+
+    This can be downloaded from the PPAML-Tools web page at http://FILLMEIN/
+
+Where X is the current version of the corresponding tar archive.  We are
+assuming that you have downloaded these to the Downloads directory in
+your home directory.  If you have placed them elsewhere, make sure to
+adjust the commands that refer to the archives later.
+
+You should also download one of the data sets for challenge problem #1
+from the PPAML MIDAS site.  We recommend using the simplest data set,
+1_straight, as the test case for this tutorial.  This archive is
+assumed to also reside in your Downloads directory as:
+
+  - 1_straight.tar.bz2
+
+    This can be downloaded from the PPAML MIDAS page at http://ppaml.kitware.com/midas/item/4388
+
+## System Prerequisites ##
+
+In order to start, you must have a set of prerequisites installed on your
 machine that are necessary to build the PPAML tools as well as their
 direct dependencies.  If you are installing on a machine that you already
 use for active development, it is quite likely that many (or all) of these
@@ -58,11 +90,17 @@ be installed via the distribution package manager apt:
  - pkg-config
  - autoconf-archive
  - build-essential
+ - python
+ - python-pip
+ - python-dev
+ - python-scipy
 
 These can be installed via the following command executed as root (or via
 sudo from a user account):
 
-    % apt-get install autoconf autotools-dev autoconf-archive automake libtool pkg-config build-essential
+    % apt-get install autoconf autotools-dev autoconf-archive automake \
+                      libtool pkg-config build-essential \
+                      python python-pip python-dev python-scipy
 
 During the installation of these packages, additional dependencies will
 automatically be installed by the package manager.
@@ -77,39 +115,24 @@ of dependencies are:
  - gcc
  - gcc-c++
  - autoconf-archive
+ - python-devel
+ - python-pip
+ - scipy
 
 These can be installed using the yum package manager via:
 
-    % yum install autoconf libtool gcc gcc-c++ autoconf-archive
+    % yum install autoconf libtool gcc gcc-c++ autoconf-archive \
+                  python-devel python-pip scipy
 
-## Python ##
-
-Many systems already have Python 2.6 or 2.7 installed, but may not have 
-necessary dependencies that are used for development purposes and Python
-package management.  These dependencies can be installed via the
-apt package manager on Debian systems via:
-
-    % apt-get install python python-pip python-dev
-
-Similarly, on RedHad-based systems, via:
-
-    % yum install python-devel python-pip
-
-You are also free to build from the Python sources, but this is not
-recommended unless you are very comfortable building compilers and
-interpreters from scratch.
+### Alternative Python ###
 
 An alternative method for obtaining Python and the necessary dependencies is
 to use a pre-built Python distribution intended for use in technical computing.
 The Anaconda Python distribution from Continuum IO has been tested with the
-PPAML tools and is available for Linux, MacOS X, and Windows.
-
-If you want to run the extended example demonstrating the tools applied to
-a basic solution to Challenge Problem 1, you’ll need [SciPy][].  If you
-are using the Anaconda Python distribution, these dependencies are already
-installed.  For users who are working with the Python distribution included
-with your platform package manager, these packages are available in the
-python-scipy package on Debian and the scipy package on Fedora.
+PPAML tools and is available for Linux, MacOS X, and Windows.  If you are working
+on multiple systems and wish to have a consistent Python environment, the use of
+a package such as Anaconda is advantageous since it will provide a consistent set of
+packages and versions across all of the platforms you install it on.
 
 ## Python packages ##
 
@@ -130,62 +153,74 @@ The following python packages are required by the PPAML tools:
  - psutil
  - sqlalchemy
  - validate
+ - pyxdg
 
 These can be installed via pip, such as:
 
     % pip install --user argparse
     % pip install --user configobj
+      [ and so on ... ]
 
 If any of these fail, please check the error message to determine whether or not your
 system is missing a dependency outside of python, such as a C or C++ library.
 Contact the TA1 PPAML team if you run into problems installing the Python dependencies
 and cannot resolve errors on your own.
 
+# Building and installing tools #
+
+## Sandbox creation ##
+
+The best way to work with the PPAML tools is to create a sandbox in
+your home directory or other private location where you can unpack
+the necessary archives and data files.  In this tutorial, we will
+assume that the sandbox is the ``ppaml'' directory in your home
+directory.
+
+    % mkdir ~/ppaml
+    % mkdir ~/ppaml/installTree
+
 ## `ppaml` ##
 
-`ppaml` is not in PyPI, but you can still install it using pip.
+The first step is to install the PPAML tools.  Start by un-archiving
+them in the sandbox directory that you created.  We will need to
+access files to run through the example contained in this archive
+later, so keep the directory after you do the installation.
 
-    % pip install --user ppaml-*.tar.bz2
+    % cd ~/ppaml
+    % tar xzvf ~/Downloads/ppamltools-X.tar.gz
+    % cd ppamltools-X
 
+The PPAML tools are easy to install in your home directory using pip.
+
+    % pip install --user .
+
+If the directory that pip installs binaries is not in your path, such
+as ~/.local/bin, then you must add it now.
+
+    % export PATH=$PATH:~/.local/bin
 
 ## ``ppamltracer'' ##
 
-The PPAML evaluation tools provide a tracing library that can be used by probabilistic
-programs to measure their performance at a finer granularity than simply recording
-the overall wallclock execution time.  The tracing library is optional for use by
-TA2-4 teams in their official evaluation. The example described
-in this tutorial for the Challenge Problem 1 solution supports tracing to illustrate
-how one would apply the tracing library to your own probabilistic programs.  In order
-to avoid requiring the tracing library dependency, please see the source code for the
-example and uncomment the lines accompanied by a comment reading "UNCOMMENT FOR TRACING".
+The PPAML evaluation tools provide a tracing library that can be used
+by probabilistic programs to measure their performance at a finer
+granularity than simply recording the overall wallclock execution
+time.  The tracing library is optional for use by TA2-4 teams in their
+official evaluation. The example described in this tutorial for the
+Challenge Problem 1 solution requires the tracing library to
+illustrate how one would apply it to your own probabilistic programs.
 
-Installation of the PPAML tracing library has a single pre-requisite: the Open
-Trace Format (OTF) library.  This library must be compiled from sources.  It can be
-downloaded from this web page:
+Installation of the PPAML tracing library has a single prerequisite:
+the Open Trace Format (OTF) library that was downloaded earlier.  This
+library must be compiled from sources.
 
-    http://tu-dresden.de/die_tu_dresden/zentrale_einrichtungen/zih/forschung/projekte/otf
-
-You must also obtain the PPAMLtracer library, which is built on top of libotf and provides
-convenient bindings to a number of languages that are used by various teams on the PPAML
-project.  This code can be found here:
-
-    https://github.com/GaloisInc/ppamltracer
-
-The first step is to build and install libotf.  We highly recommend that you follow the
-directions in this guide and avoid installing the library in a system directory like
-/usr or /usr/local.  First, create a directory for building and installing libotf:
-
-    % mkdir -p ~/ppaml/tracer
-    % mkdir -p ~/ppaml/installTree
-    % cd ~/ppaml/tracer
-
-Un-tar the libotf file into that location after downloading it from the URL above.
+The first step is to build and install libotf.  Un-tar the libotf file
+into the sandbox and enter the directory.
 
     % tar xzvf ~/Downloads/OTF-1.12.4salmon.tar.gz
-
-We now configure it and install into the directory we created:
-
     % cd OTF-1.12.4salmon
+
+We now configure it and install into the sandbox:
+
     % ./configure --prefix=$HOME/ppaml/installTree
 
 Build and install it with the following two commands:
@@ -200,14 +235,17 @@ these variables:
     % export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/ppaml/installTree/lib
     % export LIBRARY_PATH=$LIBRARY_PATH:$HOME/ppaml/installTree/lib
 
+If you are on OSX, you need to set the DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH.
+The value that you assign to the variable is the same as above.
+
 These will need to be set each time you run the PPAML tools, so be sure to add them
 to your ~/.bashrc or other script that is used to set up your environment.
 
 Now, unpack and configure the ppamltracer library.  
 
-    % cd ~/ppaml/tracer
-    % tar xzvf ~/Downloads/tracer.tar.gz
-    % cd tracer
+    % cd ~/ppaml
+    % tar xzvf ~/Downloads/ppamltracer-X.tar.gz
+    % cd ppamltracer-X
 
 We will install to the same place we installed libotf, and must
 indicate where the configure script can find the otfconfig program.
@@ -226,7 +264,7 @@ be installed via pip:
     % cd bindings/python
     % pip install --user .
 
-We now have all of the pre-requisite software installed for both the PPAML toolchain as well
+We now have all of the prerequisite software installed for both the PPAML toolchain as well
 as the example solution to Challenge Problem 1.
 
 # Basic usage #
