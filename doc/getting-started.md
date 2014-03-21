@@ -157,78 +157,45 @@ Installation of the PPAML tracing library has a single pre-requisite: the Open
 Trace Format (OTF) library.  This library must be compiled from sources.  It can be
 downloaded from this web page:
 
-http://tu-dresden.de/die_tu_dresden/zentrale_einrichtungen/zih/forschung/projekte/otf
+    http://tu-dresden.de/die_tu_dresden/zentrale_einrichtungen/zih/forschung/projekte/otf
 
+You must also obtain the PPAMLtracer library, which is built on top of libotf and provides
+convenient bindings to a number of languages that are used by various teams on the PPAML
+project.  This code can be found here:
 
+    URL for PPAML tracer
 
+The first step is to build and install libotf.  We highly recommend that you follow the
+directions in this guide and avoid installing the library in a system directory like
+/usr or /usr/local.  First, create a directory for building and installing libotf:
 
+    % mkdir -p ~/ppaml/tracer
+    % mkdir -p ~/ppaml/installTree
+    % cd ~/ppaml/tracer
 
+Un-tar the libotf file into that location after downloading it from the URL above.
 
+    % tar xzvf ~/Downloads/OTF-1.12.4salmon.tar.gz
 
-<!-- [ppamltracer][] has two components: a C library and Python bindings. -->
+We now configure it and install into the directory we created:
 
+    % cd OTF-1.12.4salmon
+    % ./configure --prefix=$HOME/ppaml/installTree
 
+Build and install it with the following two commands:
 
-<!-- [ppamltracer][] isn’t in PyPI, but you can still install it using pip. -->
+    % make
+    % make install
 
+Now, we need to set up a couple of environment variables that are used by the PPAML
+tools to find the shared library that we just built.  Be sure to set both of
+these variables:
 
+    % export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/ppaml/installTree/lib
+    % export LIBRARY_PATH=$LIBRARY_PATH:$HOME/ppaml/installTree/lib
 
-
-
-<!--   - the [ppamltracer][] package and its associated Python bindings; and -->
-
-<!-- If you don’t have it -->
-<!-- installed, though, you can install it either through your system’s package manager -->
-
-
-
-
-
-
-<!--    1. Would you like to evaluate a program?  If not, then you’re in the wrong -->
-<!--       place, and you need to find other software to do what you want. -->
-<!--       Otherwise, proceed to step X. -->
-<!--    2. Do you have [Python][] 2.6 or 2.7 installed on your system?  If so, skip -->
-<!--       to step X; otherwise, proceed to step X. -->
-<!--    3. Install Python 2.6 or 2.7 in whatever way you prefer.  Reasonable ways -->
-<!--       include `aptitude`, `apt-get`, `yum`, `dpkg`, `rpm`, `port`, `brew`, -->
-<!--       `fink`, `emerge`, and `./configure;make install`.  When you are done, -->
-<!--       proceed to step X. -->
-<!--    4. Would you like to work through an example  -->
-
-
-
-<!-- Currently, the tools are compatible with Python 2.6 and 2.7.  You’ll first need -->
-<!-- to install dependencies – namely, -->
-
-<!--   - [argparse](https://pypi.python.org/pypi/argparse) (necessary only if you -->
-<!--     have Python 2.6) -->
-<!--   - [configobj](https://pypi.python.org/pypi/configobj/4.7.2) -->
-<!--   - [lockfile](https://pypi.python.org/pypi/lockfile) -->
-<!--   - [procfs](https://pypi.python.org/pypi/procfs) -->
-<!--   - [psutil](https://pypi.python.org/pypi/psutil) -->
-<!--   - [validate](https://pypi.python.org/pypi/validate) -->
-
-<!-- You can install the packages manually, but [pip][] (the Python package manager) -->
-<!-- will make your life much happier. -->
-
-<!-- <\!-- TODO: This code overflows its allocated space in the HTML version.  How do -->
-<!-- we deal with that? -\-> -->
-
-<!--     % pip install --user argparse configobj lockfile procfs psutil validate -->
-
-<!-- This installs the required packages to `~/.local/lib`.  If you’re root, you can -->
-<!-- leave off the `--user` to install them to `/usr/local/lib`.  If you’d rather -->
-<!-- install the packages somewhere other than `~/.local/lib`, you can use the -->
-<!-- `--target` option to `pip`; you’ll need to set `PYTHONPATH` correctly. -->
-
-<!-- Once the dependencies are in place, you can actually install the package. -->
-
-<!--     # python setup.py install --user -->
-
-<!-- Again, this installs the package to `~/.local/lib` (and the executable to -->
-<!-- `~/.local/bin`).  Make sure those locations are in your `PATH`. -->
-
+These will need to be set each time you run the PPAML tools, so be sure to add them
+to your ~/.bashrc or other script that is used to set up your environment.
 
 # Basic usage #
 
