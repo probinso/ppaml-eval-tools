@@ -37,7 +37,7 @@ import contextlib
 import sys
 import scipy.io
 import numpy
-import pylab
+# import pylab
 import math
 from csv_helper import *
 from slamutil import *
@@ -284,9 +284,9 @@ with open(slam_landmarkfile, 'wb') as csvfile:
   for i in range(numpy.shape(estLocsX)[0]):
     lm_writer.writerow([estLocsX[i], estLocsY[i]])
 
-if plotting_on:
-  pylab.hold(True)
-  pylab.plot(truep[0,:],truep[1,:],'g-',deadr[0,:],deadr[1,:],'r-')
-  pylab.scatter(estLocsX,estLocsY,s=10,c='r')
-  pylab.hold(False)
-  pylab.show()
+#if plotting_on:
+#  pylab.hold(True)
+#  pylab.plot(truep[0,:],truep[1,:],'g-',deadr[0,:],deadr[1,:],'r-')
+#  pylab.scatter(estLocsX,estLocsY,s=10,c='r')
+#  pylab.hold(False)
+#  pylab.show()
