@@ -10,8 +10,9 @@ This document is written in Pandoc-flavored Markdown.  Have a look at
 
 Copyright ©  2014  Galois, Inc.
 
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
 
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
@@ -22,15 +23,16 @@ are permitted provided that the following conditions are met:
      endorse or promote products derived from this documentation without
      specific prior written permission.
 
-**This documentation is provided by Galois and other contributors “as is” and
-any express or implied warranties, including, but not limited to, the implied
-warranties of merchantability and fitness for a particular purpose are
-disclaimed.  In no event shall Galois or other contributors be liable for any
-direct, indirect, incidental, special, exemplary, or consequential damages
-(including, but not limited to, procurement of substitute goods or services;
-loss of use, data, or profits; or business interruption) however caused and on
-any theory of liability, whether in contract, strict liability, or tort
-(including negligence or otherwise) arising in any way out of the use of this
+**This documentation is provided by Galois and other contributors “as
+is” and any express or implied warranties, including, but not limited
+to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed.  In no event shall Galois or other
+contributors be liable for any direct, indirect, incidental, special,
+exemplary, or consequential damages (including, but not limited to,
+procurement of substitute goods or services; loss of use, data, or
+profits; or business interruption) however caused and on any theory of
+liability, whether in contract, strict liability, or tort (including
+negligence or otherwise) arising in any way out of the use of this
 documentation, even if advised of the possibility of such damage.**
 
 
@@ -44,9 +46,15 @@ way that we will at Galois.
 # Installing the tools #
 
 As with all research software, the most difficult part of the system is simply
-installing it.  I’ve tested the installation procedure on both
-[Debian GNU/Linux][Debian] v7.4 (“wheezy”) and [OS X][] v10.9 (“Mavericks”),
-but it should work on any GNU/Linux system or any recent version of OS X.
+installing it.  This installation procedure has been tested with:
+
+ - Debain Linux v7.4
+ - Fedora Linux v20
+ - Apple OS X 10.9
+
+The dependency set of the tools was chosen to reflect those available within
+most common Linux distributions released since 2011.  
+
 Please read this entire section before beginning the installation, as you may
 have to make decisions early in the installation process whose effects will
 only become apparent later.
@@ -55,85 +63,111 @@ Your goal is to set up your system such that
 
   - Python 2.6 or 2.7; 
   - the [PyPI][]-hosted packages [argparse][], [configobj][], [lockfile][],
-    [procfs][], [psutil][], and [validate][]; and
+    [procfs][], [psutil][], [sqlalchemy][], and [validate][]; and
   - the `ppaml` tool
 
 are all installed and accessible.  Many ways of doing so exist – far too many
-for me to cover in a simple installation document.  I’ll cover the most common
+for me to cover in a simple installation document.  We'll cover the most common
 procedure, but you should feel free to deviate from it.  If you get stuck,
-[send me mail](mailto:bbarenblat@galois.com), and I’ll help you free yourself.
+[send us mail](mailto:ppaml-tools@galois.com), and we will assist you in
+identifying the problem and working through it.
 
+## System Pre-requisites ##
+
+In order to start, you must have a set of pre-requisites installed on your
+machine that are necessary to build the PPAML tools as well as their
+direct dependencies.  If you are installing on a machine that you already
+use for active development, it is quite likely that many (or all) of these
+dependencies are already installed.
+
+### Debian/Ubuntu Linux ###
+
+If installing on a Debian (or Ubuntu) system, the following packages should
+be installed via the distribution package manager apt:
+
+ - autoconf
+ - automake
+ - libtool
+ - autotools-dev
+ - pkg-config
+ - autoconf-archive
+ - build-essential
+
+These can be installed via the following command executed as root (or via
+sudo from a user account):
+
+    % apt-get install autoconf autotools-dev autoconf-archive automake libtool pkg-config build-essential
+
+During the installation of these packages, additional dependencies will
+automatically be installed by the package manager.
+
+### RedHat/Fedora/Centos Linux ###
+
+A similar process is used on a RedHat (or Fedora and Centos) system.  The set 
+of dependencies are:
+
+ - autoconf
+ - libtool
+ - gcc
+ - gcc-c++
+ - autoconf-archive
+
+These can be installed using the yum package manager via:
+
+    % yum install autoconf libtool gcc gcc-c++ autoconf-archive
 
 ## Python ##
 
-Many systems already have Python 2.6 or 2.7 installed.  On those systems that
-do not, you can install it through your system’s package manager or by
-[downloading it](http://python.org/download/releases/2.7.6/).  Please make sure
-that the version of Python you install matches the word size of your operating
-system – 32-bit systems need 32-bit Python, and 64-bit systems need 64-bit
-Python.
+Many systems already have Python 2.6 or 2.7 installed, but may not have 
+necessary dependencies that are used for development purposes and Python
+package management.  These dependencies can be installed via the
+apt package manager on Debian systems via:
 
-If you want to run the extended example, you’ll need [SciPy][].  Installing
-SciPy on OS X is nontrivial; consider installing [Anaconda][] (a distribution
-of Python 2.7 targeted at scientific computing), which has SciPy built in.  If
-you install Anaconda, you’ll need to restart your open terminals; the installer
-mutates some dotfiles, and you need to pick up those changes.
+    % apt-get install python python-pip python-dev
 
+Similarly, on RedHad-based systems, via:
 
-## PyPI-hosted packages ##
+    % yum install python-devel python-pip
 
+You are also free to build from the Python sources, but this is not
+recommended unless you are very comfortable building compilers and
+interpreters from scratch.
 
-### Installing pip ###
+An alternative method for obtaining Python and the necessary dependencies is
+to use a pre-built Python distribution intended for use in technical computing.
+The Anaconda Python distribution from Continuum IO has been tested with the
+PPAML tools and is available for Linux, MacOS X, and Windows.
 
-While it’s possible to download and install each of these packages manually,
-[pip][] will make your life much easier.  To determine if you have pip, try
-running
+If you want to run the extended example demonstrating the tools applied to
+a basic solution to Challenge Problem 1, you’ll need [SciPy][].  If you
+are using the Anaconda Python distribution, these dependencies are already
+installed.  For users who are working with the Python distribution included
+with your platform package manager, these packages are available in the
+python-scipy package on Debian and the scipy package on Fedora.
 
-    % pip --version
+## Python packages ##
 
-in a terminal; if you get something like `pip 1.1 from
-/usr/lib/python2.7/dist-packages (python 2.7)`, then you have pip.
+A number of Python packages now must be installed via pip.  Installing python
+packages can be done either system-wide or within a users home directory.
+In instances where the user does not have adminstrative priviledges, we 
+highly recommend installing locally within the home directory.  The example
+commands in this section are written assuming that installation will be
+in the home directory.  If you wish to install system-wide, the "--user"
+command line option can be omitted in the examples where it appears.
 
-If you don’t have pip, you should install it.  If you’re on GNU/Linux, install
-the relevant pip package (on Debian, python-pip).  If you’re on OS X and
-installed Anaconda, then you should have pip already.  In any case, though, you
-can always [download pip](https://pypi.python.org/pypi/pip#downloads) from
-PyPI, extract it, and run the Distutils script.
+The following python packages are required by the PPAML tools:
 
-    % cd pip-*
-    % python setup.py install --user
+ - argparse
+ - configobj
+ - lockfile
+ - procfs
+ - psutil
+ - sqlalchemy
+ - validate
 
-Where pip gets installed is OS-dependent:
+These can be installed via:
 
-  - On GNU/Linux, pip’s binaries will be installed in `~/.local/bin`, and pip’s
-    libraries will be installed in
-      - `~/.local/lib/python2.7/site-packages` (if you’re using Python 2.7) or
-      - `~/.local/lib/python2.6/site-packages` (if you’re using Python 2.6).
-
-  - On OS X, pip’s binaries will be installed in
-      - `~/Library/Python/2.7/bin` (if you’re using Python 2.7) or
-      - `~/Library/Python/2.6/bin` (if you’re using Python 2.6),
-
-    and pip’s libraries will be installed in
-      - `~/Library/Python/2.7/lib/python/site-packages` (if you’re using Python
-        2.7) or
-      - `~/Library/Python/2.6/lib/python/site-packages` (if you’re using Python
-        2.6).
-
-You can override these locations by passing the `--prefix` option to `setup.py
-install`.  In any case, ensure that the directory containing the binaries is in
-your `PATH` and the directory containing the libraries is in your `PYTHONPATH`.
-
-
-### Installing the packages ###
-
-With pip installed, you can run
-
-    % pip install --user argparse configobj lockfile procfs psutil validate
-
-Again, you can pass `--prefix` to change where the libraries get installed; you
-may need to set `PYTHONPATH` as in the previous section.
-
+    % pip install --user argparse configobj lockfile procfs psutil sqlalchemy validate
 
 ## `ppaml` ##
 
@@ -141,10 +175,23 @@ may need to set `PYTHONPATH` as in the previous section.
 
     % pip install --user ppaml-*.tar.bz2
 
-The usual instructions regarding `--prefix`, `PATH`, and `PYTHONPATH` apply.
 
+## ``ppamltracer'' ##
 
+The PPAML evaluation tools provide a tracing library that can be used by probabilistic
+programs to measure their performance at a finer granularity than simply recording
+the overall wallclock execution time.  The tracing library is optional for use by
+TA2-4 teams in their official evaluation. The example described
+in this tutorial for the Challenge Problem 1 solution supports tracing to illustrate
+how one would apply the tracing library to your own probabilistic programs.  In order
+to avoid requiring the tracing library dependency, please see the source code for the
+example and uncomment the lines accompanied by a comment reading "UNCOMMENT FOR TRACING".
 
+Installation of the PPAML tracing library has a single pre-requisite: the Open
+Trace Format (OTF) library.  This library must be compiled from sources.  It can be
+downloaded from this web page:
+
+http://tu-dresden.de/die_tu_dresden/zentrale_einrichtungen/zih/forschung/projekte/otf
 
 
 
@@ -395,15 +442,15 @@ console.
 
     % tree /tmp/my_runs/001
     /tmp/my_runs/001
-    ├── files
-    │   ├── output
-    │   │   ├── slam_out_landmarks.csv
-    │   │   └── slam_out_path.csv
-    │   └── trace
-    │       ├── trace.0.def
-    │       ├── trace.1.events
-    │       └── trace.otf
-    └── index.json
+    +-- files
+    |   +-- output
+    |   |   +-- slam_out_landmarks.csv
+    |   |   `-- slam_out_path.csv
+    |   `-- trace
+    |       +-- trace.0.def
+    |       +-- trace.1.events
+    |       `-- trace.otf
+    `-- index.json
 
     2 directories, 4 files
 
@@ -467,11 +514,12 @@ and any number of _files_, arranged into a directory tree.  For example, a PPS
 run might translate to the following package:
 
     /package/
-    ├── files/
-    │   ├── file_1.txt
-    │   ├── file_2.dat
-    │   └── file_3.gif
-    └── index.json
+    +-- files/
+    |   +-- file_1.txt
+    |   +-- file_2.dat
+    |   `-- file_3.gif
+    `-- index.json
+
 
 The index is a single file named `index.ext`, where `ext` is some extension.
 The extension determines the format of the file.  Valid extensions are
