@@ -45,111 +45,132 @@ from . import __version__
 
 def main(arguments):
     """Create a configuration file."""
-    try:
-        def _format(text):
-            # Format all comment text at 78 characters so that when the
-            # configurator prepends '# ', we'll get a nice block of text
-            # wrapped at 80 characters.
-            return textwrap.fill(textwrap.dedent(text), width=78).split('\n')
+    def _format(text):
+        # Format all comment text at 78 characters so that when the
+        # configurator prepends '# ', we'll get a nice block of text
+        # wrapped at 80 characters.
+        return textwrap.fill(textwrap.dedent(text), width=78).split('\n')
 
-        conf = configuration.RunConfiguration()
+    conf = configuration.RunConfiguration()
 
-        conf.initial_comment = [
-            "Configuration file for PPAML run",
-            "Created by ppaml init v{0}".format(__version__),
-            "All paths are relative to the directory this file is stored in.",
-            ]
-
-        # [artifact]
-        conf['artifact'] = {}
-        conf.comments['artifact'] = [
-            '', '',
-            "Fundamental properties of the artifact",
-            ]
-        # paths
-        conf['artifact']['paths'] = ['artifact', 'support_files', '*.blah']
-        conf['artifact'].comments['paths'] = [
-            '',
-            "All the paths which contribute to this artifact",
-            '#'
-            ] + _format("""\
-                This field gets used for two purposes.  It's used to determine
-                which executable to run (the first file listed is assumed to be
-                the executable), but it's also used to generate a unique
-                identifier for the artifact.  You should thus list the primary
-                executable first, followed by all of its source files.""")
-        # config
-        conf['artifact']['config'] = '/dev/null'
-        conf['artifact'].comments['config'] = [
-            '',
-            "Path to the artifact configuration file",
-            '#',
-            ] + _format("""\
-                This path will get passed to the artifact.  It's optional; if
-                you don't specify it, the artifact will receive
-                '/dev/null'.""")
-        # input
-        conf['artifact']['input'] = 'path/to/my_dataset'
-        conf['artifact'].comments['input'] = [
-            '',
-            "Path to the artifact input",
-            ]
+    conf.initial_comment = [
+        "Configuration file for PPAML run",
+        "Created by ppaml init v{0}".format(__version__),
+        "All paths are relative to the directory this file is stored in.",
+        ]
 
 
-        # [package]
-        conf['package'] = {}
-        conf.comments['package'] = [
-            '', '',
-            "Packaging",
-            ]
-        # base
-        conf['package']['base'] = '/tmp/runs'
-        conf['package'].comments['base'] = [
-            '',
-            "Where to place packaged runs",
-            ]
+    # [problem]
+    conf['problem'] = {}
+    conf.comments['problem'] = [
+        '', '',
+        "The problem the artifact is going to solve",
+        ]
+    # challenge_problem_id
+    conf['problem']['challenge_problem_id'] = 1
+    conf['problem'].comments['challenge_problem_id'] = [
+        '',
+        "What challenge problem the artifact is associated with",
+        ]
+    # team_id
+    conf['problem']['team_id'] = 3
+    conf['problem'].comments['team_id'] = [
+        '',
+        "What team produced the artifact",
+        ]
+    # pps_id
+    conf['problem']['pps_id'] = 4
+    conf['problem'].comments['pps_id'] = [
+        '',
+        "What PPS the artifact runs under",
+        ]
 
 
-        # [evaluation]
-        conf['evaluation'] = {}
-        conf.comments['evaluation'] = [
-            '', '',
-            "Evaluating runs",
-            ]
-        # evaluator
-        conf['evaluation']['evaluator'] = ['evaluator.py', '*.h']
-        conf['evaluation'].comments['evaluator'] = [
-            '',
-            "All the paths which contribute to the evaluator",
-            '#',
-            ] + _format("""\
-                This field is interpreted in the same way as the "paths" field
-                in the "artifact" section.""")
-        # ground_truth
-        conf['evaluation']['ground_truth'] = 'path/to/ground'
-        conf['evaluation'].comments['ground_truth'] = [
-            '',
-            "Path to ground truth data",
-            ]
+    # [artifact]
+    conf['artifact'] = {}
+    conf.comments['artifact'] = [
+        '', '',
+        "Fundamental properties of the artifact",
+        ]
+    # description
+    conf['artifact']['description'] = "My cool probabilistic program"
+    conf['artifact'].comments['description'] = [
+        '',
+        "A brief description of the artifact (optional)",
+        ]
+    # version
+    conf['artifact']['version'] = "v1.7.2"
+    conf['artifact'].comments['version'] = [
+        '',
+        "The artifact version as a free-form string (optional)",
+        ]
+    # paths
+    conf['artifact']['paths'] = ['artifact', 'support_files', '*.blah']
+    conf['artifact'].comments['paths'] = [
+        '',
+        "All the paths which contribute to this artifact",
+        '#'
+        ] + _format("""\
+            This field gets used for two purposes.  It's used to determine
+            which executable to run (the first file listed is assumed to be
+            the executable), but it's also used to generate a unique
+            identifier for the artifact.  You should thus list the primary
+            executable first, followed by all of its source files.""")
+    # config
+    conf['artifact']['config'] = '/dev/null'
+    conf['artifact'].comments['config'] = [
+        '',
+        "Path to the artifact configuration file",
+        '#',
+        ] + _format("""\
+            This path will get passed to the artifact.  It's optional; if
+            you don't specify it, the artifact will receive
+            '/dev/null'.""")
+    # input
+    conf['artifact']['input'] = 'path/to/my_dataset'
+    conf['artifact'].comments['input'] = [
+        '',
+        "Path to the artifact input",
+        ]
 
-        if arguments.output == '-':
-            conf.write(sys.stdout)
-        else:
-            if os.path.exists(arguments.output):
-                raise utility.FatalError(
-                    'refusing to overwrite configuration file "{0}"'.format(
-                        arguments.output,
-                        ),
-                    )
-            conf.filename = arguments.output
-            try:
-                conf.write()
-            except IOError as io_error:
-                raise utility.FatalError(io_error)
 
-    except utility.FatalError as fatal_error:
-        print(textwrap.fill(str(fatal_error), width=80), file=sys.stderr)
-        sys.exit(fatal_error.exit_status)
+    # [evaluation]
+    conf['evaluation'] = {}
+    conf.comments['evaluation'] = [
+        '', '',
+        "Evaluating runs",
+        ]
+    # evaluator
+    conf['evaluation']['evaluator'] = ['evaluator.py', '*.h']
+    conf['evaluation'].comments['evaluator'] = [
+        '',
+        "All the paths which contribute to the evaluator",
+        '#',
+        ] + _format("""\
+            This field is interpreted in the same way as the "paths" field
+            in the "artifact" section.""")
+    # ground_truth
+    conf['evaluation']['ground_truth'] = 'path/to/ground'
+    conf['evaluation'].comments['ground_truth'] = [
+        '',
+        "Path to ground truth data",
+        ]
+
+    if arguments.output == '-':
+        conf.write(sys.stdout)
+    else:
+        if os.path.exists(arguments.output):
+            raise utility.FatalError(
+                'refusing to overwrite configuration file "{0}"'.format(
+                    arguments.output,
+                    ),
+                )
+        conf.filename = arguments.output
+        try:
+            conf.write()
+        except IOError as io_error:
+            raise utility.FatalError(io_error)
+
 
 
 def add_subparser(subparsers):
