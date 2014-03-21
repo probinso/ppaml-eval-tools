@@ -1,40 +1,6 @@
 % Getting started with the PPAML client tools
-% Benjamin Barenblat
-% February 2014
-
-<!-- getting-started.md – basic documentation for ppaml_client
-Copyright (C)  2014  Galois, Inc.
-
-This document is written in Pandoc-flavored Markdown.  Have a look at
-<http://johnmacfarlane.net/pandoc/>. -->
-
-Copyright ©  2014  Galois, Inc.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-  1. Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-  3. Neither Galois’s name nor the names of other contributors may be used to
-     endorse or promote products derived from this documentation without
-     specific prior written permission.
-
-**This documentation is provided by Galois and other contributors “as
-is” and any express or implied warranties, including, but not limited
-to, the implied warranties of merchantability and fitness for a
-particular purpose are disclaimed.  In no event shall Galois or other
-contributors be liable for any direct, indirect, incidental, special,
-exemplary, or consequential damages (including, but not limited to,
-procurement of substitute goods or services; loss of use, data, or
-profits; or business interruption) however caused and on any theory of
-liability, whether in contract, strict liability, or tort (including
-negligence or otherwise) arising in any way out of the use of this
-documentation, even if advised of the possibility of such damage.**
-
+% Galois, Inc.
+% March 2014
 
 # Introduction #
 
@@ -550,6 +516,38 @@ No key may appear in both the `"data"` and `"files"` sections.
 ## SQLite indices ##
 
 The schema for SQLite indices remains to be standardized.  Check back later.
+
+## License and Copyright ##
+
+Copyright ©  2014  Galois, Inc.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  1. Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+  3. Neither Galois’s name nor the names of other contributors may be used to
+     endorse or promote products derived from this documentation without
+     specific prior written permission.
+
+**This documentation is provided by Galois and other contributors “as
+is” and any express or implied warranties, including, but not limited
+to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed.  In no event shall Galois or other
+contributors be liable for any direct, indirect, incidental, special,
+exemplary, or consequential damages (including, but not limited to,
+procurement of substitute goods or services; loss of use, data, or
+profits; or business interruption) however caused and on any theory of
+liability, whether in contract, strict liability, or tort (including
+negligence or otherwise) arising in any way out of the use of this
+documentation, even if advised of the possibility of such damage.**
+
+
+
 
 
 <!-- References -->
