@@ -44,11 +44,11 @@ import socket
 
 import procfs
 
-from .namespace import Namespace
+from . import db
 
 
 
-##################################### CPU #####################################
+################################## Hardware ###################################
 
 
 _METRIC_PREFIX = {
@@ -78,171 +78,121 @@ class HeterogeneousSystemException(Exception):
             "heterogeneous SMP systems are unsupported")
 
 
-class CPU(Namespace):
-    """A central processing unit.
+def current_hardware():
+    """Create a new db.Hardware capturing the current platform."""
+    result = db.Hardware()
 
-    Standard fields:
-        cache_kb -- L3 cache size in kilobytes
-        family, model, stepping -- numeric model identifiers
-        microcode -- version of microcode loaded
-        model_name -- human-readable model name
-        mhz -- maximum clock speed in megahertz
-        n_cores -- the number of cores
-        n_threads -- the number of threads
+    # CPU
+    try:
+        proc = procfs.Proc()
+    except procfs.exceptions.DoesNotExist:
+        # We're on a system that doesn't have a procfs, like OS X.
+        # TODO: Handle this case.
+        pass
 
-    """
+    else:
+        cpuinfo = proc.cpuinfo
+        # This cpuinfo data structure behaves very strangely--it
+        # presents an interface similar to a dictionary, but among other
+        # weirdness, it does not iterate correctly, and __len__ does not
+        # work.  The code in this section thus looks a bit unpythonic,
+        # but doing this any other way causes boatloads of unexpected
+        # exceptions.
 
-    @classmethod
-    def current(cls):
-        """Create a new CPU with the properties of the current one."""
-        result = cls()
+        # n_threads
+        result.cpu_n_threads = len(dict(cpuinfo))
 
-        try:
-            proc = procfs.Proc()
-        except procfs.exceptions.DoesNotExist:
-            # We're on a system that doesn't have a procfs, like OS X.
-            # TODO: Handle this case.
-            pass
+        # Ensure all the remaining statistics are uniform across the
+        # remaining CPUs.
+        first_thread = cpuinfo[0]
+        for thread in cpuinfo.values():
+            for attribute in ['cpu_cores', 'cpu_family', 'model',
+                              'stepping', 'microcode', 'cache_size',
+                              'model_name']:
+                if thread[attribute] != first_thread[attribute]:
+                    raise HeterogeneousSystemException
+        result.cpu_n_cores = first_thread.cpu_cores
+        result.cpu_family = first_thread.cpu_family
+        result.cpu_model = first_thread.model
+        result.cpu_stepping = first_thread.stepping
+        result.cpu_microcode = int(first_thread.microcode, 0)
+        result.cpu_cache = int(first_thread.cache_size) * 1024
+        result.cpu_model_name = first_thread.model_name
 
-        else:
-            cpuinfo = proc.cpuinfo
-            # This cpuinfo data structure behaves very strangely--it
-            # presents an interface similar to a dictionary, but among
-            # other weirdness, it does not iterate correctly, and
-            # __len__ does not work.  The code in this function thus
-            # looks a bit unpythonic, but doing this any other way
-            # causes boatloads of unexpected exceptions.
+        # Get the CPU speed.  Don't use the cpu_mhz field from
+        # cpuinfo, as this indicates the current CPU speed and will
+        # likely be inaccurate if CPU frequency scaling is enabled.
+        cpu_speed_spec = first_thread.model_name.split()[-1].lower()
+        hz_re = re.compile('^([-+]?[\d.]+) *([kmgt]?)hz$', re.IGNORECASE)
+        value_str, unit = hz_re.search(cpu_speed_spec).groups()
+        result.cpu_clock = int(float(value_str) * _METRIC_PREFIX[unit])
 
-            # n_threads
-            result.n_threads = len(dict(cpuinfo))
+    # RAM
+    try:
+        proc = procfs.Proc()
+    except procfs.exceptions.DoesNotExist:
+        # TODO: Handle this case.
+        pass
 
-            # Ensure all the remaining statistics are uniform across the
-            # remaining CPUs.
-            first_thread = cpuinfo[0]
-            for thread in cpuinfo.values():
-                for attribute in ['cpu_cores', 'cpu_family', 'model',
-                                  'stepping', 'microcode', 'cache_size',
-                                  'model_name']:
-                    if thread[attribute] != first_thread[attribute]:
-                        raise HeterogeneousSystemException
-            result.n_cores = first_thread.cpu_cores
-            result.family = first_thread.cpu_family
-            result.model = first_thread.model
-            result.stepping = first_thread.stepping
-            result.microcode = int(first_thread.microcode, 0)
-            result.cache_kb = int(first_thread.cache_size)
-            result.model_name = first_thread.model_name
+    else:
+        result.ram = proc.meminfo.MemTotal * 1024 # kiB -> B
 
-            # Get the CPU speed.  Don't use the cpu_mhz field from
-            # cpuinfo, as this indicates the current CPU speed and will
-            # likely be inaccurate if CPU frequency scaling is enabled.
-            cpu_speed_spec = first_thread.model_name.split()[-1].lower()
-            hz_re = re.compile('^([-+]?[\d.]+) *([kmgt]?)hz$', re.IGNORECASE)
-            value_str, unit = hz_re.search(cpu_speed_spec).groups()
-            result.mhz = int(float(value_str) * _METRIC_PREFIX[unit] / 1e6)
-
-        return result
+    return result
 
 
+def current_software():
+    """Create a new db.Software capturing the current platform."""
+    result = db.Software()
 
-##################################### RAM #####################################
+    # Kernel
+    result.kernel = platform.system()
+    result.kernel_version = platform.release()
 
+    # Userland
+    if platform.libc_ver()[0] == 'glibc':
+        # We're almost certainly a GNU/Linux system.
+        result.userland = 'GNU'
 
-class RAM(Namespace):
-    """A RAM unit.
+    # Hostname, for good measure
+    result.hostname = socket.getfqdn()
+    if result.hostname == "localhost":
+        result.hostname = socket.gethostname()
 
-    Standard fields:
-        total_kib -- total RAM capacity in kilobytes
-
-    """
-
-    @classmethod
-    def current(cls):
-        """Create a new RAM with the properties of the current one."""
-        result = cls()
-
-        try:
-            proc = procfs.Proc()
-        except procfs.exceptions.DoesNotExist:
-            # TODO: Handle this case.
-            pass
-
-        else:
-            result.total_kib = proc.meminfo.MemTotal
-
-        return result
+    return result
 
 
+def insert_current():
+    """Insert the current machine fingerprint into the database."""
+    with db.session() as session:
+        # Hardware
+        hw = current_hardware()
+        session.add(hw)
 
-##################################### OS ######################################
+        # Software
+        sw = current_software()
+        session.add(sw)
 
+        # Environment
+        env = db.Environment()
+        session.flush()
+        env.hardware_id = hw.hardware_id
+        env.software_id = sw.software_id
+        session.add(env)
 
-class Platform(Namespace):
-    """A software platform (kernel + userland).
-
-    Standard fields:
-        kernel -- name of the kernel (e.g., 'Linux')
-        kernel_version -- kernel version string
-        userland -- name of the userland (e.g., 'GNU')
-        userland_version -- userland version string
-        hostname -- system host name (including domain if possible)
-
-    """
-
-    @classmethod
-    def current(cls):
-        """Create a new Platform with the properties of the current one."""
-        result = cls()
-
-        # Kernel
-        result.kernel = platform.system()
-        result.kernel_version = platform.release()
-
-        # Userland
-        if platform.libc_ver()[0] == 'glibc':
-            # We're almost certainly a GNU/Linux system.
-            result.userland = 'GNU'
-
-        # Hostname, for good measure
-        result.hostname = socket.getfqdn()
-        if result.hostname == "localhost":
-            result.hostname = socket.gethostname()
-
-        return result
+        session.flush()
+        return env.environment_id
 
 
 
 #################################### Main #####################################
 
 
-class Fingerprint(Namespace):
-    """A machine fingerprint.
-
-    This data do not uniquely identify the machine, but they give enough
-    information that its overall specifications may be easily inferred.
-
-    """
-
-    @classmethod
-    def current(cls):
-        """Fingerprint the current machine."""
-        result = cls()
-        result.cpu = CPU.current()
-        result.ram = RAM.current()
-        result.os = Platform.current()
-        return result
-
-
 def main(arguments):
-    """Print the current machine fingerprint in JSON format."""
-    indent_level = arguments.indent if arguments.indent else None
-    print(json.dumps(Fingerprint.current(), indent=indent_level))
+    insert_current()
 
 
 def add_subparser(subparsers):
     """Register the 'fingerprint' subcommand."""
     parser = subparsers.add_parser('fingerprint',
-                                   help="print machine fingerprint")
-    parser.add_argument('-i', '--indent', default=4, type=int,
-                        help="set output indentation level")
+                                   help="record machine fingerprint")
     parser.set_defaults(func=main)

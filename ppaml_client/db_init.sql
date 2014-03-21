@@ -25,47 +25,73 @@
 -- DAMAGE.
 --
 --
--- This SQL schema is written in standard SQL, modulo pragmas for SQLite 3.
+-- This SQL schema is written in as close to standard SQL as is possible, but
+-- when necessary, I've foregone portability in favor of functionality with
+-- SQLite.  Specific fields and pragmas compatible only with SQLite are tagged
+-- '[sqlite]'.
 
--- Set the application_id field in the SQLite database header to something
--- other than its default, so file(1) knows this isn't just some random SQLite
--- database.
+-- [sqlite] Set the application_id field in the SQLite database header to
+-- something other than its default, so file(1) knows this isn't just some
+-- random SQLite database.
 PRAGMA application_id = 3430079183; -- 0xCC72DACF
 
--- SQLite provides a nice database header to associate human-readable version
--- information with the schema.
+-- [sqlite] SQLite provides a nice database header to associate human-readable
+-- version information with the schema.
 PRAGMA user_version = 4;
 
+-- [sqlite] SQLAlchemy's SQLite backend does not natively handle floating-point
+-- values, so all instances of TIMESTAMP WITH TIME ZONE have been replaced with
+-- BIGINT.
+
 CREATE TABLE challenge_problem (
-	id INTEGER PRIMARY KEY,
+	challenge_problem_id INTEGER PRIMARY KEY
+		AUTOINCREMENT,	-- [sqlite]
 
 	description VARCHAR(255) NOT NULL,
 	revision SMALLINT NOT NULL CHECK (revision > 0),
-	url VARCHAR(255) NOT NULL,
+	url VARCHAR(255) NOT NULL, -- challenge problem's wiki page
 
-	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
+	meta_created BIGINT NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
-	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP);
+	meta_updated BIGINT NOT NULL
+		DEFAULT CURRENT_TIMESTAMP
 
--- Ideally, we'd have a trigger to update meta_updated whenever somebody
--- changes a row.  Unfortunately, SQLite and PostgreSQL each implements a
--- different part of the SQL standard regarding trigger syntax, so it's not
--- currently possible to write triggers that work in both.
+	CHECK (meta_created <= meta_updated),
+	UNIQUE (description, revision));
+
+CREATE TRIGGER challenge_problem_updated AFTER UPDATE ON challenge_problem
+	FOR EACH ROW
+	BEGIN
+		UPDATE challenge_problem
+		SET meta_updated = CURRENT_TIMESTAMP
+		WHERE challenge_problem_id = NEW.challenge_problem_id;
+	END;
 
 CREATE TABLE team (
-	id INTEGER PRIMARY KEY,
+	team_id INTEGER PRIMARY KEY
+		AUTOINCREMENT,	-- [sqlite]
 
 	institution VARCHAR(255) NOT NULL,
 	contact_name VARCHAR(255) NOT NULL,
 	contact_email VARCHAR(255) NOT NULL,
 
-	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
+	meta_created BIGINT NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
-	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP);
+	meta_updated BIGINT NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
 
-CREATE TABLE challenge_problem_and_pps(
+	CHECK (meta_created <= meta_updated),
+	UNIQUE (institution, contact_name, contact_email));
+
+CREATE TRIGGER team_updated AFTER UPDATE ON team
+	FOR EACH ROW
+	BEGIN
+		UPDATE team
+		SET meta_updated = CURRENT_TIMESTAMP
+		WHERE team_id = NEW.team_id;
+	END;
+
+CREATE TABLE challenge_problem_and_pps (
 	challenge_problem_id INTEGER NOT NULL
 		REFERENCES challenge_problem ON DELETE CASCADE
 		DEFERRABLE INITIALLY DEFERRED,
@@ -73,32 +99,41 @@ CREATE TABLE challenge_problem_and_pps(
 		REFERENCES pps ON DELETE CASCADE
 		DEFERRABLE INITIALLY DEFERRED,
 
-	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP,
-	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
+	meta_created BIGINT NOT NULL
 		DEFAULT CURRENT_TIMESTAMP);
 
 CREATE TABLE pps (
-	id INTEGER PRIMARY KEY,
+	pps_id INTEGER PRIMARY KEY
+		AUTOINCREMENT,	-- [sqlite]
 
 	team_id INTEGER NOT NULL
 		REFERENCES team ON DELETE CASCADE
 		DEFERRABLE INITIALLY DEFERRED,
 
-	description VARCHAR(255),
-	version VARCHAR(255),
+	description VARCHAR(255) NOT NULL,
+	version VARCHAR(255) NOT NULL,
 
-	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
+	meta_created BIGINT NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
-	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP);
+	meta_updated BIGINT NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+
+	CHECK (meta_created <= meta_updated),
+	UNIQUE (team_id, description, version));
+
+CREATE TRIGGER pps_updated AFTER UPDATE ON pps
+	FOR EACH ROW
+	BEGIN
+		UPDATE pps
+		SET meta_updated = CURRENT_TIMESTAMP
+		WHERE pps_id = NEW.pps_id;
+	END;
 
 CREATE TABLE artifact (
-	id CHAR(32) PRIMARY KEY,
+	-- The artifact ID is a 32-character string--a stringified version of
+	-- the artifact's 128-bit MD5 hash (as would be output by md5sum(1)).
+	artifact_id CHAR(32) PRIMARY KEY,
 
-	compiler_environment_id INTEGER NOT NULL
-		REFERENCES environment ON DELETE RESTRICT
-		DEFERRABLE INITIALLY DEFERRED,
 	challenge_problem_id INTEGER NOT NULL
 		REFERENCES challenge_problem ON DELETE CASCADE
 		DEFERRABLE INITIALLY DEFERRED,
@@ -111,28 +146,47 @@ CREATE TABLE artifact (
 
 	description VARCHAR(255),
 	version VARCHAR(255),
-	source VARCHAR(255) NOT NULL,
-	time TIMESTAMP WITH TIME ZONE,
+	submit_timestamp BIGINT DEFAULT CURRENT_TIMESTAMP,
+
+	-- Some artifacts will be interpreted, but some have a separate
+	-- compilation step.  These columns are currently placeholders, but
+	-- they may be used in the future.
+	interpreted DECIMAL(1, 0)
+		CHECK (interpreted BETWEEN 0 AND 1),
+	-- Artifact binary bundle
+	binary VARCHAR(255),
+	build_environment_id INTEGER
+		REFERENCES environment(environment_id) ON DELETE RESTRICT
+		DEFERRABLE INITIALLY DEFERRED,
 	compiler VARCHAR(255),
-	compiler_flags VARCHAR(255),
-	compiler_configuration VARCHAR(255),
-	compiler_started TIMESTAMP WITH TIME ZONE,
-	compiler_load_average REAL CHECK (compiler_load_average >= 0),
-	compiler_load_max REAL CHECK (compiler_load_max >= 0),
-	compiler_ram_average BIGINT CHECK (compiler_ram_average >= 0),
-	compiler_ram_max BIGINT CHECK (compiler_ram_max >= 0),
-	binary VARCHAR(255) NOT NULL,
+	build_flags VARCHAR(255),
+	build_configuration VARCHAR(255),
+	build_started BIGINT,
+	build_load_average REAL CHECK (build_load_average >= 0),
+	build_load_max REAL CHECK (build_load_max >= 0),
+	build_ram_average BIGINT CHECK (build_ram_average >= 0),
+	build_ram_max BIGINT CHECK (build_ram_max >= 0),
 
-	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
+	meta_created BIGINT NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
-	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
+	meta_updated BIGINT NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
 
-	CHECK (compiler_load_average <= compiler_load_max),
-	CHECK (compiler_ram_average <= compiler_ram_max));
+	CHECK (build_load_average <= build_load_max),
+	CHECK (build_ram_average <= build_ram_max),
+	CHECK (meta_created <= meta_updated));
+
+CREATE TRIGGER artifact_updated AFTER UPDATE ON artifact
+	FOR EACH ROW
+	BEGIN
+		UPDATE artifact
+		SET meta_updated = CURRENT_TIMESTAMP
+		WHERE artifact_id = NEW.artifact_id;
+	END;
 
 CREATE TABLE run (
-	id INTEGER PRIMARY KEY,
+	run_id INTEGER PRIMARY KEY
+		AUTOINCREMENT,	-- [sqlite]
 
 	artifact_id CHAR(32) NOT NULL
 		REFERENCES artifact ON DELETE CASCADE
@@ -150,28 +204,40 @@ CREATE TABLE run (
 		REFERENCES team ON DELETE CASCADE
 		DEFERRABLE INITIALLY DEFERRED,
 
-	started TIMESTAMP WITH TIME ZONE,
+	started BIGINT,
 	artifact_configuration VARCHAR(255),
 	output VARCHAR(255),
 	log VARCHAR(255),
-	trace_base VARCHAR(255),
+	trace VARCHAR(255),
 	duration DOUBLE PRECISION CHECK (duration >= 0),
-	score VARCHAR(255),
+	quant_score VARCHAR(255),
+	-- Where the qualitative evaluation goes
+	qual_score VARCHAR(255),
 	load_average REAL CHECK (load_average >= 0),
 	load_max REAL CHECK (load_max >= 0),
 	ram_average BIGINT CHECK (ram_average >= 0),
 	ram_max BIGINT CHECK (ram_max >= 0),
 
-	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
+	meta_created BIGINT NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
-	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
+	meta_updated BIGINT NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
 
 	CHECK (load_average <= load_max),
-	CHECK (ram_average <= ram_max));
+	CHECK (ram_average <= ram_max),
+	CHECK (meta_created <= meta_updated));
+
+CREATE TRIGGER run_updated AFTER UPDATE ON run
+	FOR EACH ROW
+	BEGIN
+		UPDATE run
+		SET meta_updated = CURRENT_TIMESTAMP
+		WHERE run_id = NEW.run_id;
+	END;
 
 CREATE TABLE environment (
-	id INTEGER PRIMARY KEY,
+	environment_id INTEGER PRIMARY KEY
+		AUTOINCREMENT,	-- [sqlite]
 
 	hardware_id INTEGER NOT NULL
 		REFERENCES hardware ON DELETE CASCADE
@@ -180,14 +246,26 @@ CREATE TABLE environment (
 		REFERENCES software ON DELETE CASCADE
 		DEFERRABLE INITIALLY DEFERRED,
 
-	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
+	meta_created BIGINT NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
-	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP);
+	meta_updated BIGINT NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+
+	CHECK (meta_created <= meta_updated));
+
+CREATE TRIGGER environment_updated AFTER UPDATE ON environment
+	FOR EACH ROW
+	BEGIN
+		UPDATE environment
+		SET meta_updated = CURRENT_TIMESTAMP
+		WHERE environment_id = NEW.environment_id;
+	END;
 
 CREATE TABLE hardware (
-	id INTEGER PRIMARY KEY,
+	hardware_id INTEGER PRIMARY KEY
+		AUTOINCREMENT,	-- [sqlite]
 
+	description VARCHAR(255),
 	cpu_family INTEGER,
 	cpu_model INTEGER,
 	cpu_model_name VARCHAR(63),
@@ -200,20 +278,42 @@ CREATE TABLE hardware (
 
 	ram BIGINT CHECK (ram > 0),
 
-	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
+	meta_created BIGINT NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
-	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP);
+	meta_updated BIGINT NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+
+	CHECK (meta_created <= meta_updated));
+
+CREATE TRIGGER hardware_updated AFTER UPDATE ON hardware
+	FOR EACH ROW
+	BEGIN
+		UPDATE hardware
+		SET meta_updated = CURRENT_TIMESTAMP
+		WHERE hardware_id = NEW.hardware_id;
+	END;
 
 CREATE TABLE software (
-	id INTEGER PRIMARY KEY,
+	software_id INTEGER PRIMARY KEY
+		AUTOINCREMENT,	-- [sqlite]
 
-	kernel VARCHAR(31) NOT NULL,
+	description VARCHAR(255),
+	kernel VARCHAR(31) NOT NULL, -- e.g., "Linux"
 	kernel_version VARCHAR(63),
-	userland VARCHAR(31),
+	userland VARCHAR(31),	-- e.g., "GNU", "Darwin"
 	hostname VARCHAR(255) NOT NULL,
 
-	meta_created TIMESTAMP WITH TIME ZONE NOT NULL
+	meta_created BIGINT NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
-	meta_updated TIMESTAMP WITH TIME ZONE NOT NULL
-		DEFAULT CURRENT_TIMESTAMP);
+	meta_updated BIGINT NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+
+	CHECK (meta_created <= meta_updated));
+
+CREATE TRIGGER software_updated AFTER UPDATE ON software
+	FOR EACH ROW
+	BEGIN
+		UPDATE software
+		SET meta_updated = CURRENT_TIMESTAMP
+		WHERE software_id = NEW.software_id;
+	END;

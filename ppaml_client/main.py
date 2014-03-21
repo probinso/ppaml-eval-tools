@@ -36,14 +36,17 @@ from __future__ import (absolute_import, division, print_function)
 
 import os.path
 import sys
+import textwrap
 
 import argparse
 
 from . import __version__
-from . import evaluate
+from . import add_pps
+from . import add_team
 from . import fingerprint
 from . import init
 from . import run
+from . import utility
 
 
 def _generate_parser(version):
@@ -76,10 +79,11 @@ def _generate_parser(version):
     parser_version.set_defaults(func=lambda _args: parser.print_help())
 
     # External subcommands
-    init.add_subparser(subparsers)
+    add_team.add_subparser(subparsers)
+    add_pps.add_subparser(subparsers)
     fingerprint.add_subparser(subparsers)
+    init.add_subparser(subparsers)
     run.add_subparser(subparsers)
-    evaluate.add_subparser(subparsers)
 
     # All done.
     return parser
@@ -88,4 +92,9 @@ def _generate_parser(version):
 def main(version):
     """Parse command-line arguments and dispatch appropriately."""
     arguments = _generate_parser(version).parse_args()
-    arguments.func(arguments)
+    try:
+        arguments.func(arguments)
+    except utility.FatalError as fatal_error:
+        print(textwrap.fill(str(fatal_error), width=80), file=sys.stderr)
+        sys.exit(fatal_error.exit_status)
+

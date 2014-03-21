@@ -41,7 +41,6 @@ if not '2.6' <= sys.version < '3':
 del sys
 
 
-__all__ = ['fingerprint', 'namespace']
+__all__ = ['fingerprint']
 
-from fingerprint import Fingerprint, HeterogeneousSystemException
-from namespace import Namespace
+from fingerprint import HeterogeneousSystemException

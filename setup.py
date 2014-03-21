@@ -52,9 +52,9 @@ def missing_dependency(description):
     sys.exit(2)
 
 
-def require(module, version=None):
+def require(module, version=None, package=None):
     """Attempts to import a module, exiting if it fails."""
-    module_description = (module +
+    module_description = ((module if package is None else package) +
                           ("" if version is None
                               else " >={0}".format(version)))
     try:
@@ -62,15 +62,25 @@ def require(module, version=None):
     except ImportError:
         missing_dependency(module_description)
     else:
-        if version is not None and eval(module).__version__ < version:
-            missing_dependency(module_description)
+        mod = eval(module)
+        try:
+            module_version = mod.__version__
+        except AttributeError:
+            # The module doesn't have a __version__ tag.
+            pass
+        else:
+            if version is not None and module_version < version:
+                missing_dependency(module_description)
 
 
 require('argparse', '1.1')
 require('configobj', '4.7')
 require('lockfile')
+require('procfs', '0.1')
 require('psutil', '0.5')
+require('sqlalchemy', '0.9')
 require('validate', '1.0')
+require('xdg', package='pyxdg')
 
 
 # Run the setup program.
@@ -90,6 +100,7 @@ setup(
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         ],
     packages=['ppaml_client'],
+    package_data={'ppaml_client': ['*.sql']},
     scripts=['scripts/ppaml'],
     data_files=[
         ('doc', ['doc/getting-started.html']),

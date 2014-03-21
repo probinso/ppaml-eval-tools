@@ -81,10 +81,14 @@ class RunConfiguration(configobj.ConfigObj):
     """Configuration file for an artifact run."""
 
     _CONFIG_SPEC = (
-        "[package]",
-        "base = string",
+        "[problem]",
+        "challenge_problem_id = int",
+        "team_id = int",
+        "pps_id = int",
 
         "[artifact]",
+        "description = string",
+        "version = string",
         "paths = force_list",
         "config = string",
         "input = string",
@@ -130,6 +134,16 @@ class RunConfiguration(configobj.ConfigObj):
         """The path to the configuration file (or None)."""
         return self._path
 
+    @property
+    def base_dir(self):
+        """The directory holding the configuration file (or None)."""
+        try:
+            return os.path.dirname(
+                os.path.abspath(
+                    os.path.expanduser(self.path)))
+        except AttributeError:
+            return None
+
     def require_no_extra_fields(self):
         """Checks that a configuration file lacks extra fields."""
         self.validate(validate.Validator())
@@ -170,13 +184,14 @@ class RunConfiguration(configobj.ConfigObj):
             raise EmptyField(section, field)
 
     def expand_path_list(self, section, field):
-        """Canonicalizes, expands, and globs the specified paths.
+        """Canonicalize, expand, and glob the specified paths.
 
-        Relative paths are interpreted relative to the directory
-        containing the configuration file; if self does not correspond
-        to a file on disk, relative paths will trigger a MalformedError.
-        The tilde (~) will be expanded to the user's home directory, but
-        no environment variable expansion will occur.
+        Paths are interpreted relative to the directory containing the
+        configuration file.  It is a MalformedError for self not to
+        correspond to a file on disk, for absolute paths to appear, or
+        for paths which reference files above self to appear.
+        Accordingly, neither tilde (~) expansion nor environment
+        variable expansion will occur.
 
         Despite the name, this function will not necessarily return a
         list; it is merely guaranteed to return a Sequence.
@@ -187,25 +202,17 @@ class RunConfiguration(configobj.ConfigObj):
         except KeyError:
             raise MissingField(section, field)
 
-        # Expand tildes.
-        result = [os.path.expanduser(path) for path in result]
-
-        # Absolutize the paths.  This needs to be done after tilde
-        # expansion, since os.path.join does not recognize that a
-        # literal tilde represents an absolute path.
+        # Absolutize the paths.
         try:
-            base_dir = os.path.dirname(
-                           os.path.abspath(
-                               os.path.expanduser(self._path)))
-        except AttributeError:
-            base_dir = None
-        try:
-            result = [os.path.join(base_dir, path) for path in result]
-        except AttributeError:
-            # base_dir is None, and one of the paths was relative.
+            for i, path in enumerate(result):
+                absolute_path = os.path.join(self.base_dir, path)
+                if not absolute_path.startswith(self.base_dir):
+                    raise MalformedError(textwrap.dedent("""\
+                        found an absolute path in the configuration object"""))
+                result[i] = absolute_path
+        except (AttributeError, TypeError):
             raise MalformedError(textwrap.dedent("""\
-                found a relative path in a configuration object not backed by a
-                file"""))
+                configuration object not backed by a file on disk"""))
 
         # Expand globs and flatten the list of expansions.
         result = [glob.glob(path) for path in result]
