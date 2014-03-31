@@ -1,38 +1,6 @@
 % Getting started with the PPAML client tools
-% Benjamin Barenblat
-% February 2014
-
-<!-- getting-started.md – basic documentation for ppaml_client
-Copyright (C)  2014  Galois, Inc.
-
-This document is written in Pandoc-flavored Markdown.  Have a look at
-<http://johnmacfarlane.net/pandoc/>. -->
-
-Copyright ©  2014  Galois, Inc.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-  1. Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-  3. Neither Galois’s name nor the names of other contributors may be used to
-     endorse or promote products derived from this documentation without
-     specific prior written permission.
-
-**This documentation is provided by Galois and other contributors “as is” and
-any express or implied warranties, including, but not limited to, the implied
-warranties of merchantability and fitness for a particular purpose are
-disclaimed.  In no event shall Galois or other contributors be liable for any
-direct, indirect, incidental, special, exemplary, or consequential damages
-(including, but not limited to, procurement of substitute goods or services;
-loss of use, data, or profits; or business interruption) however caused and on
-any theory of liability, whether in contract, strict liability, or tort
-(including negligence or otherwise) arising in any way out of the use of this
-documentation, even if advised of the possibility of such damage.**
-
+% Galois, Inc.
+% March 2014
 
 # Introduction #
 
@@ -44,9 +12,15 @@ way that we will at Galois.
 # Installing the tools #
 
 As with all research software, the most difficult part of the system is simply
-installing it.  I’ve tested the installation procedure on both
-[Debian GNU/Linux][Debian] v7.4 (“wheezy”) and [OS X][] v10.9 (“Mavericks”),
-but it should work on any GNU/Linux system or any recent version of OS X.
+installing it.  This installation procedure has been tested with:
+
+ - Debain Linux v7.4
+ - Fedora Linux v20
+ - Apple OS X 10.9
+
+The dependency set of the tools was chosen to reflect those available within
+most common Linux distributions released since 2011.  
+
 Please read this entire section before beginning the installation, as you may
 have to make decisions early in the installation process whose effects will
 only become apparent later.
@@ -54,168 +28,244 @@ only become apparent later.
 Your goal is to set up your system such that
 
   - Python 2.6 or 2.7; 
-  - the [PyPI][]-hosted packages [argparse][], [configobj][], [lockfile][],
-    [procfs][], [psutil][], and [validate][]; and
-  - the `ppaml` tool
+  - the PyPI-hosted packages argparse, configobj, lockfile,
+    procfs, psutil, sqlalchemy, pyxdg, and validate;
+  - the `ppaml` tool; and
+  - the `ppamltracer` library
 
-are all installed and accessible.  Many ways of doing so exist – far too many
-for me to cover in a simple installation document.  I’ll cover the most common
-procedure, but you should feel free to deviate from it.  If you get stuck,
-[send me mail](mailto:bbarenblat@galois.com), and I’ll help you free yourself.
+are all installed and accessible.  
 
+If you get stuck, send us mail (ppaml-support@community.galois.com),
+and we will assist you in identifying the problem and working through
+it.
 
-## Python ##
+## Download Software ##
 
-Many systems already have Python 2.6 or 2.7 installed.  On those systems that
-do not, you can install it through your system’s package manager or by
-[downloading it](http://python.org/download/releases/2.7.6/).  Please make sure
-that the version of Python you install matches the word size of your operating
-system – 32-bit systems need 32-bit Python, and 64-bit systems need 64-bit
-Python.
+Before starting, please make sure you have the following tar archives
+downloaded:
 
-If you want to run the extended example, you’ll need [SciPy][].  Installing
-SciPy on OS X is nontrivial; consider installing [Anaconda][] (a distribution
-of Python 2.7 targeted at scientific computing), which has SciPy built in.  If
-you install Anaconda, you’ll need to restart your open terminals; the installer
-mutates some dotfiles, and you need to pick up those changes.
+  - OTF-1.12.4salmon.tar.gz
 
+    This can be downloaded from the OTF web page at http://bit.ly/PZ32Eg
 
-## PyPI-hosted packages ##
+  - ppamltracer-X.tar.gz 
 
+    This can be downloaded from the PPAML-Tracer web page at http://FILLMEIN/
 
-### Installing pip ###
+  - ppamltools-X.tar.gz
 
-While it’s possible to download and install each of these packages manually,
-[pip][] will make your life much easier.  To determine if you have pip, try
-running
+    This can be downloaded from the PPAML-Tools web page at http://FILLMEIN/
 
-    % pip --version
+Where X is the current version of the corresponding tar archive.  We are
+assuming that you have downloaded these to the Downloads directory in
+your home directory.  If you have placed them elsewhere, make sure to
+adjust the commands that refer to the archives later.
 
-in a terminal; if you get something like `pip 1.1 from
-/usr/lib/python2.7/dist-packages (python 2.7)`, then you have pip.
+You should also download one of the data sets for challenge problem #1
+from the PPAML MIDAS site.  We recommend using the simplest data set,
+1_straight, as the test case for this tutorial.  This archive is
+assumed to also reside in your Downloads directory as:
 
-If you don’t have pip, you should install it.  If you’re on GNU/Linux, install
-the relevant pip package (on Debian, python-pip).  If you’re on OS X and
-installed Anaconda, then you should have pip already.  In any case, though, you
-can always [download pip](https://pypi.python.org/pypi/pip#downloads) from
-PyPI, extract it, and run the Distutils script.
+  - 1_straight.tar.bz2
 
-    % cd pip-*
-    % python setup.py install --user
+    This can be downloaded from the PPAML MIDAS page at http://ppaml.kitware.com/midas/item/4388
 
-Where pip gets installed is OS-dependent:
+## System Prerequisites ##
 
-  - On GNU/Linux, pip’s binaries will be installed in `~/.local/bin`, and pip’s
-    libraries will be installed in
-      - `~/.local/lib/python2.7/site-packages` (if you’re using Python 2.7) or
-      - `~/.local/lib/python2.6/site-packages` (if you’re using Python 2.6).
+In order to start, you must have a set of prerequisites installed on your
+machine that are necessary to build the PPAML tools as well as their
+direct dependencies.  If you are installing on a machine that you already
+use for active development, it is quite likely that many (or all) of these
+dependencies are already installed.
 
-  - On OS X, pip’s binaries will be installed in
-      - `~/Library/Python/2.7/bin` (if you’re using Python 2.7) or
-      - `~/Library/Python/2.6/bin` (if you’re using Python 2.6),
+### Debian/Ubuntu Linux ###
 
-    and pip’s libraries will be installed in
-      - `~/Library/Python/2.7/lib/python/site-packages` (if you’re using Python
-        2.7) or
-      - `~/Library/Python/2.6/lib/python/site-packages` (if you’re using Python
-        2.6).
+If installing on a Debian (or Ubuntu) system, the following packages should
+be installed via the distribution package manager apt:
 
-You can override these locations by passing the `--prefix` option to `setup.py
-install`.  In any case, ensure that the directory containing the binaries is in
-your `PATH` and the directory containing the libraries is in your `PYTHONPATH`.
+ - autoconf
+ - automake
+ - libtool
+ - autotools-dev
+ - pkg-config
+ - autoconf-archive
+ - build-essential
+ - python
+ - python-pip
+ - python-dev
+ - python-scipy
 
+These can be installed via the following command executed as root (or via
+sudo from a user account):
 
-### Installing the packages ###
+    % apt-get install autoconf autotools-dev autoconf-archive automake \
+                      libtool pkg-config build-essential \
+                      python python-pip python-dev python-scipy
 
-With pip installed, you can run
+During the installation of these packages, additional dependencies will
+automatically be installed by the package manager.
 
-    % pip install --user argparse configobj lockfile procfs psutil validate
+### RedHat/Fedora/Centos Linux ###
 
-Again, you can pass `--prefix` to change where the libraries get installed; you
-may need to set `PYTHONPATH` as in the previous section.
+A similar process is used on a RedHat (or Fedora and Centos) system.  The set 
+of dependencies are:
 
+ - autoconf
+ - libtool
+ - gcc
+ - gcc-c++
+ - autoconf-archive
+ - python-devel
+ - python-pip
+ - scipy
+
+These can be installed using the yum package manager via:
+
+    % yum install autoconf libtool gcc gcc-c++ autoconf-archive \
+                  python-devel python-pip scipy
+
+### Alternative Python ###
+
+An alternative method for obtaining Python and the necessary dependencies is
+to use a pre-built Python distribution intended for use in technical computing.
+The Anaconda Python distribution from Continuum IO has been tested with the
+PPAML tools and is available for Linux, MacOS X, and Windows.  If you are working
+on multiple systems and wish to have a consistent Python environment, the use of
+a package such as Anaconda is advantageous since it will provide a consistent set of
+packages and versions across all of the platforms you install it on.
+
+## Python packages ##
+
+A number of Python packages now must be installed via pip.  Installing python
+packages can be done either system-wide or within a users home directory.
+In instances where the user does not have adminstrative priviledges, we 
+highly recommend installing locally within the home directory.  The example
+commands in this section are written assuming that installation will be
+in the home directory.  If you wish to install system-wide, the "--user"
+command line option can be omitted in the examples where it appears.
+
+The following python packages are required by the PPAML tools:
+
+ - argparse
+ - configobj
+ - lockfile
+ - procfs
+ - psutil
+ - sqlalchemy
+ - validate
+ - pyxdg
+
+These can be installed via pip, such as:
+
+    % pip install --user argparse
+    % pip install --user configobj
+      [ and so on ... ]
+
+If any of these fail, please check the error message to determine whether or not your
+system is missing a dependency outside of python, such as a C or C++ library.
+Contact the TA1 PPAML team if you run into problems installing the Python dependencies
+and cannot resolve errors on your own.
+
+# Building and installing tools #
+
+## Sandbox creation ##
+
+The best way to work with the PPAML tools is to create a sandbox in
+your home directory or other private location where you can unpack
+the necessary archives and data files.  In this tutorial, we will
+assume that the sandbox is the ``ppaml'' directory in your home
+directory.
+
+    % mkdir ~/ppaml
+    % mkdir ~/ppaml/installTree
 
 ## `ppaml` ##
 
-`ppaml` is not in PyPI, but you can still install it using pip.
+The first step is to install the PPAML tools.  Start by un-archiving
+them in the sandbox directory that you created.  We will need to
+access files to run through the example contained in this archive
+later, so keep the directory after you do the installation.
 
-    % pip install --user ppaml-*.tar.bz2
+    % cd ~/ppaml
+    % tar xzvf ~/Downloads/ppamltools-X.tar.gz
+    % cd ppamltools-X
 
-The usual instructions regarding `--prefix`, `PATH`, and `PYTHONPATH` apply.
+The PPAML tools are easy to install in your home directory using pip.
 
+    % pip install --user .
 
+If the directory that pip installs binaries is not in your path, such
+as ~/.local/bin, then you must add it now.
 
+    % export PATH=$PATH:~/.local/bin
 
+## ``ppamltracer'' ##
 
+The PPAML evaluation tools provide a tracing library that can be used
+by probabilistic programs to measure their performance at a finer
+granularity than simply recording the overall wallclock execution
+time.  The tracing library is optional for use by TA2-4 teams in their
+official evaluation. The example described in this tutorial for the
+Challenge Problem 1 solution requires the tracing library to
+illustrate how one would apply it to your own probabilistic programs.
 
+Installation of the PPAML tracing library has a single prerequisite:
+the Open Trace Format (OTF) library that was downloaded earlier.  This
+library must be compiled from sources.
 
+The first step is to build and install libotf.  Un-tar the libotf file
+into the sandbox and enter the directory.
 
+    % tar xzvf ~/Downloads/OTF-1.12.4salmon.tar.gz
+    % cd OTF-1.12.4salmon
 
+We now configure it and install into the sandbox:
 
-<!-- [ppamltracer][] has two components: a C library and Python bindings. -->
+    % ./configure --prefix=$HOME/ppaml/installTree
 
+Build and install it with the following two commands:
 
+    % make
+    % make install
 
-<!-- [ppamltracer][] isn’t in PyPI, but you can still install it using pip. -->
+Now, we need to set up a couple of environment variables that are used by the PPAML
+tools to find the shared library that we just built.  Be sure to set both of
+these variables:
 
+    % export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/ppaml/installTree/lib
+    % export LIBRARY_PATH=$LIBRARY_PATH:$HOME/ppaml/installTree/lib
 
+If you are on OSX, you need to set the DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH.
+The value that you assign to the variable is the same as above.
 
+These will need to be set each time you run the PPAML tools, so be sure to add them
+to your ~/.bashrc or other script that is used to set up your environment.
 
+Now, unpack and configure the ppamltracer library.  
 
-<!--   - the [ppamltracer][] package and its associated Python bindings; and -->
+    % cd ~/ppaml
+    % tar xzvf ~/Downloads/ppamltracer-X.tar.gz
+    % cd ppamltracer-X
 
-<!-- If you don’t have it -->
-<!-- installed, though, you can install it either through your system’s package manager -->
+We will install to the same place we installed libotf, and must
+indicate where the configure script can find the otfconfig program.
 
+    % OTFCONFIG=$HOME/ppaml/installTree/bin/otfconfig ./configure --prefix=$HOME/ppaml/installTree
 
+Now we can build and install:
 
+    % make
+    % make install
 
+At this point, we will need to also install the ppamltracer python bindings.  All language 
+bindings are provided in the bindings subdirectory of the ppamltracer archive.  These can
+be installed via pip:
 
+    % cd bindings/python
+    % pip install --user .
 
-<!--    1. Would you like to evaluate a program?  If not, then you’re in the wrong -->
-<!--       place, and you need to find other software to do what you want. -->
-<!--       Otherwise, proceed to step X. -->
-<!--    2. Do you have [Python][] 2.6 or 2.7 installed on your system?  If so, skip -->
-<!--       to step X; otherwise, proceed to step X. -->
-<!--    3. Install Python 2.6 or 2.7 in whatever way you prefer.  Reasonable ways -->
-<!--       include `aptitude`, `apt-get`, `yum`, `dpkg`, `rpm`, `port`, `brew`, -->
-<!--       `fink`, `emerge`, and `./configure;make install`.  When you are done, -->
-<!--       proceed to step X. -->
-<!--    4. Would you like to work through an example  -->
-
-
-
-<!-- Currently, the tools are compatible with Python 2.6 and 2.7.  You’ll first need -->
-<!-- to install dependencies – namely, -->
-
-<!--   - [argparse](https://pypi.python.org/pypi/argparse) (necessary only if you -->
-<!--     have Python 2.6) -->
-<!--   - [configobj](https://pypi.python.org/pypi/configobj/4.7.2) -->
-<!--   - [lockfile](https://pypi.python.org/pypi/lockfile) -->
-<!--   - [procfs](https://pypi.python.org/pypi/procfs) -->
-<!--   - [psutil](https://pypi.python.org/pypi/psutil) -->
-<!--   - [validate](https://pypi.python.org/pypi/validate) -->
-
-<!-- You can install the packages manually, but [pip][] (the Python package manager) -->
-<!-- will make your life much happier. -->
-
-<!-- <\!-- TODO: This code overflows its allocated space in the HTML version.  How do -->
-<!-- we deal with that? -\-> -->
-
-<!--     % pip install --user argparse configobj lockfile procfs psutil validate -->
-
-<!-- This installs the required packages to `~/.local/lib`.  If you’re root, you can -->
-<!-- leave off the `--user` to install them to `/usr/local/lib`.  If you’d rather -->
-<!-- install the packages somewhere other than `~/.local/lib`, you can use the -->
-<!-- `--target` option to `pip`; you’ll need to set `PYTHONPATH` correctly. -->
-
-<!-- Once the dependencies are in place, you can actually install the package. -->
-
-<!--     # python setup.py install --user -->
-
-<!-- Again, this installs the package to `~/.local/lib` (and the executable to -->
-<!-- `~/.local/bin`).  Make sure those locations are in your `PATH`. -->
-
+We now have all of the prerequisite software installed for both the PPAML toolchain as well
+as the example solution to Challenge Problem 1.
 
 # Basic usage #
 
@@ -255,54 +305,33 @@ for challenge problem 1: a Kalman filter.  All the files used in this example
 `example` directory of this distribution.
 
 
-## Installing dependencies ##
-
-Our example requires a couple dependencies beyond what got installed earlier.
-Notably, it needs [SciPy][].  If you installed Anaconda earlier, you have
-SciPy; otherwise, fire up your operating system package manager and install it,
-or download and install it manually.
-
-The example also requires [libotf][] and [ppamltracer][], which you should
-install in that order.  If you’re on GNU/Linux, there’s a good chance libotf is
-packaged for your system (on Debian, install libopen-trace-format-dev); in any
-case, though, both libraries follow the standard `./configure; make; make
-install` procedure.  If you choose to install them into a prefix, make sure you
-set `PATH`, `LIBRARY_PATH`, `LD_LIBRARY_PATH` (or `DYLD_LIBRARY_PATH`), and
-`C_INCLUDE_PATH` to pick up the files installed by the libraries.
-
-Finally, the example requires the Python bindings for ppamltracer, located in
-the `bindings/python` subdirectory of the ppamltracer distribution.  You can
-install the bindings with pip.
-
-    % cd bindings/python
-    % pip install --user .
-
-
 ## Data collection ##
 
-With the dependencies in place, you can proceed to the example.  Like `ppaml`
-and the associated library, the example is a Python script compatible with
-Python 2.6 or 2.7.  Running it yields a nice usage message.
+The evaluation process is best performed by creating a working directory where
+you place the artifact to evaluate and any related data files.
 
-    % cd wherever_you_unpacked/ppaml-*
-    % example="`pwd`"/example
-    % mkdir sandbox
-    % cd sandbox
+    % mkdir ~/ppaml-sandbox
+    % cd ~/ppaml-sandbox
 
-    % cp -a "$example"/{csv_helper,slam,slamutil,test-slamutil}.py .
+In this document, we will work through the CP1 solution that is included with the
+PPAML tools distribution.  Copy the files from the example/ subdirectory of the
+tools distribution to your sandbox:
+
+    % cp -a (location of PPAML tools)/example/{csv_helper,slam,slamutil,test-slamutil}.py .
     % python slam.py
     USAGE: slam.py END_TIME INPUT_DATA_DIR OUTPUT_DATA_DIR
 
-Unfortunately, the usage message doesn’t have quite all the documentation we
-need, for `slam.py` uses the [ppamltracer][] tracing library, which expects an
-environment variable with a trace destination.  Fortunately, that’s easy to
-specify, and so we can pretty easily try out `slam.py` on ten seconds of data.
-The data, [1_straight.tar.bz2](http://ppaml.kitware.com/midas/item/4388), come
+This example is instrumented with the PPAML tracing library, so
+invocation requires us to indicate where traces are to be stored when
+the code is run.  Before we can try it out, download one of the data
+sets that are provided for Challenge Problem 1, such as the basic
+straight path set.  The data,
+[1_straight.tar.bz2](http://ppaml.kitware.com/midas/item/4388), come
 from MIDAS.
 
-    % tar xvf 1_straight.tar.bz2
+    % tar xvf ~/Downloads/1_straight.tar.bz2
     1_straight/
-    [… other output elided …]
+    [... other output elided ...]
     % mkdir /tmp/slam_out
     % PPAMLTRACER_TRACE_BASE=/tmp/slam_out/trace python slam.py 10 1_straight/data/ground /tmp/slam_out
     % ls /tmp/slam_out
@@ -316,19 +345,24 @@ from MIDAS.
     9.720175,-5.39463311078,0.684530275571
     9.93518,-5.38026736461,0.666373478798
 
-Looks good.
+The interface that slam.py presents is not the interface that `ppaml`
+expects.  This is likely to be true with most challenge problem solutions, as
+each solution likely adopts its own parameter set and parameter passing
+style.  To solve this, each solution must be wrapped with a small layer of
+shell or Python code that translates the argument set that the PPAML tools
+present to those that are used by the specific probabalistic program.  The
+SLAM example used here is a good model for how to approach this problem.
 
-Unfortunately, the interface slam.py presents is not the interface that `ppaml`
-expects.  When the time comes, `ppaml` will execute the artifact executable as
+The basic calling pattern that PPAML assumes is:
 
     /path/to/artifact_executable config_file input_dir output_path log_path
 
-Furthermore, `ppaml` does not create `output_path` and `log_path`; it merely
-reserves the names.  The executable itself is responsible for creating either
+`ppaml` does not create `output_path` and `log_path`; it merely
+reserves the names.  The user or executable itself is responsible for creating either
 files or directories at those paths.  However, a bit of shell can easily bridge
-the gap between `ppaml` and slam.py.
+the gap between `ppaml` and slam.py.  We can create a shell script called "run_slam"
+that contains the following:
 
-    % tee <"$example"/run_slam run_slam
     #!/bin/bash -eu
     if (( $# != 4 )); then
         printf "Usage: %s config_file input_dir output_path log_path\n" "$0" >&2
@@ -336,7 +370,8 @@ the gap between `ppaml` and slam.py.
     fi
     mkdir "$3"
     exec python "$(dirname "$0")"/slam.py 10 "$2" "$3"
-    % chmod +x run_slam
+
+Be sure to make this file executable using chmod.
 
 Now it’s time to write a run configuration file.  This master configuration
 file drives all the client tools.  To get a configuration file skeleton, go
@@ -395,15 +430,15 @@ console.
 
     % tree /tmp/my_runs/001
     /tmp/my_runs/001
-    ├── files
-    │   ├── output
-    │   │   ├── slam_out_landmarks.csv
-    │   │   └── slam_out_path.csv
-    │   └── trace
-    │       ├── trace.0.def
-    │       ├── trace.1.events
-    │       └── trace.otf
-    └── index.json
+    +-- files
+    |   +-- output
+    |   |   +-- slam_out_landmarks.csv
+    |   |   `-- slam_out_path.csv
+    |   `-- trace
+    |       +-- trace.0.def
+    |       +-- trace.1.events
+    |       `-- trace.otf
+    `-- index.json
 
     2 directories, 4 files
 
@@ -467,11 +502,12 @@ and any number of _files_, arranged into a directory tree.  For example, a PPS
 run might translate to the following package:
 
     /package/
-    ├── files/
-    │   ├── file_1.txt
-    │   ├── file_2.dat
-    │   └── file_3.gif
-    └── index.json
+    +-- files/
+    |   +-- file_1.txt
+    |   +-- file_2.dat
+    |   `-- file_3.gif
+    `-- index.json
+
 
 The index is a single file named `index.ext`, where `ext` is some extension.
 The extension determines the format of the file.  Valid extensions are
@@ -502,6 +538,38 @@ No key may appear in both the `"data"` and `"files"` sections.
 ## SQLite indices ##
 
 The schema for SQLite indices remains to be standardized.  Check back later.
+
+## License and Copyright ##
+
+Copyright ©  2014  Galois, Inc.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  1. Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+  3. Neither Galois’s name nor the names of other contributors may be used to
+     endorse or promote products derived from this documentation without
+     specific prior written permission.
+
+**This documentation is provided by Galois and other contributors “as
+is” and any express or implied warranties, including, but not limited
+to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed.  In no event shall Galois or other
+contributors be liable for any direct, indirect, incidental, special,
+exemplary, or consequential damages (including, but not limited to,
+procurement of substitute goods or services; loss of use, data, or
+profits; or business interruption) however caused and on any theory of
+liability, whether in contract, strict liability, or tort (including
+negligence or otherwise) arising in any way out of the use of this
+documentation, even if advised of the possibility of such damage.**
+
+
+
 
 
 <!-- References -->
