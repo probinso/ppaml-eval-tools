@@ -31,6 +31,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import array
+import contextlib
 import errno
 import hashlib
 import math
@@ -43,7 +44,6 @@ import time
 import textwrap
 
 import psutil
-import sqlalchemy
 import xdg
 
 from . import configuration
@@ -69,12 +69,29 @@ def main(arguments):
         )
 
     # Register the artifact.
-    with utility.TemporaryDirectory(prefix='ppaml.') as sandbox:
+    with contextlib.nested(utility.TemporaryDirectory(prefix='ppaml.'),
+                           db.session()) as (sandbox, session):
         artifact = db.Artifact()
-        artifact.challenge_problem_id = \
-            conf['problem']['challenge_problem_id']
-        artifact.team_id = conf['problem']['team_id']
-        artifact.pps_id = conf['problem']['pps_id']
+
+        artifact.challenge_problem_id = db.require_foreign_key(
+            session,
+            db.ChallengeProblem,
+            challenge_problem_id=conf['problem']['challenge_problem_id'],
+            )
+        # TODO: Don't fatal-error on missing challenge problems; try to
+        # add them to the database.
+
+        artifact.team_id = db.require_foreign_key(
+            session,
+            db.Team,
+            team_id=conf['problem']['team_id'],
+            )
+
+        artifact.pps_id = db.require_foreign_key(
+            session,
+            db.PPS,
+            pps_id=conf['problem']['pps_id'],
+            )
 
         try:
             artifact.description = conf['artifact']['description']
@@ -91,26 +108,23 @@ def main(arguments):
         # artifacts interpreted.
         artifact.interpreted = 1
 
-        try:
-            with db.session() as session:
-                # Capture the artifact source code.
-                artifact.artifact_id = db.migrate(
-                    conf.expand_path_list('artifact', 'paths'),
-                    conf.base_dir
-                    )
-                session.add(artifact)
+        # Capture the artifact source code.
+        artifact.artifact_id = db.migrate(
+            conf.expand_path_list('artifact', 'paths'),
+            conf.base_dir
+            )
 
-        except sqlalchemy.exc.IntegrityError as integrity_error:
-            if "not unique" in integrity_error.orig.message.lower():
-                # The artifact is already in the database, so just move
-                # on.
-                pass
-            else:
+        # Insert the artifact into the database.
+        if db.contains(session, db.Artifact, artifact_id=artifact.artifact_id):
+            # We've already captured this artifact; we don't need to
+            # insert a new row into the database.
+            pass
+        else:
+            try:
+                session.add(artifact)
+            except Exception:
                 db.remove_blob(artifact.artifact_id)
                 raise
-        except Exception:
-            db.remove_blob(artifact.artifact_id)
-            raise
 
         # Run the artifact.
         run_data = _run_artifact(RunProcedure(conf), sandbox)

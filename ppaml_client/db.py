@@ -76,30 +76,35 @@ class ChallengeProblem(PPAMLDBTable):
     """A PPAML challenge problem."""
 
     __tablename__ = 'challenge_problem'
+    human_name = "challenge problem"
 
 
 class Team(PPAMLDBTable):
     """A performer team."""
 
     __tablename__ = 'team'
+    human_name = "team"
 
 
 class PPS(PPAMLDBTable):
     """A probabilistic programming system."""
 
     __tablename__ = 'pps'
+    human_name = "PPS"
 
 
 class Artifact(PPAMLDBTable):
     """A program submitted to PPAML for evaluation."""
 
     __tablename__ = 'artifact'
+    human_name = "artifact"
 
 
 class Run(PPAMLDBTable):
     """A single execution of an Artifact."""
 
     __tablename__ = 'run'
+    human_name = "run"
 
 
 class Environment(PPAMLDBTable):
@@ -111,18 +116,21 @@ class Environment(PPAMLDBTable):
     """
 
     __tablename__ = 'environment'
+    human_name = "environment record"
 
 
 class Hardware(PPAMLDBTable):
     """The hardware component of an Environment."""
 
     __tablename__ = 'hardware'
+    human_name = "hardware record"
 
 
 class Software(PPAMLDBTable):
     """The software component of an Environment."""
 
     __tablename__ = 'software'
+    human_name = "software record"
 
 
 
@@ -161,6 +169,64 @@ def session(*args, **kwargs):
 
 
 
+##### Queries #####
+
+
+# A useful shortcut for EXISTS queries.
+def contains(active_session, class_, **filters):
+    """Performs an EXISTS query.
+
+    The provided class is the ORM class to query over.  All filters are
+    passed directly to SQLAlchemy's filter_by function.
+
+    Example:
+        db.contains(session, PPS, team_id=arguments.team_id)
+
+    """
+    exists_query = active_session.query(class_).filter_by(**filters).exists()
+    return active_session.query(exists_query).scalar()
+
+
+# A shortcut for checking FOREIGN KEY constraints.
+def require_foreign_key(active_session, class_, **id_constraint):
+    """Checks a foreign key constraint.
+
+    This function sits at a level of abstraction which is difficult to
+    express in Python, so its interface is a bit weird.  It's best to
+    think of it as taking four arguments:
+
+        require_foreign_key(session, OtherTable,
+                            other_table_id=expected_id)
+
+    will return expected_id if and only if OtherTable contains a row
+    with the other_table_id column equal to expected_id.  This provides
+    an elegant idiom for setting columns in a new row--e.g.,
+
+        def add_student(n):
+            new_student = Student()
+            new_student.homeroom_id = require_foreign_key(
+                session,
+                Homeroom,
+                id=n,
+                )
+
+    If the foreign key constraint is not satisfied, this function throws
+    a utility.FatalError.
+
+    """
+    assert len(id_constraint) == 1
+    id_number = id_constraint.values()[0]
+    if contains(active_session, class_, **id_constraint):
+        return id_number
+    else:
+        raise utility.FatalError(textwrap.fill(textwrap.dedent("""\
+            {0} {1} does not exist.""".format(
+                class_.human_name.capitalize(),
+                id_number,
+                ))))
+
+
+
 ################################ Saving files #################################
 
 
@@ -182,6 +248,7 @@ def migrate(paths, strip_prefix):
         with open(tarball_path, 'rb') as tarball:
             blob_id = hashlib.md5(tarball.read()).hexdigest()
 
+        # TODO: Throw an exception if the file is already there?
         shutil.copyfile(
             tarball_path,
             os.path.join(xdg.BaseDirectory.save_data_path('ppaml'), blob_id),
