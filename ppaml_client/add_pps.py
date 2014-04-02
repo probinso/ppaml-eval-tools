@@ -32,8 +32,6 @@ from __future__ import (absolute_import, division, print_function)
 
 import textwrap
 
-import sqlalchemy
-
 from . import db
 from . import static
 from . import utility
@@ -52,30 +50,21 @@ def main(arguments):
     # Add the PPS.
     with db.session() as session:
         pps = db.PPS()
-        pps.team_id = arguments.team_id
         pps.description = arguments.name
         pps.version = arguments.version
+        pps.team_id = db.require_foreign_key(session, db.Team,
+                                             team_id=arguments.team_id)
+
+        # Ensure UNIQUE constraint is satisfied.
+        if db.contains(session, db.PPS, team_id=arguments.team_id,
+                       description=arguments.name, version=arguments.version):
+            raise utility.FatalError(textwrap.fill(textwrap.dedent("""\
+                Duplicate PPS: This PPS is already registered.  Are you sure
+                you've set your description and version correctly?""")))
+
         session.add(pps)
 
-        try:
-            # This must be a commit, not just a flush, since we need
-            # foreign key constraints to be checked.
-            session.commit()
-        except sqlalchemy.exc.IntegrityError as integrity_error:
-            session.rollback()
-            if 'foreign key' in integrity_error.orig.message.lower():
-                raise utility.FatalError("invalid team ID")
-            else:
-                # The PPS has already been added.  Warn the user.
-                existing_id = session.query(db.PPS).filter_by(
-                    description=arguments.name,
-                    version=arguments.version,
-                    )[0].pps_id
-                raise utility.FatalError(textwrap.fill(textwrap.dedent("""\
-                    Duplicate PPS: This PPS is already registered with PPS ID
-                    {0}.  Are you sure you've set your description and version
-                    correctly?""".format(existing_id))))
-
+        session.flush()
         print("{0}".format(pps.pps_id))
 
 

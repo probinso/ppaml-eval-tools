@@ -30,8 +30,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import sqlalchemy
-
 from . import db
 
 
@@ -42,22 +40,23 @@ from . import db
 def main(arguments):
     """Insert the specified team into the database."""
     with db.session() as session:
-        team = db.Team()
-        team.institution = arguments.institution
-        team.contact_name = arguments.contact_name
-        team.contact_email = arguments.contact_email
-        session.add(team)
+        # Ensure UNIQUE constraint is satisfied; if the user tries to
+        # add a duplicate team, just use the one already in the
+        # database.
+        team = session.query(db.Team).filter_by(
+            institution=arguments.institution,
+            contact_name=arguments.contact_name,
+            contact_email=arguments.contact_email,
+            ).scalar()
 
-        try:
+        if not team:
+            team = db.Team()
+            team.institution = arguments.institution
+            team.contact_name = arguments.contact_name
+            team.contact_email = arguments.contact_email
+            session.add(team)
+
             session.flush()
-        except sqlalchemy.exc.IntegrityError:
-            # Whoops, that team's already been added.  Find it.
-            session.rollback()
-            team = session.query(db.Team).filter_by(
-                institution=arguments.institution,
-                contact_name=arguments.contact_name,
-                contact_email=arguments.contact_email,
-                )[0]
 
         print("{0}".format(team.team_id))
 
