@@ -37,7 +37,6 @@ are obvious.
 
 from __future__ import (absolute_import, division, print_function)
 
-import json
 import platform
 import re
 import socket
@@ -187,7 +186,7 @@ def insert_current():
 #################################### Main #####################################
 
 
-def main(arguments):
+def main(_arguments):
     insert_current()
 
 

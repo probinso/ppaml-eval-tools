@@ -138,7 +138,7 @@ class Software(PPAMLDBTable):
 
 
 @sqlalchemy.event.listens_for(sqlalchemy.engine.Engine, 'connect')
-def set_sqlite_pragma(dbapi_connection, connection_record):
+def _set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()

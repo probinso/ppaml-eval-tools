@@ -33,18 +33,13 @@ from __future__ import (absolute_import, division, print_function)
 import array
 import contextlib
 import errno
-import hashlib
 import math
 import os
-import shutil
 import subprocess
-import sys
-import tarfile
 import time
 import textwrap
 
 import psutil
-import xdg
 
 from . import configuration
 from . import db
@@ -190,7 +185,6 @@ def _save_run(artifact_id, conf, sandbox, run_result):
             )
     except TypeError:
         assert run_result.config_file_path is None
-        pass
 
     # Save the artifact output, log, and trace.
     def save(paths, strip_prefix):
