@@ -216,7 +216,12 @@ def _save_run(artifact_id, conf, sandbox, run_result):
         # Clear the saved data.
         for blob_id in (run.artifact_configuration, run.output, run.log,
                         run.trace):
-            db.remove_blob(blob_id)
+            # We'd like to use EAFP here, but Python 2 doesn't support
+            # exception chaining (see PEP 3134), so EAFP would require
+            # making this its own function.  LBYL is more elegant,
+            # anyway.
+            if blob_id:
+                db.remove_blob(blob_id)
         raise
 
 
