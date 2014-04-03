@@ -235,6 +235,27 @@ CREATE TRIGGER run_updated AFTER UPDATE ON run
 		WHERE run_id = NEW.run_id;
 	END;
 
+CREATE TABLE tag (
+	label VARCHAR(255) NOT NULL PRIMARY KEY,
+	run_id INTEGER NOT NULL
+		REFERENCES run ON DELETE CASCADE,
+
+	meta_created BIGINT NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+	meta_updated BIGINT NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+
+	CHECK (meta_created <= meta_updated),
+	UNIQUE (label));
+
+CREATE TRIGGER tag_updated AFTER UPDATE ON tag
+	FOR EACH ROW
+	BEGIN
+		UPDATE tag
+		SET meta_updated = CURRENT_TIMESTAMP
+		WHERE label = NEW.label;
+	END;
+
 CREATE TABLE environment (
 	environment_id INTEGER PRIMARY KEY
 		AUTOINCREMENT,	-- [sqlite]
