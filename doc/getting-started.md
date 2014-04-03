@@ -302,7 +302,7 @@ tree, which can be trivially archived, compressed, and transferred.  To
 illustrate artifact evaluation, let’s consider a not-so-hypothetical solution
 for challenge problem 1: a Kalman filter.  All the files used in this example
 (modulo one data set, which needs to be downloaded from MIDAS) are in the
-`example` directory of this distribution.
+`ekm_slam_solution` directory of this distribution.
 
 
 ## Data collection ##
@@ -314,10 +314,10 @@ you place the artifact to evaluate and any related data files.
     % cd ~/ppaml-sandbox
 
 In this document, we will work through the CP1 solution that is included with the
-PPAML tools distribution.  Copy the files from the example/ subdirectory of the
-tools distribution to your sandbox:
+PPAML tools distribution.  Copy the files from the ekm_slam_solution/
+subdirectory of the tools distribution to your sandbox:
 
-    % cp -a (location of PPAML tools)/example/{csv_helper,slam,slamutil,test-slamutil}.py .
+    % cp -a (location of PPAML tools)/ekm_slam_solution/{csv_helper,slam,slamutil,test-slamutil}.py .
     % python slam.py
     USAGE: slam.py END_TIME INPUT_DATA_DIR OUTPUT_DATA_DIR
 
