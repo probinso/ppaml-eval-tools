@@ -41,7 +41,21 @@ from . import db
 
 
 def main(arguments):
-    pass
+    """Insert the specified tag lookup label into db."""
+    with db.session() as session:
+        # Ensure UNIQUE constraint is satisfied; if the user tries to
+        # add a duplicate tag, update the one already in the database.
+        tag = session.query(db.Tag).filter_by(label=arguments.label).scalar()
+
+        if not tag:
+            tag = db.Tag()
+            tag.label = arguments.label
+
+        tag.run_id = db.require_foreign_key(session, db.Run,
+          run_id=arguments.run_id)
+        session.add(tag)
+
+        print("\"{0}\" tags {1}".format(tag.label, tag.run_id))
 
 def add_subparser(subparsers):
     """Register the 'add-team' subcommand."""
