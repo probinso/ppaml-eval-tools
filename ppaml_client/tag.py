@@ -57,6 +57,7 @@ def main(arguments):
 
         print("\"{0}\" tags {1}".format(tag.label, tag.run_id))
 
+
 def add_subparser(subparsers):
     """Register the 'add-team' subcommand."""
     parser = subparsers.add_parser('tag', help="tag a 'run id' with a label")
