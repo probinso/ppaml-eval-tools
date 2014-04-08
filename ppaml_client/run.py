@@ -47,6 +47,7 @@ import psutil
 from . import configuration
 from . import db
 from . import fingerprint
+from . import static
 from . import utility
 
 
@@ -71,13 +72,15 @@ def main(arguments):
                            db.session()) as (sandbox, session):
         artifact = db.Artifact()
 
+        # Ensure that all challenge problems, teams, &c. are in the
+        # database.
+        static.populate_db(session, commit=True)
+
         artifact.challenge_problem_id = db.require_foreign_key(
             session,
             db.ChallengeProblem,
             challenge_problem_id=conf['problem']['challenge_problem_id'],
             )
-        # TODO: Don't fatal-error on missing challenge problems; try to
-        # add them to the database.
 
         artifact.team_id = db.require_foreign_key(
             session,
