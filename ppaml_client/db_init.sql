@@ -37,7 +37,7 @@ PRAGMA application_id = 3430079183; -- 0xCC72DACF
 
 -- [sqlite] SQLite provides a nice database header to associate human-readable
 -- version information with the schema.
-PRAGMA user_version = 5;
+PRAGMA user_version = 6;
 
 -- [sqlite] SQLAlchemy's SQLite backend does not natively handle floating-point
 -- values, so all instances of TIMESTAMP WITH TIME ZONE have been replaced with
@@ -233,6 +233,27 @@ CREATE TRIGGER run_updated AFTER UPDATE ON run
 		UPDATE run
 		SET meta_updated = CURRENT_TIMESTAMP
 		WHERE run_id = NEW.run_id;
+	END;
+
+CREATE TABLE tag (
+	label VARCHAR(255) NOT NULL PRIMARY KEY,
+	run_id INTEGER NOT NULL
+		REFERENCES run ON DELETE CASCADE,
+
+	meta_created BIGINT NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+	meta_updated BIGINT NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+
+	CHECK (meta_created <= meta_updated),
+	UNIQUE (label));
+
+CREATE TRIGGER tag_updated AFTER UPDATE ON tag
+	FOR EACH ROW
+	BEGIN
+		UPDATE tag
+		SET meta_updated = CURRENT_TIMESTAMP
+		WHERE label = NEW.label;
 	END;
 
 CREATE TABLE environment (
