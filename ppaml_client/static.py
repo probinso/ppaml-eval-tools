@@ -55,15 +55,11 @@ challenge_problems = {
     }
 
 
-def populate_db():
+def populate_db(session, commit=False):
     """Populate the database with the static data."""
     for cp in challenge_problems.itervalues():
-        with db.session() as session:
-            try:
-                session.add(cp)
+        if not db.contains(session, db.ChallengeProblem,
+                           description=cp.description, revision=cp.revision):
+            session.add(cp)
+            if commit:
                 session.commit()
-            except sqlalchemy.exc.IntegrityError:
-                # The challenge problem has already been added.  Big
-                # deal.
-                session.rollback()
-                continue

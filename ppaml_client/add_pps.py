@@ -46,12 +46,12 @@ from . import utility
 
 def main(arguments):
     """Insert the specified PPS into the database."""
-    # PPSs have a many-to-many relationship with challenge problems, so
-    # make sure the challenge problems are all in the database.
-    static.populate_db()
-
-    # Add the PPS.
     with db.session() as session:
+        # PPSs have a many-to-many relationship with challenge problems,
+        # so make sure the challenge problems are all in the database.
+        static.populate_db(session, commit=True)
+
+        # Add the PPS.
         pps = db.PPS()
         pps.description = arguments.name
         pps.version = arguments.version
