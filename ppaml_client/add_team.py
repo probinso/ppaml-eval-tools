@@ -59,7 +59,7 @@ def main(arguments):
             team.contact_email = arguments.contact_email
             session.add(team)
 
-            session.flush()
+            session.commit()
 
         print("{0}".format(team.team_id))
 
