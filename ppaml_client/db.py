@@ -110,6 +110,13 @@ class Run(PPAMLDBTable):
     human_name = "run"
 
 
+class Tag(PPAMLDBTable):
+    """Lookup for Tagged Runs."""
+
+    __tablename__ = 'tag'
+    human_name = "tag"
+
+
 class Environment(PPAMLDBTable):
     """A machine fingerprint.
 
