@@ -169,19 +169,20 @@ def insert_current():
         # Hardware
         hw = current_hardware()
         session.add(hw)
+        session.commit()
 
         # Software
         sw = current_software()
         session.add(sw)
+        session.commit()
 
         # Environment
         env = db.Environment()
-        session.flush()
         env.hardware_id = hw.hardware_id
         env.software_id = sw.software_id
         session.add(env)
+        session.commit()
 
-        session.flush()
         return env.environment_id
 
 

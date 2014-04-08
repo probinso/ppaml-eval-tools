@@ -61,7 +61,7 @@ def populate_db():
         with db.session() as session:
             try:
                 session.add(cp)
-                session.flush()
+                session.commit()
             except sqlalchemy.exc.IntegrityError:
                 # The challenge problem has already been added.  Big
                 # deal.

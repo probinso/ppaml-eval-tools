@@ -66,8 +66,8 @@ def main(arguments):
                 you've set your description and version correctly?""")))
 
         session.add(pps)
+        session.commit()
 
-        session.flush()
         print("{0}".format(pps.pps_id))
 
 

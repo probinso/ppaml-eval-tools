@@ -120,6 +120,7 @@ def main(arguments):
         else:
             try:
                 session.add(artifact)
+                session.commit()
             except Exception:
                 db.remove_blob(artifact.artifact_id)
                 raise
@@ -210,7 +211,7 @@ def _save_run(artifact_id, conf, sandbox, run_result):
     try:
         with db.session() as session:
             session.add(run)
-            session.flush()
+            session.commit()
             return run.run_id
     except Exception:
         # Clear the saved data.
