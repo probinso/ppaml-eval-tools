@@ -37,7 +37,7 @@ PRAGMA application_id = 3430079183; -- 0xCC72DACF
 
 -- [sqlite] SQLite provides a nice database header to associate human-readable
 -- version information with the schema.
-PRAGMA user_version = 4;
+PRAGMA user_version = 5;
 
 -- [sqlite] SQLAlchemy's SQLite backend does not natively handle floating-point
 -- values, so all instances of TIMESTAMP WITH TIME ZONE have been replaced with
@@ -151,7 +151,7 @@ CREATE TABLE artifact (
 	-- Some artifacts will be interpreted, but some have a separate
 	-- compilation step.  These columns are currently placeholders, but
 	-- they may be used in the future.
-	interpreted DECIMAL(1, 0)
+	interpreted SMALLINT
 		CHECK (interpreted BETWEEN 0 AND 1),
 	-- Artifact binary bundle
 	binary VARCHAR(255),
