@@ -34,10 +34,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 from . import db
-import os.path
-from shutil import copyfile
 from . import utility
+from shutil import copyfile
+
 import xdg.BaseDirectory
+import os.path
+
+import tarfile
 
 
 
@@ -84,7 +87,12 @@ def create_tables_to_submit(tmpdir, table_entries):
                 session.add(entry)
 
 def package_directory(submitdir):
-    pass
+    contents = os.listdir(submitdir)
+    path = os.path.join(submitdir,"submit.tar.gz")
+    with tarfile.open(path, "w:gz") as tar:
+        for item in contents:
+            tar.add(os.path.join(submitdir,item))
+    return path
 
 def submit_package(package):
     pass
