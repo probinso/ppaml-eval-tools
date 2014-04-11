@@ -42,6 +42,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractproperty
 import contextlib
+import errno
 import hashlib
 import os
 import pkgutil
@@ -338,7 +339,7 @@ class Index(_Database):
         """
         try:
             with self.session() as sess:
-                yield session
+                yield sess
         except NotReentrant:
             yield self._active_session
 
