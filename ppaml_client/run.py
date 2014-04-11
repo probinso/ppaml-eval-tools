@@ -68,71 +68,78 @@ def main(arguments):
         )
 
     # Register the artifact.
-    with contextlib.nested(utility.TemporaryDirectory(prefix='ppaml.'),
-                           db.session()) as (sandbox, session):
-        artifact = db.Artifact()
+    try:
+        index = db.Index.open_user_index()
+    except db.SchemaMismatch as exception:
+        raise utility.FatalError(exception)
 
-        # Ensure that all challenge problems, teams, &c. are in the
-        # database.
-        static.populate_db(session, commit=True)
+    else:
+        with contextlib.nested(utility.TemporaryDirectory(prefix='ppaml.'),
+                               index.session()) as (sandbox, session):
+            artifact = index.Artifact()
 
-        artifact.challenge_problem_id = db.require_foreign_key(
-            session,
-            db.ChallengeProblem,
-            challenge_problem_id=conf['problem']['challenge_problem_id'],
-            )
+            # Ensure that all challenge problems, teams, &c. are in the
+            # database.
+            static.populate_db(session, index, commit=True)
 
-        artifact.team_id = db.require_foreign_key(
-            session,
-            db.Team,
-            team_id=conf['problem']['team_id'],
-            )
+            artifact.challenge_problem_id = index.require_foreign_key(
+                index.ChallengeProblem,
+                challenge_problem_id=conf['problem']['challenge_problem_id'],
+                )
 
-        artifact.pps_id = db.require_foreign_key(
-            session,
-            db.PPS,
-            pps_id=conf['problem']['pps_id'],
-            )
+            artifact.team_id = index.require_foreign_key(
+                index.Team,
+                team_id=conf['problem']['team_id'],
+                )
 
-        try:
-            artifact.description = conf['artifact']['description']
-        except KeyError:
-            pass
+            artifact.pps_id = index.require_foreign_key(
+                index.PPS,
+                pps_id=conf['problem']['pps_id'],
+                )
 
-        try:
-            artifact.version = conf['artifact']['version']
-        except KeyError:
-            pass
-
-        # In the future, we may handle compiled artifacts differently
-        # than interpreted ones.  In the meantime, consider all
-        # artifacts interpreted.
-        artifact.interpreted = 1
-
-        # Capture the artifact source code.
-        artifact.artifact_id = db.migrate(
-            conf.expand_path_list('artifact', 'paths'),
-            conf.base_dir
-            )
-
-        # Insert the artifact into the database.
-        if db.contains(session, db.Artifact, artifact_id=artifact.artifact_id):
-            # We've already captured this artifact; we don't need to
-            # insert a new row into the database.
-            pass
-        else:
             try:
-                session.add(artifact)
-                session.commit()
-            except Exception:
-                db.remove_blob(artifact.artifact_id)
-                raise
+                artifact.description = conf['artifact']['description']
+            except KeyError:
+                pass
 
-        # Run the artifact.
-        run_data = _run_artifact(RunProcedure(conf), sandbox)
+            try:
+                artifact.version = conf['artifact']['version']
+            except KeyError:
+                pass
 
-        # Save the run in the database.
-        print(_save_run(artifact.artifact_id, conf, sandbox, run_data))
+            # In the future, we may handle compiled artifacts
+            # differently than interpreted ones.  In the meantime,
+            # consider all artifacts interpreted.
+            artifact.interpreted = 1
+
+            # Capture the artifact source code.
+            artifact.artifact_id = db.Index.migrate(
+                conf.expand_path_list('artifact', 'paths'),
+                conf.base_dir
+                )
+
+            # Insert the artifact into the database.
+            if index.contains(
+                    index.Artifact,
+                    artifact_id=artifact.artifact_id,
+                    ):
+                # We've already captured this artifact; we don't need to
+                # insert a new row into the database.
+                pass
+            else:
+                try:
+                    session.add(artifact)
+                    session.commit()
+                except Exception:
+                    db.Index.remove_blob(artifact.artifact_id)
+                    raise
+
+            # Run the artifact.
+            run_data = _run_artifact(RunProcedure(conf), sandbox)
+
+            # Save the run in the database.
+            print(_save_run(index, session, artifact.artifact_id, conf,
+                            sandbox, run_data))
 
 
 def _run_artifact(run_procedure, sandbox):
@@ -168,9 +175,9 @@ def _run_artifact(run_procedure, sandbox):
         raise utility.FatalError(error_message, 10)
 
 
-def _save_run(artifact_id, conf, sandbox, run_result):
-    """Convert a _RunResult to a db.Run and save it."""
-    run = db.Run()
+def _save_run(index, session, artifact_id, conf, sandbox, run_result):
+    """Convert a _RunResult to a index.Run and save it."""
+    run = index.Run()
     run.artifact_id = artifact_id
     run.pps_id = conf['problem']['pps_id']
     run.environment_id = run_result.environment_id
@@ -186,7 +193,7 @@ def _save_run(artifact_id, conf, sandbox, run_result):
 
     # Save the artifact configuration.
     try:
-        run.artifact_configuration = db.migrate(
+        run.artifact_configuration = db.Index.migrate(
             run_result.config_file_path,
             conf.base_dir,
             )
@@ -196,7 +203,7 @@ def _save_run(artifact_id, conf, sandbox, run_result):
     # Save the artifact output, log, and trace.
     def save(paths, strip_prefix):
         try:
-            return db.migrate(paths, strip_prefix)
+            return db.Index.migrate(paths, strip_prefix)
         except OSError as os_error:
             if os_error.errno == errno.ENOENT:
                 # The artifact didn't produce this datum.
@@ -212,10 +219,9 @@ def _save_run(artifact_id, conf, sandbox, run_result):
         )
 
     try:
-        with db.session() as session:
-            session.add(run)
-            session.commit()
-            return run.run_id
+        session.add(run)
+        session.commit()
+        return run.run_id
     except Exception:
         # Clear the saved data.
         for blob_id in (run.artifact_configuration, run.output, run.log,
@@ -225,7 +231,7 @@ def _save_run(artifact_id, conf, sandbox, run_result):
             # making this its own function.  LBYL is more elegant,
             # anyway.
             if blob_id:
-                db.remove_blob(blob_id)
+                db.Index.remove_blob(blob_id)
         raise
 
 
@@ -328,7 +334,7 @@ class RunProcedure(object):
 class _RunResult(object):
     """A single execution of an artifact, as it exists on disk.
 
-    Instances of this class get converted to instances of db.Run as
+    Instances of this class get converted to instances of index.Run as
     appropriate.
 
     """

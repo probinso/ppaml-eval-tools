@@ -80,9 +80,9 @@ class HeterogeneousSystemException(Exception):
             "heterogeneous SMP systems are unsupported")
 
 
-def current_hardware():
-    """Create a new db.Hardware capturing the current platform."""
-    result = db.Hardware()
+def current_hardware(index):
+    """Create a new index.Hardware capturing the current platform."""
+    result = index.Hardware()
 
     # CPU
     try:
@@ -142,9 +142,9 @@ def current_hardware():
     return result
 
 
-def current_software():
-    """Create a new db.Software capturing the current platform."""
-    result = db.Software()
+def current_software(index):
+    """Create a new index.Software capturing the current platform."""
+    result = index.Software()
 
     # Kernel
     result.kernel = platform.system()
@@ -165,19 +165,20 @@ def current_software():
 
 def insert_current():
     """Insert the current machine fingerprint into the database."""
-    with db.session() as session:
+    index = db.Index.open_user_index()
+    with index.session() as session:
         # Hardware
-        hw = current_hardware()
+        hw = current_hardware(index)
         session.add(hw)
         session.commit()
 
         # Software
-        sw = current_software()
+        sw = current_software(index)
         session.add(sw)
         session.commit()
 
         # Environment
-        env = db.Environment()
+        env = index.Environment()
         env.hardware_id = hw.hardware_id
         env.software_id = sw.software_id
         session.add(env)
@@ -191,7 +192,10 @@ def insert_current():
 
 
 def main(_arguments):
-    insert_current()
+    try:
+        insert_current()
+    except db.SchemaMismatch as exception:
+        raise utility.FatalError(exception)
 
 
 def add_subparser(subparsers):

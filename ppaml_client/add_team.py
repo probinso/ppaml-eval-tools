@@ -42,26 +42,32 @@ from . import db
 
 def main(arguments):
     """Insert the specified team into the database."""
-    with db.session() as session:
-        # Ensure UNIQUE constraint is satisfied; if the user tries to
-        # add a duplicate team, just use the one already in the
-        # database.
-        team = session.query(db.Team).filter_by(
-            institution=arguments.institution,
-            contact_name=arguments.contact_name,
-            contact_email=arguments.contact_email,
-            ).scalar()
+    try:
+        index = db.Index.open_user_index()
+    except db.SchemaMismatch as exception:
+        raise utility.FatalError(exception)
 
-        if not team:
-            team = db.Team()
-            team.institution = arguments.institution
-            team.contact_name = arguments.contact_name
-            team.contact_email = arguments.contact_email
-            session.add(team)
+    else:
+        with index.session() as session:
+            # Ensure UNIQUE constraint is satisfied; if the user tries
+            # to add a duplicate team, just use the one already in the
+            # database.
+            team = session.query(index.Team).filter_by(
+                institution=arguments.institution,
+                contact_name=arguments.contact_name,
+                contact_email=arguments.contact_email,
+                ).scalar()
 
-            session.commit()
+            if not team:
+                team = index.Team()
+                team.institution = arguments.institution
+                team.contact_name = arguments.contact_name
+                team.contact_email = arguments.contact_email
+                session.add(team)
 
-        print("{0}".format(team.team_id))
+                session.commit()
+
+            print("{0}".format(team.team_id))
 
 
 def add_subparser(subparsers):
