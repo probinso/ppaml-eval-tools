@@ -44,8 +44,8 @@ def main(arguments):
     """Insert the specified tag lookup label into db."""
 
     if arguments.label.isdigit():
-        print("\"{0}\" innapropriate tag, must include alphabetical characters",
-          arguments.label)
+        print("\"{0}\" innapropriate tag:".format(arguments.label),
+          "must include alphabetical characters")
         return
 
     try:
