@@ -51,6 +51,7 @@ from . import init
 from . import run
 from . import utility
 from . import tag
+from . import submit
 
 
 def _generate_parser(version):
@@ -89,6 +90,7 @@ def _generate_parser(version):
     init.add_subparser(subparsers)
     run.add_subparser(subparsers)
     tag.add_subparser(subparsers)
+    submit.add_subparser(subparsers)
 
     # All done.
     return parser
