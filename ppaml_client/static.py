@@ -39,7 +39,8 @@ from . import db
 
 
 def _cp(description, url):
-    result = db.ChallengeProblem()
+    index = db.Index.open_user_index()
+    result = index.ChallengeProblem()
     result.description = description
     result.revision = 1
     result.url = url
@@ -55,11 +56,12 @@ challenge_problems = {
     }
 
 
-def populate_db(session, commit=False):
+def populate_db(session, index, commit=False):
     """Populate the database with the static data."""
     for cp in challenge_problems.itervalues():
-        if not db.contains(session, db.ChallengeProblem,
-                           description=cp.description, revision=cp.revision):
+        if not index.contains(index.ChallengeProblem,
+                              description=cp.description,
+                              revision=cp.revision):
             session.add(cp)
             if commit:
                 session.commit()

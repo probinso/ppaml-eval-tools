@@ -46,29 +46,44 @@ from . import utility
 
 def main(arguments):
     """Insert the specified PPS into the database."""
-    with db.session() as session:
-        # PPSs have a many-to-many relationship with challenge problems,
-        # so make sure the challenge problems are all in the database.
-        static.populate_db(session, commit=True)
+    try:
+        index = db.Index.open_user_index()
+    except db.SchemaMismatch as exception:
+        raise utility.FatalError(exception)
 
-        # Add the PPS.
-        pps = db.PPS()
-        pps.description = arguments.name
-        pps.version = arguments.version
-        pps.team_id = db.require_foreign_key(session, db.Team,
-                                             team_id=arguments.team_id)
+    else:
+        with index.session() as session:
+            # PPSs have a many-to-many relationship with challenge
+            # problems, so make sure the challenge problems are all in
+            # the database.
+            static.populate_db(session, index, commit=True)
 
-        # Ensure UNIQUE constraint is satisfied.
-        if db.contains(session, db.PPS, team_id=arguments.team_id,
-                       description=arguments.name, version=arguments.version):
-            raise utility.FatalError(textwrap.fill(textwrap.dedent("""\
-                Duplicate PPS: This PPS is already registered.  Are you sure
-                you've set your description and version correctly?""")))
+            # Add the PPS.
+            pps = index.PPS()
+            pps.description = arguments.name
+            pps.version = arguments.version
+            try:
+                pps.team_id = index.require_foreign_key(
+                    index.Team,
+                    team_id=arguments.team_id,
+                    )
+            except db.ForeignKeyViolation as exception:
+                raise utility.FatalError(exception)
 
-        session.add(pps)
-        session.commit()
+            else:
+                # Ensure UNIQUE constraint is satisfied.
+                if index.contains(index.PPS, team_id=arguments.team_id,
+                                  description=arguments.name,
+                                  version=arguments.version):
+                    raise utility.FatalError(textwrap.fill(textwrap.dedent("""\
+                        Duplicate PPS: This PPS is already registered.  Are
+                        you sure you've set your description and version
+                        correctly?""")))
 
-        print("{0}".format(pps.pps_id))
+                session.add(pps)
+                session.commit()
+
+                print("{0}".format(pps.pps_id))
 
 
 def add_subparser(subparsers):
