@@ -43,6 +43,14 @@ from . import utility
 
 def main(arguments):
     """Insert the specified team into the database."""
+    # Validate arguments.
+    if not arguments.institution:
+        raise utility.FatalError("You must specify a nonempty institution.")
+    if not arguments.contact_name:
+        raise utility.FatalError("You must specify a point-of-contact.")
+    if not arguments.contact_email:
+        raise utility.FatalError("You must specify a contact e-mail address.")
+
     try:
         index = db.Index.open_user_index()
     except db.SchemaMismatch as exception:
