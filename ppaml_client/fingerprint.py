@@ -109,12 +109,17 @@ def current_hardware(index):
         # remaining CPUs.
         first_thread = cpuinfo[0]
         for thread in cpuinfo.values():
-            for attribute in ['cpu_cores', 'cpu_family', 'model',
-                              'stepping', 'microcode', 'cache_size',
-                              'model_name']:
+            # Check everything except 'cpu_cores'.
+            for attribute in ['cpu_family', 'model', 'stepping', 'microcode',
+                              'cache_size', 'model_name']:
                 if thread[attribute] != first_thread[attribute]:
                     raise HeterogeneousSystemException
-        result.cpu_n_cores = first_thread.cpu_cores
+            # 'cpu_cores' needs to be special-cased: on a single-core
+            # system, 'cpu_cores' is simply not present in the thread
+            # object.
+            if thread.get('cpu_cores', 1) != first_thread.get('cpu_cores', 1):
+                raise HeterogeneousSystemException()
+        result.cpu_n_cores = first_thread.get('cpu_cores', 1)
         result.cpu_family = first_thread.cpu_family
         result.cpu_model = first_thread.model
         result.cpu_stepping = first_thread.stepping
