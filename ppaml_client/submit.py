@@ -44,21 +44,6 @@ import tarfile
 
 
 
-def run_tid_to_run(db, session, run_tid):
-    """takes in possible run tag or id and returns corresponding run"""
-    if run_tid.isdigit():
-        run_id = int(run_tid)
-    else:
-        tag = session.query(db.Tag).filter_by(
-          label = run_tid).scalar()
-        run_id = tag.run_id if tag else None
-
-    run = None if run_id == None else session.query(db.Run).filter_by(
-      run_id = run_id).scalar()
-
-    return run
-
-
 def run_to_artifact_data(db, session, run):
     """takes in run and returns relevent artifact data"""
     artifact_id, output, trace = run.artifact_id, run.output, run.trace
@@ -109,23 +94,27 @@ def main(arguments):
         raise utility.FatalError(exception)
     else:
         with index.session() as session:
-            get_run = lambda run_tid: run_tid_to_run(index, session, run_tid)
+            interesting_runs = set()
+            bad_specifiers = []
 
-            runs = [[],[]]
             for run_tid in arguments.run_tids:
-                run = get_run(run_tid)
-                runs[bool(run)].append(run if run else run_tid)
+                runs = index.runs_specified_by((run_tid,))
+                if runs:
+                    interesting_runs = interesting_runs.union(runs)
+                else:
+                    # This tid didn't produce any runs, which means the
+                    # user screwed up.  Record the specifier so we can
+                    # fail loudly later.
+                    bad_specifiers.append(run_tid)
 
-            if runs[False]:
-                print("non-existant run_tids {0}".format(runs[False]),
+            if bad_specifiers:
+                print("non-existant run_tids {0}".format(bad_specifiers),
                 ": NO ACTION TAKEN")
                 return # raise fatal exception instead of return
 
-            runs = runs[True]
-
             # cannot move 'map' out of with statement, dependent on session
             get_artifact = lambda run: run_to_artifact_data(index, session, run)
-            artifact_datas = map(get_artifact, runs)
+            artifact_datas = map(get_artifact, interesting_runs)
 
     artifacts, filenames = [], []
     for artifact, artifact_id, output, trace in artifact_datas:
