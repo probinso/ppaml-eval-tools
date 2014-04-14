@@ -113,7 +113,7 @@ def current_hardware(index):
             for attribute in ['cpu_family', 'model', 'stepping', 'microcode',
                               'cache_size', 'model_name']:
                 if thread[attribute] != first_thread[attribute]:
-                    raise HeterogeneousSystemException
+                    raise HeterogeneousSystemException()
             # 'cpu_cores' needs to be special-cased: on a single-core
             # system, 'cpu_cores' is simply not present in the thread
             # object.
