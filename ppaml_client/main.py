@@ -46,6 +46,7 @@ import argparse
 from . import __version__
 from . import add_pps
 from . import add_team
+from . import evaluate
 from . import fingerprint
 from . import init
 from . import run
@@ -89,6 +90,7 @@ def _generate_parser(version):
     fingerprint.add_subparser(subparsers)
     init.add_subparser(subparsers)
     run.add_subparser(subparsers)
+    evaluate.add_subparser(subparsers)
     tag.add_subparser(subparsers)
     submit.add_subparser(subparsers)
 
