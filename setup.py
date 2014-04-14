@@ -106,15 +106,18 @@ setup(
     package_data={'ppaml_client': ['*.sql']},
     scripts=['scripts/ppaml'],
     data_files=[
-        ('doc', ['doc/getting-started.html']),
+        ('doc', [
+                'doc/getting-started.html',
+                'doc/getting-started.pdf',
+                ]),
         ('example', [
-                'example/csv_helper.py',
-                'example/README',
-                'example/run_slam',
-                'example/slam_eval',
-                'example/slam.py',
-                'example/slamutil.py',
-                'example/test-slamutil.py',
+                'ekm_slam_solution/csv_helper.py',
+                'ekm_slam_solution/README',
+                'ekm_slam_solution/run_slam',
+                'ekm_slam_solution/slam_eval',
+                'ekm_slam_solution/slam.py',
+                'ekm_slam_solution/slamutil.py',
+                'ekm_slam_solution/test-slamutil.py',
                 ]),
         ],
     )
