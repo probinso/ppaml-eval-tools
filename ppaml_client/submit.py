@@ -69,6 +69,14 @@ def create_tables_to_submit(tmpdir, table_entries):
     else:
         with index.session() as session:
             for entry in table_entries:
+                # BUG: The following line asks SQLAlchemy to transplant
+                # a row from the original database's run table to the
+                # corresponding table in submit.db.  This should be just
+                # fine--the two tables have identical schemata, after
+                # all--but SQLAlchemy apparently doesn't verify this
+                # fact and refuses to transplant the row.  Surprisingly,
+                # this doesn't trigger an exception or anything;
+                # SQLAlchemy just doesn't generate any SQL for it.
                 session.add(entry)
 
 def package_directory(submitdir):
@@ -80,7 +88,7 @@ def package_directory(submitdir):
     return path
 
 def submit_package(package):
-    pass
+    pass                        # TODO: stub
 
 
 #################################### Main #####################################
