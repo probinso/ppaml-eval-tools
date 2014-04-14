@@ -33,8 +33,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from . import db
-from . import utility
 from shutil import copyfile
 
 import xdg.BaseDirectory
@@ -42,7 +40,8 @@ import os.path
 
 import tarfile
 
-
+from . import db
+from . import utility
 
 def run_tid_to_run(db, session, run_tid):
     """takes in possible run tag or id and returns corresponding run"""
@@ -60,12 +59,15 @@ def run_tid_to_run(db, session, run_tid):
 
 
 def run_to_artifact_data(db, session, run):
-    """takes in run and returns relevent artifact data"""
+    """
+      takes in run and returns relevent/'detached' artifact data
+    """
     artifact_id, output, trace = run.artifact_id, run.output, run.trace
 
     artifact = session.query(db.Artifact).filter_by(
       artifact_id = artifact_id).scalar()
 
+    session.expunge(artifact) # detaches artifact from current session
     return artifact, artifact_id, output, trace
 
 
@@ -83,7 +85,10 @@ def create_tables_to_submit(tmpdir, table_entries):
         raise utility.FatalError(exception)
     else:
         with index.session() as session:
+            session.execute("PRAGMA foreign_keys=OFF") # this is special case
             for entry in table_entries:
+                print(entry.artifact_id)
+                entry = session.merge(entry) # attach entry to current session
                 session.add(entry)
 
 def package_directory(submitdir):
@@ -117,7 +122,7 @@ def main(arguments):
                 runs[bool(run)].append(run if run else run_tid)
 
             if runs[False]:
-                print("non-existant run_tids {0}".format(runs[False]),
+                print("nonexistant run_tids {0}".format(runs[False]),
                 ": NO ACTION TAKEN")
                 return # raise fatal exception instead of return
 
@@ -129,6 +134,16 @@ def main(arguments):
 
     artifacts, filenames = [], []
     for artifact, artifact_id, output, trace in artifact_datas:
+        """
+          Need to assume that artifact_ids may overlap where outputs dont
+          must also check for additional hashes..
+        """
+        """
+          Consistant crash output behaviour
+        """
+        """
+          talk to benjamin about specific change
+        """
         if artifact_id not in filenames:
             artifacts.append(artifact)
             filenames.append(artifact_id)
