@@ -47,13 +47,21 @@ def run_to_artifact_data(db, session, run):
     """
       takes in run and returns relevent/'detached' artifact data
     """
-    artifact_id, output, trace = run.artifact_id, run.output, run.trace
+
+    assert(run is not None)
+
+    filenames = [run.artifact_id, run.output, run.trace]
 
     artifact = session.query(db.Artifact).filter_by(
-      artifact_id = artifact_id).scalar()
+      artifact_id = run.artifact_id).scalar()
 
-    session.expunge(artifact) # detaches artifact from current session
-    return artifact, artifact_id, output, trace
+    filenames += [
+      artifact.binary, artifact.compiler, artifact.build_configuration
+      ]
+    filenames = filter(lambda x: x is not None, filenames)
+
+    session.expunge(artifact) # detaches artifact from current db session
+    return artifact, filenames
 
 
 def copy_files_to_submit(srcdir, dstdir, filenames):
@@ -119,19 +127,10 @@ def main(arguments):
             artifact_datas = map(get_artifact, runs)
 
     artifacts, filenames = [], []
-    for artifact, artifact_id, output, trace in artifact_datas:
-        """
-          Need to assume that artifact_ids may overlap where outputs dont
-          must also check for additional hashes..
-        """
-        """
-          Consistant crash output behaviour
-        """
-        if artifact_id not in filenames:
-            artifacts.append(artifact)
-            filenames.append(artifact_id)
-            filenames.append(output)
-            filenames.append(trace)
+    for artifact, artifact_files in artifact_datas:
+        artifacts.append(artifact)
+        filenames += artifact_files
+    artifacts, filenames = set(artifacts), set(filenames)
 
     srcdir = xdg.BaseDirectory.save_data_path('ppaml')
     with utility.TemporaryDirectory() as dstdir:
