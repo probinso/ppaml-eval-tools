@@ -72,7 +72,6 @@ def create_tables_to_submit(tmpdir, table_entries):
         with index.session() as session:
             session.execute("PRAGMA foreign_keys=OFF") # this is special case
             for entry in table_entries:
-                print(entry.artifact_id)
                 entry = session.merge(entry) # attach entry to current session
                 session.add(entry)
 
@@ -99,27 +98,25 @@ def main(arguments):
         raise utility.FatalError(exception)
     else:
         with index.session() as session:
-            interesting_runs = set()
-            bad_specifiers = []
+            runs = [[],[]] # [[failed], [successful]]
 
             for run_tid in arguments.run_tids:
-                runs = index.runs_specified_by((run_tid,))
-                if runs:
-                    interesting_runs = interesting_runs.union(runs)
-                else:
-                    # This tid didn't produce any runs, which means the
-                    # user screwed up.  Record the specifier so we can
-                    # fail loudly later.
-                    bad_specifiers.append(run_tid)
+                run = index.run_specified_by(run_tid)
 
-            if bad_specifiers:
-                print("nonexistant run_tids {0}".format(bad_specifiers),
+                # this will store failed run_tids in runs[False] for later use
+                runs[bool(run)].append(run if run else run_tid)
+
+            if runs[False]:
+                print("nonexistant run_tids {0}".format(runs[False]),
                 ": NO ACTION TAKEN")
-                return # raise fatal exception instead of return
+                return # TODO: raise fatal exception instead of return
+
+            # this will remove doubles of the successfully addressed runs
+            runs = set(runs[True])
 
             # cannot move 'map' out of with statement, dependent on session
             get_artifact = lambda run: run_to_artifact_data(index, session, run)
-            artifact_datas = map(get_artifact, interesting_runs)
+            artifact_datas = map(get_artifact, runs)
 
     artifacts, filenames = [], []
     for artifact, artifact_id, output, trace in artifact_datas:
@@ -129,9 +126,6 @@ def main(arguments):
         """
         """
           Consistant crash output behaviour
-        """
-        """
-          talk to benjamin about specific change
         """
         if artifact_id not in filenames:
             artifacts.append(artifact)
