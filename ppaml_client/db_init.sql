@@ -37,7 +37,7 @@ PRAGMA application_id = 3430079183; -- 0xCC72DACF
 
 -- [sqlite] SQLite provides a nice database header to associate human-readable
 -- version information with the schema.
-PRAGMA user_version = 6;
+PRAGMA user_version = 7;
 
 -- [sqlite] SQLAlchemy's SQLite backend does not natively handle floating-point
 -- values, so all instances of TIMESTAMP WITH TIME ZONE have been replaced with
@@ -154,13 +154,13 @@ CREATE TABLE artifact (
 	interpreted SMALLINT
 		CHECK (interpreted BETWEEN 0 AND 1),
 	-- Artifact binary bundle
-	binary VARCHAR(255),
+	binary CHAR(32),
 	build_environment_id INTEGER
 		REFERENCES environment(environment_id) ON DELETE RESTRICT
 		DEFERRABLE INITIALLY DEFERRED,
-	compiler VARCHAR(255),
+	compiler CHAR(32),
 	build_flags VARCHAR(255),
-	build_configuration VARCHAR(255),
+	build_configuration CHAR(32),
 	build_started BIGINT,
 	build_load_average REAL CHECK (build_load_average >= 0),
 	build_load_max REAL CHECK (build_load_max >= 0),
@@ -205,14 +205,14 @@ CREATE TABLE run (
 		DEFERRABLE INITIALLY DEFERRED,
 
 	started BIGINT,
-	artifact_configuration VARCHAR(255),
-	output VARCHAR(255),
-	log VARCHAR(255),
-	trace VARCHAR(255),
+	artifact_configuration CHAR(32),
+	output CHAR(32),
+	log CHAR(32),
+	trace CHAR(32),
 	duration DOUBLE PRECISION CHECK (duration >= 0),
-	quant_score VARCHAR(255),
+	quant_score CHAR(32),
 	-- Where the qualitative evaluation goes
-	qual_score VARCHAR(255),
+	qual_score CHAR(32),
 	load_average REAL CHECK (load_average >= 0),
 	load_max REAL CHECK (load_max >= 0),
 	ram_average BIGINT CHECK (ram_average >= 0),
