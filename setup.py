@@ -106,7 +106,10 @@ setup(
     package_data={'ppaml_client': ['*.sql']},
     scripts=['scripts/ppaml'],
     data_files=[
-        ('doc', ['doc/getting-started.html']),
+        ('doc', [
+                'doc/getting-started.html',
+                'doc/getting-started.pdf',
+                ]),
         ('example', [
                 'example/csv_helper.py',
                 'example/README',
