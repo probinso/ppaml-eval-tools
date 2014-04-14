@@ -42,6 +42,12 @@ from . import db
 
 def main(arguments):
     """Insert the specified tag lookup label into db."""
+
+    if arguments.label.isdigit():
+        print("\"{0}\" innapropriate tag:".format(arguments.label),
+          "must include alphabetical characters")
+        return
+
     try:
         index = db.Index.open_user_index()
     except db.SchemaMismatch as exception:
