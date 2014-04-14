@@ -42,6 +42,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractproperty
 import contextlib
+import errno
 import hashlib
 import os
 import pkgutil
@@ -338,7 +339,7 @@ class Index(_Database):
         """
         try:
             with self.session() as sess:
-                yield session
+                yield sess
         except NotReentrant:
             yield self._active_session
 
@@ -388,6 +389,34 @@ class Index(_Database):
         else:
             raise ForeignKeyViolation(orm_class, id_number)
 
+    def runs_specified_by(self, specifiers):
+        """Finds a sequence of runs.
+
+        Given a sequence of specifiers (either run IDs or tags),
+        runs_specified_by locates all runs which satisfy one or more of
+        the specifiers.  The result is a sequence of self.Runs, which
+        may be empty (if none of the specifiers match anything) or
+        contain duplicates.
+
+        """
+        result = []
+        with self.__create_or_use_session() as sess:
+            for specifier in specifiers:
+                if specifier.isdigit():
+                    # We've been asked to find a run by ID.
+                    specifier = int(specifier)
+                    result += list(
+                        sess.query(self.Run).filter_by(run_id=specifier),
+                        )
+                else:
+                    # We've been asked to look for a tag.
+                    result += list(
+                        sess.query(self.Run).join(self.Tag).filter(
+                            self.Tag.label == specifier,
+                            ).all(),
+                        )
+        return result
+
     ##### Saving files #####
 
     @staticmethod
@@ -419,6 +448,16 @@ class Index(_Database):
                 )
 
         return blob_id
+
+    @staticmethod
+    def extract_blob(blob_id, dest_dir):
+        """Extracts the contents of a blob into a directory."""
+        with tarfile.open(os.path.join(
+                xdg.BaseDirectory.save_data_path('ppaml'),
+                blob_id,
+                )) as tar:
+            tar.extractall(dest_dir)
+
 
     @staticmethod
     def remove_blob(blob_id):
