@@ -31,14 +31,20 @@ else
 X := @
 endif
 
-all:	getting-started.html
+all: getting-started.html getting-started.pdf
 
 clean:
 	@echo "  RM      getting-started.html"
 	$(X)$(RM) getting-started.html
+	@echo "  RM      getting-started.pdf"
+	$(X)$(RM) getting-started.pdf
 
 %.html: %.md template.html
 	@echo "  PANDOC  $@"
 	$(X)$(PANDOC) $< --standalone --to html5 --base-header-level=2 --template=template.html --toc -o $@
+
+%.pdf: %.md
+	@echo "  PANDOC  $@"
+	$(X)$(PANDOC) $< --to latex --number-sections --toc -o $@
 
 .PHONY: all clean
