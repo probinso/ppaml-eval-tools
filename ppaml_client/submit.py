@@ -34,6 +34,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from shutil import copyfile
+from shutil import move
 
 import xdg.BaseDirectory
 import os.path
@@ -50,7 +51,7 @@ def run_to_artifact_data(db, session, run):
 
     assert(run is not None)
 
-    filenames = [run.artifact_id, run.output, run.trace]
+    filenames = [run.artifact_id]
 
     artifact = session.query(db.Artifact).filter_by(
       artifact_id = run.artifact_id).scalar()
@@ -83,16 +84,21 @@ def create_tables_to_submit(tmpdir, table_entries):
                 entry = session.merge(entry) # attach entry to current session
                 session.add(entry)
 
+SUBMIT = "submit.tar.gz"
+
 def package_directory(submitdir):
     contents = os.listdir(submitdir)
-    path = os.path.join(submitdir,"submit.tar.gz")
+    path = os.path.join(submitdir, SUBMIT)
     with tarfile.open(path, "w:gz") as tar:
         for item in contents:
-            tar.add(os.path.join(submitdir,item))
+            tar.add(os.path.join(submitdir, item))
     return path
 
-def submit_package(package):
-    pass                        # TODO: stub
+def submit_package(srcdir, dstdir):
+    send = os.path.join(dstdir, SUBMIT)
+    move(os.path.join(srcdir, SUBMIT), send)
+    print("please e-mail \"{0}\" to the contact ".format(SUBMIT),
+      "e-mail address for the challenge problem")
 
 
 #################################### Main #####################################
@@ -100,6 +106,10 @@ def main(arguments):
     """given a list of tags and run_ids this procedure packages up cooresponding
        artifact information, then submits it
     """
+    if not os.path.isdir(arguments.path):
+        print("path does not exist : \"{0}\"".format(arguments.path))
+        return # TODO: raise fatal exception instead of return
+
     try:
         index = db.Index.open_user_index()
     except db.SchemaMismatch as exception:
@@ -138,7 +148,7 @@ def main(arguments):
         copy_files_to_submit(srcdir, dstdir, filenames)
 
         package = package_directory(dstdir)
-        submit_package(package)
+        submit_package(dstdir, arguments.path)
 
     print("submit successful!")
 
@@ -148,6 +158,9 @@ def add_subparser(subparsers):
     parser = subparsers.add_parser(
       'submit',
       help="submit artifact data associated with tag or run_id")
+
+    parser.add_argument('path', type=str,
+      help="directory to save submit.tar.gz")
 
     parser.add_argument('run_tids', type=str, nargs='+',
       help='list of tags or run_ids')
