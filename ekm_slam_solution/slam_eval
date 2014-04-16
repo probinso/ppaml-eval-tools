@@ -37,25 +37,65 @@ import numpy as np
 
 ################################ Reading data #################################
 
-def read_slam_csv(raw):
-    dialect = csv.Sniffer().sniff(raw.read(1024))
-    raw.seek(0)
-    reader = csv.reader(raw, dialect)
-    processed = set()
-    for x_str, y_str in list(reader)[1:]: # drop header
-        processed.add((float(x_str), float(y_str)))
-    return processed
+def read_floats_csv_file(path, filename, cols):
+    """
+      takes in path filename and expected number of collumns for csv
+      returns a list of float-lists, and removes column labels
+    """
+    # TODO : move into utilities
+    with open(os.path.join(path, filename), 'rb') as raw:
+        sample = raw.read(1024)
+        raw.seek(0)
 
-def read_result(path):
-    with open(os.path.join(path, "slam_out_landmarks.csv"), 'rb') as raw:
-        return read_slam_csv(raw)
+        dialect = csv.Sniffer().sniff(sample)
+        reader = csv.reader(raw, dialect)
 
-def read_ground(path):
-    with open(os.path.join(path, "obstacles.csv"), 'rb') as raw:
-        return read_slam_csv(raw)
+        # removes header and provides file format check
+        firstline = reader.next()
+        assert(len(firstline) == cols)
 
+        if not csv.Sniffer().has_header(sample):
+            raw.seek(0) # reset reader
+
+        processed = [map(float, line) for line in reader]
+
+        return processed
 
 ################################# Evaluation ##################################
+
+def gps_euclidean_distance(result, ground):
+    # presupposes that the input has identical time stamps and samples
+    strip_xy  = lambda x: np.array([x[1], x[2]])
+    result_xy = map(strip_xy, result)
+    ground_xy = map(strip_xy, ground)
+
+    dist = lambda (a, b): np.linalg.norm(a-b)
+    distance_xy = map(dist, zip(result_xy, ground_xy))
+    return sum(distance_xy)
+
+EPSILON  = 10**-4
+MIN_TIME =  1.0 - EPSILON
+MAX_TIME =  10.0 + EPSILON
+
+def gps_time_bounds(result, ground):
+    # this should be applied after time_match
+    bound = lambda vec : vec[0] <= MAX_TIME and vec[0] >= MIN_TIME
+    result = filter(bound, result)
+    ground = filter(bound, ground)
+
+    assert(len(result) == len(ground)) # TODO: raise exception
+
+    delta_check = lambda (a, b): np.abs(a[0]-b[0]) > EPSILON
+    tst = filter(delta_check, zip(result, ground))
+    # tst should be an empty list
+    assert(not tst) # TODO: raise exception
+
+    return result, ground
+
+
+def gps_compare(result, ground):
+    result, ground = gps_time_bounds(result, ground)
+    return gps_euclidean_distance(result, ground)
 
 def gaussian2(a, bx, by, c, x, y):
     return a * np.exp(-(np.sqrt((x-bx)**2 + (y-by)**2)) / (2*c*c))
@@ -77,7 +117,7 @@ def map_metric(points1, points2, x_range, y_range, width):
     map2 = map_pointset(points2, x_range, y_range, width)
     return np.sum(np.abs(map1 - map2))
 
-def compare(result, ground):
+def obsticle_compare(result, ground):
     # How many extra points were found?
     n_extras = np.abs(len(result) - len(ground))
     # How close were the found points?
@@ -101,10 +141,21 @@ def read_cli():
 
 def main():
     result_path, ground_path, output_path = read_cli()
-    result = read_result(result_path)
-    ground = read_ground(ground_path)
+
+    objects_result = read_floats_csv_file(
+      result_path, 
+      "slam_out_landmarks.csv", 2)
+    objects_ground = read_floats_csv_file(ground_path, "obstacles.csv", 2)
+
+    paths_result = read_floats_csv_file(result_path, "slam_out_path.csv", 3)
+    paths_ground = read_floats_csv_file(
+      ground_path, "data/ground/slam_gps.csv", 4)
+
     with open(output_path, 'w') as output:
-        output.writelines(str(val) + '\n' for val in compare(result, ground))
+        extras, score = obsticle_compare(objects_result, objects_ground)
+        dist = gps_compare(paths_result, paths_ground)
+        output.writelines(str(val) + '\n' for val in (extras, score, dist))
+
 
 if __name__ == '__main__':
     main()
