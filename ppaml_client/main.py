@@ -85,14 +85,18 @@ def _generate_parser(version):
     parser_version.set_defaults(func=lambda _args: parser.print_help())
 
     # External subcommands
-    add_team.add_subparser(subparsers)
-    add_pps.add_subparser(subparsers)
-    fingerprint.add_subparser(subparsers)
+
     init.add_subparser(subparsers)
     run.add_subparser(subparsers)
     evaluate.add_subparser(subparsers)
     tag.add_subparser(subparsers)
     submit.add_subparser(subparsers)
+
+    # Internal subcommands
+    if False: # change to True if you are a contributer
+        add_team.add_subparser(subparsers)
+        add_pps.add_subparser(subparsers)
+        fingerprint.add_subparser(subparsers)
 
     # All done.
     return parser
