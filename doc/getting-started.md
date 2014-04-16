@@ -1,6 +1,6 @@
-% Getting started with the PPAML client tools
+% Getting started with the PPAML evaluation tools
 % Galois, Inc.
-% March 2014
+% DRAFT: April 16, 2014
 
 # Introduction #
 
@@ -46,20 +46,19 @@ downloaded:
 
   - OTF-1.12.4salmon.tar.gz
 
-    This can be downloaded from the OTF web page at http://bit.ly/PZ32Eg
+    This can be downloaded from the OTF web page at <http://bit.ly/PZ32Eg>
 
-  - ppamltracer-X.tar.gz 
+  - ppaml-tracer 
 
-    This can be downloaded from the PPAML-Tracer web page at http://FILLMEIN/
+    This can be downloaded from the PPAML-Tracer web page at <https://github.com/GaloisInc/ppaml-tracer/releases>
 
-  - ppamltools-X.tar.gz
+  - ppaml-eval-tools
 
-    This can be downloaded from the PPAML-Tools web page at http://FILLMEIN/
+    This can be downloaded from the PPAML-Eval-Tools web page at: <https://github.com/GaloisInc/ppaml-eval-tools/releases>
 
-Where X is the current version of the corresponding tar archive.  We are
-assuming that you have downloaded these to the Downloads directory in
-your home directory.  If you have placed them elsewhere, make sure to
-adjust the commands that refer to the archives later.
+We are assuming that you have downloaded these to the Downloads
+directory in your home directory.  If you have placed them elsewhere,
+make sure to adjust the commands that refer to the archives later.
 
 You should also download one of the data sets for challenge problem #1
 from the PPAML MIDAS site.  We recommend using the simplest data set,
@@ -68,7 +67,7 @@ assumed to also reside in your Downloads directory as:
 
   - 1_straight.tar.bz2
 
-    This can be downloaded from the PPAML MIDAS page at http://ppaml.kitware.com/midas/item/4388
+    This can be downloaded from the PPAML MIDAS page at <http://ppaml.kitware.com/midas/item/4388>
 
 ## System Prerequisites ##
 
@@ -187,8 +186,8 @@ access files to run through the example contained in this archive
 later, so keep the directory after you do the installation.
 
     % cd ~/ppaml
-    % tar xzvf ~/Downloads/ppamltools-X.tar.gz
-    % cd ppamltools-X
+    % tar xzvf ~/Downloads/ppaml-eval-tools-X.tar.gz
+    % cd ppaml-eval-tools-X
 
 The PPAML tools are easy to install in your home directory using pip.
 
@@ -199,7 +198,7 @@ as ~/.local/bin, then you must add it now.
 
     % export PATH=$PATH:~/.local/bin
 
-## ``ppamltracer'' ##
+## PPAML tracing library ##
 
 The PPAML evaluation tools provide a tracing library that can be used
 by probabilistic programs to measure their performance at a finer
@@ -250,7 +249,8 @@ Now, unpack and configure the ppamltracer library.
 We will install to the same place we installed libotf, and must
 indicate where the configure script can find the otfconfig program.
 
-    % OTFCONFIG=$HOME/ppaml/installTree/bin/otfconfig ./configure --prefix=$HOME/ppaml/installTree
+    % OTFCONFIG=$HOME/ppaml/installTree/bin/otfconfig ./configure \
+        --prefix=$HOME/ppaml/installTree
 
 Now we can build and install:
 
@@ -276,13 +276,6 @@ concept should be quite familiar to users of [Git][] or [Mercurial][].)  To
 ensure that everything was installed correctly, try running `ppaml version`,
 which prints the version of the `ppaml` executable and library to standard
 output, or `ppaml help`, which prints a usage message.
-
-If `ppaml` ever propagates an exception back to the console, then
-congratulations!  You’ve found a bug.  Please
-[send me](mailto:bbarenblat@galois.com) the invocation of `ppaml` that you
-used, along with the exception traceback, and we’ll do everything in our power
-to get it fixed in a timely fashion.
-
 
 # Extended example: Evaluating an artifact #
 
@@ -313,9 +306,10 @@ you place the artifact to evaluate and any related data files.
     % mkdir ~/ppaml-sandbox
     % cd ~/ppaml-sandbox
 
-In this document, we will work through the CP1 solution that is included with the
-PPAML tools distribution.  Copy the files from the ekm_slam_solution/
-subdirectory of the tools distribution to your sandbox:
+In this document, we will work through the CP1 solution that is
+included with the PPAML tools distribution.  Copy the files from the
+ekm_slam_solution/ subdirectory of the tools distribution to your
+sandbox:
 
     % cp -a (location of PPAML tools)/ekm_slam_solution/{csv_helper,slam,slamutil,test-slamutil}.py .
     % python slam.py
