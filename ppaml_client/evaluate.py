@@ -64,20 +64,14 @@ def main(arguments):
         raise utility.FatalError(exception)
     else:
         with index.session():
-            runs_to_evaluate = index.runs_specified_by((arguments.run_tid,))
-            if not runs_to_evaluate:
+            run_to_evaluate = index.run_specified_by(arguments.run_tid)
+            if not run_to_evaluate:
                 raise utility.FatalError(
                     "nonexistent run identifier {}".format(arguments.run_tid),
                     )
-            elif 1 < len(runs_to_evaluate):
-                # Too many runs!
-                # TODO: Support evaluating multiple runs in parallel.
-                raise utility.FatalError(
-                    "ambiguous run identifier {}".format(arguments.run_tid),
-                    )
 
             else:
-                evaluator = Evaluator(conf, runs_to_evaluate[0])
+                evaluator = Evaluator(conf, run_to_evaluate)
                 with utility.TemporaryDirectory(prefix='ppaml.') as sandbox:
                     results = _run_evaluator(evaluator, sandbox)
 

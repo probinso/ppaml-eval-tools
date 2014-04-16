@@ -33,25 +33,36 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from . import db
-from . import utility
 from shutil import copyfile
+from shutil import move
 
 import xdg.BaseDirectory
 import os.path
 
 import tarfile
 
-
+from . import db
+from . import utility
 
 def run_to_artifact_data(db, session, run):
-    """takes in run and returns relevent artifact data"""
-    artifact_id, output, trace = run.artifact_id, run.output, run.trace
+    """
+      takes in run and returns relevent/'detached' artifact data
+    """
+
+    assert(run is not None)
+
+    filenames = [run.artifact_id]
 
     artifact = session.query(db.Artifact).filter_by(
-      artifact_id = artifact_id).scalar()
+      artifact_id = run.artifact_id).scalar()
 
-    return artifact, artifact_id, output, trace
+    filenames += [
+      artifact.binary, artifact.compiler, artifact.build_configuration
+      ]
+    filenames = filter(lambda x: x is not None, filenames)
+
+    session.expunge(artifact) # detaches artifact from current db session
+    return artifact, filenames
 
 
 def copy_files_to_submit(srcdir, dstdir, filenames):
@@ -68,27 +79,26 @@ def create_tables_to_submit(tmpdir, table_entries):
         raise utility.FatalError(exception)
     else:
         with index.session() as session:
+            session.execute("PRAGMA foreign_keys=OFF") # this is special case
             for entry in table_entries:
-                # BUG: The following line asks SQLAlchemy to transplant
-                # a row from the original database's run table to the
-                # corresponding table in submit.db.  This should be just
-                # fine--the two tables have identical schemata, after
-                # all--but SQLAlchemy apparently doesn't verify this
-                # fact and refuses to transplant the row.  Surprisingly,
-                # this doesn't trigger an exception or anything;
-                # SQLAlchemy just doesn't generate any SQL for it.
+                entry = session.merge(entry) # attach entry to current session
                 session.add(entry)
+
+SUBMIT = "submit.tar.gz"
 
 def package_directory(submitdir):
     contents = os.listdir(submitdir)
-    path = os.path.join(submitdir,"submit.tar.gz")
+    path = os.path.join(submitdir, SUBMIT)
     with tarfile.open(path, "w:gz") as tar:
         for item in contents:
-            tar.add(os.path.join(submitdir,item))
+            tar.add(os.path.join(submitdir, item))
     return path
 
-def submit_package(package):
-    pass                        # TODO: stub
+def submit_package(srcdir, dstdir):
+    send = os.path.join(dstdir, SUBMIT)
+    move(os.path.join(srcdir, SUBMIT), send)
+    print("please e-mail \"{0}\" to the contact ".format(SUBMIT),
+      "e-mail address for the challenge problem")
 
 
 #################################### Main #####################################
@@ -96,41 +106,41 @@ def main(arguments):
     """given a list of tags and run_ids this procedure packages up cooresponding
        artifact information, then submits it
     """
+    if not os.path.isdir(arguments.path):
+        print("path does not exist : \"{0}\"".format(arguments.path))
+        return # TODO: raise fatal exception instead of return
+
     try:
         index = db.Index.open_user_index()
     except db.SchemaMismatch as exception:
         raise utility.FatalError(exception)
     else:
         with index.session() as session:
-            interesting_runs = set()
-            bad_specifiers = []
+            runs = [[],[]] # [[failed], [successful]]
 
             for run_tid in arguments.run_tids:
-                runs = index.runs_specified_by((run_tid,))
-                if runs:
-                    interesting_runs = interesting_runs.union(runs)
-                else:
-                    # This tid didn't produce any runs, which means the
-                    # user screwed up.  Record the specifier so we can
-                    # fail loudly later.
-                    bad_specifiers.append(run_tid)
+                run = index.run_specified_by(run_tid)
 
-            if bad_specifiers:
-                print("non-existant run_tids {0}".format(bad_specifiers),
+                # this will store failed run_tids in runs[False] for later use
+                runs[bool(run)].append(run if run else run_tid)
+
+            if runs[False]:
+                print("nonexistant run_tids {0}".format(runs[False]),
                 ": NO ACTION TAKEN")
-                return # raise fatal exception instead of return
+                return # TODO: raise fatal exception instead of return
+
+            # this will remove doubles of the successfully addressed runs
+            runs = set(runs[True])
 
             # cannot move 'map' out of with statement, dependent on session
             get_artifact = lambda run: run_to_artifact_data(index, session, run)
-            artifact_datas = map(get_artifact, interesting_runs)
+            artifact_datas = map(get_artifact, runs)
 
     artifacts, filenames = [], []
-    for artifact, artifact_id, output, trace in artifact_datas:
-        if artifact_id not in filenames:
-            artifacts.append(artifact)
-            filenames.append(artifact_id)
-            filenames.append(output)
-            filenames.append(trace)
+    for artifact, artifact_files in artifact_datas:
+        artifacts.append(artifact)
+        filenames += artifact_files
+    artifacts, filenames = set(artifacts), set(filenames)
 
     srcdir = xdg.BaseDirectory.save_data_path('ppaml')
     with utility.TemporaryDirectory() as dstdir:
@@ -138,7 +148,7 @@ def main(arguments):
         copy_files_to_submit(srcdir, dstdir, filenames)
 
         package = package_directory(dstdir)
-        submit_package(package)
+        submit_package(dstdir, arguments.path)
 
     print("submit successful!")
 
@@ -148,6 +158,9 @@ def add_subparser(subparsers):
     parser = subparsers.add_parser(
       'submit',
       help="submit artifact data associated with tag or run_id")
+
+    parser.add_argument('path', type=str,
+      help="directory to save submit.tar.gz")
 
     parser.add_argument('run_tids', type=str, nargs='+',
       help='list of tags or run_ids')

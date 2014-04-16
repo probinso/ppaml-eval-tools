@@ -41,7 +41,10 @@ from . import db
 
 
 def main(arguments):
-    """Insert the specified tag lookup label into db."""
+    """
+      Insert the specified tag lookup label into db.
+      Use of existing labels overwrites tag entries.
+    """
 
     if arguments.label.isdigit():
         print("\"{0}\" innapropriate tag:".format(arguments.label),
@@ -77,7 +80,9 @@ def main(arguments):
 
 def add_subparser(subparsers):
     """Register the 'add-team' subcommand."""
-    parser = subparsers.add_parser('tag', help="tag a 'run id' with a label")
+    parser = subparsers.add_parser(
+      'tag',
+      help="Tag a 'run id' with a label. Use of existing labels overites tag.")
 
     parser.add_argument('label', type=str, help="human readable label")
     parser.add_argument('run_id', type=int, help="run_id existing in database")
