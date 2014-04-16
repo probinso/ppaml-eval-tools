@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="author" content="Galois, Inc.">
+
+<title>Getting started with the PPAML evaluation tools</title>
+<!--[if lt IE 9]>
+<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<style type="text/css">
+q { quotes: "“" "”" "‘" "’"; }
+</style>
+
+
+<style type="text/css">
+body {
+  max-width: 36em;
+  margin-left: 10em;
+  font-size: 12pt;
+  text-align: justify;
+  font-family: sans-serif;
+}
+
+.title, .author, .date {
+  font-weight: normal;
+  text-align: center;
+}
+.title {
+  font-size: 18pt;
+  margin-bottom: 1.2em;
+}
+.author, .date {
+  font-size: 14pt;
+  margin-bottom: 1em;
+}
+.date {
+  margin-bottom: 3em;
+}
+
+nav {
+  margin-bottom: 3em;
+}
+
+pre {
+  margin-left: 2em;
+  margin-right: 2em;
+  background-color: hsl(0, 0%, 96%);
+  border-radius: 3px;
+  /* Force wrapping */
+  /*
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  */
+}
+
+code {
+  background-color: hsl(0, 0%, 96%);
+  border-radius: 3px;
+}
+
+h2 {
+  font-size: 16pt;
+}
+
+h3 {
+  font-size: 14pt;
+}
+
+table {
+  margin-left: 2em;
+  border-spacing: 8px 2px;
+}
+
+footer {
+  font-size: 11pt;
+}
+
+span.A {
+  position: relative;
+  bottom: 0.25em;
+  font-size: 0.75em;
+  margin-left: -0.4em;
+  margin-right: -0.1em;
+  text-transform: uppercase;
+}
+  span.E {
+  position: relative;
+  top: 0.2em;
+  margin-left: -0.15em;
+  margin-right: -0.1em;
+  text-transform: uppercase;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h1 class="title">Getting started with the PPAML evaluation tools</h1>
+<p class="author">Galois, Inc.</p>
+<p class="date">DRAFT: April 16, 2014</p>
+</header>
+
+<h2>Contents</h2>
+<nav id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#installing-the-tools">Installing the tools</a><ul>
+<li><a href="#download-software">Download Software</a></li>
+<li><a href="#system-prerequisites">System Prerequisites</a></li>
+<li><a href="#python-packages">Python packages</a></li>
+</ul></li>
+<li><a href="#building-and-installing-tools">Building and installing tools</a><ul>
+<li><a href="#sandbox-creation">Sandbox creation</a></li>
+<li><a href="#ppaml"><code>ppaml</code></a></li>
+<li><a href="#ppaml-tracing-library">PPAML tracing library</a></li>
+</ul></li>
+<li><a href="#basic-usage">Basic usage</a></li>
+<li><a href="#extended-example-evaluating-an-artifact">Extended example: Evaluating an artifact</a><ul>
+<li><a href="#data-collection">Data collection</a></li>
+<li><a href="#correctness-evaluation">Correctness evaluation</a></li>
+</ul></li>
+<li><a href="#package-format">Package format</a><ul>
+<li><a href="#ascii-json-indices">ASCII-JSON indices</a></li>
+<li><a href="#sqlite-indices">SQLite indices</a></li>
+<li><a href="#license-and-copyright">License and Copyright</a></li>
+</ul></li>
+</ul>
+</nav>
+
+<h2 id="introduction">Introduction</h2>
+<p>The PPAML client tools are a set of libraries and scripts that allow <a href="http://ppaml.galois.com/">PPAML</a> TA2–4 teams to evaluate their own probabilistic programming systems in the same way that we will at Galois.</p>
+<h2 id="installing-the-tools">Installing the tools</h2>
+<p>As with all research software, the most difficult part of the system is simply installing it. This installation procedure has been tested with:</p>
+<ul>
+<li>Debain Linux v7.4</li>
+<li>Fedora Linux v20</li>
+<li>Apple OS X 10.9</li>
+</ul>
+<p>The dependency set of the tools was chosen to reflect those available within most common Linux distributions released since 2011.</p>
+<p>Please read this entire section before beginning the installation, as you may have to make decisions early in the installation process whose effects will only become apparent later.</p>
+<p>Your goal is to set up your system such that</p>
+<ul>
+<li>Python 2.6 or 2.7;</li>
+<li>the PyPI-hosted packages argparse, configobj, lockfile, procfs, psutil, sqlalchemy, pyxdg, and validate;</li>
+<li>the <code>ppaml</code> tool; and</li>
+<li>the <code>ppamltracer</code> library</li>
+</ul>
+<p>are all installed and accessible.</p>
+<p>If you get stuck, send us mail (ppaml-support@community.galois.com), and we will assist you in identifying the problem and working through it.</p>
+<h3 id="download-software">Download Software</h3>
+<p>Before starting, please make sure you have the following tar archives downloaded:</p>
+<ul>
+<li><p>OTF-1.12.4salmon.tar.gz</p>
+<p>This can be downloaded from the OTF web page at <a href="http://bit.ly/PZ32Eg">http://bit.ly/PZ32Eg</a></p></li>
+<li><p>ppaml-tracer</p>
+<p>This can be downloaded from the PPAML-Tracer web page at <a href="https://github.com/GaloisInc/ppaml-tracer/releases">https://github.com/GaloisInc/ppaml-tracer/releases</a></p></li>
+<li><p>ppaml-eval-tools</p>
+<p>This can be downloaded from the PPAML-Eval-Tools web page at: <a href="https://github.com/GaloisInc/ppaml-eval-tools/releases">https://github.com/GaloisInc/ppaml-eval-tools/releases</a></p></li>
+</ul>
+<p>We are assuming that you have downloaded these to the Downloads directory in your home directory. If you have placed them elsewhere, make sure to adjust the commands that refer to the archives later.</p>
+<p>You should also download one of the data sets for challenge problem #1 from the PPAML MIDAS site. We recommend using the simplest data set, 1_straight, as the test case for this tutorial. This archive is assumed to also reside in your Downloads directory as:</p>
+<ul>
+<li><p>1_straight.tar.bz2</p>
+<p>This can be downloaded from the PPAML MIDAS page at <a href="http://ppaml.kitware.com/midas/item/4388">http://ppaml.kitware.com/midas/item/4388</a></p></li>
+</ul>
+<h3 id="system-prerequisites">System Prerequisites</h3>
+<p>In order to start, you must have a set of prerequisites installed on your machine that are necessary to build the PPAML tools as well as their direct dependencies. If you are installing on a machine that you already use for active development, it is quite likely that many (or all) of these dependencies are already installed.</p>
+<h4 id="debianubuntu-linux">Debian/Ubuntu Linux</h4>
+<p>If installing on a Debian (or Ubuntu) system, the following packages should be installed via the distribution package manager apt:</p>
+<ul>
+<li>autoconf</li>
+<li>automake</li>
+<li>libtool</li>
+<li>autotools-dev</li>
+<li>pkg-config</li>
+<li>autoconf-archive</li>
+<li>build-essential</li>
+<li>python</li>
+<li>python-pip</li>
+<li>python-dev</li>
+<li>python-scipy</li>
+</ul>
+<p>These can be installed via the following command executed as root (or via sudo from a user account):</p>
+<pre><code>% apt-get install autoconf autotools-dev autoconf-archive automake \
+                  libtool pkg-config build-essential \
+                  python python-pip python-dev python-scipy</code></pre>
+<p>During the installation of these packages, additional dependencies will automatically be installed by the package manager.</p>
+<h4 id="redhatfedoracentos-linux">RedHat/Fedora/Centos Linux</h4>
+<p>A similar process is used on a RedHat (or Fedora and Centos) system. The set of dependencies are:</p>
+<ul>
+<li>autoconf</li>
+<li>libtool</li>
+<li>gcc</li>
+<li>gcc-c++</li>
+<li>autoconf-archive</li>
+<li>python-devel</li>
+<li>python-pip</li>
+<li>scipy</li>
+</ul>
+<p>These can be installed using the yum package manager via:</p>
+<pre><code>% yum install autoconf libtool gcc gcc-c++ autoconf-archive \
+              python-devel python-pip scipy</code></pre>
+<h4 id="alternative-python">Alternative Python</h4>
+<p>An alternative method for obtaining Python and the necessary dependencies is to use a pre-built Python distribution intended for use in technical computing. The Anaconda Python distribution from Continuum IO has been tested with the PPAML tools and is available for Linux, MacOS X, and Windows. If you are working on multiple systems and wish to have a consistent Python environment, the use of a package such as Anaconda is advantageous since it will provide a consistent set of packages and versions across all of the platforms you install it on.</p>
+<h3 id="python-packages">Python packages</h3>
+<p>A number of Python packages now must be installed via pip. Installing python packages can be done either system-wide or within a users home directory. In instances where the user does not have adminstrative priviledges, we highly recommend installing locally within the home directory. The example commands in this section are written assuming that installation will be in the home directory. If you wish to install system-wide, the &quot;--user&quot; command line option can be omitted in the examples where it appears.</p>
+<p>The following python packages are required by the PPAML tools:</p>
+<ul>
+<li>argparse</li>
+<li>configobj</li>
+<li>lockfile</li>
+<li>procfs</li>
+<li>psutil</li>
+<li>sqlalchemy</li>
+<li>validate</li>
+<li>pyxdg</li>
+</ul>
+<p>These can be installed via pip, such as:</p>
+<pre><code>% pip install --user argparse
+% pip install --user configobj
+  [ and so on ... ]</code></pre>
+<p>If any of these fail, please check the error message to determine whether or not your system is missing a dependency outside of python, such as a C or C++ library. Contact the TA1 PPAML team if you run into problems installing the Python dependencies and cannot resolve errors on your own.</p>
+<h2 id="building-and-installing-tools">Building and installing tools</h2>
+<h3 id="sandbox-creation">Sandbox creation</h3>
+<p>The best way to work with the PPAML tools is to create a sandbox in your home directory or other private location where you can unpack the necessary archives and data files. In this tutorial, we will assume that the sandbox is the ``ppaml'' directory in your home directory.</p>
+<pre><code>% mkdir ~/ppaml
+% mkdir ~/ppaml/installTree</code></pre>
+<h3 id="ppaml"><code>ppaml</code></h3>
+<p>The first step is to install the PPAML tools. Start by un-archiving them in the sandbox directory that you created. We will need to access files to run through the example contained in this archive later, so keep the directory after you do the installation.</p>
+<pre><code>% cd ~/ppaml
+% tar xzvf ~/Downloads/ppaml-eval-tools-X.tar.gz
+% cd ppaml-eval-tools-X</code></pre>
+<p>The PPAML tools are easy to install in your home directory using pip.</p>
+<pre><code>% pip install --user .</code></pre>
+<p>If the directory that pip installs binaries is not in your path, such as ~/.local/bin, then you must add it now.</p>
+<pre><code>% export PATH=$PATH:~/.local/bin</code></pre>
+<h3 id="ppaml-tracing-library">PPAML tracing library</h3>
+<p>The PPAML evaluation tools provide a tracing library that can be used by probabilistic programs to measure their performance at a finer granularity than simply recording the overall wallclock execution time. The tracing library is optional for use by TA2-4 teams in their official evaluation. The example described in this tutorial for the Challenge Problem 1 solution requires the tracing library to illustrate how one would apply it to your own probabilistic programs.</p>
+<p>Installation of the PPAML tracing library has a single prerequisite: the Open Trace Format (OTF) library that was downloaded earlier. This library must be compiled from sources.</p>
+<p>The first step is to build and install libotf. Un-tar the libotf file into the sandbox and enter the directory.</p>
+<pre><code>% tar xzvf ~/Downloads/OTF-1.12.4salmon.tar.gz
+% cd OTF-1.12.4salmon</code></pre>
+<p>We now configure it and install into the sandbox:</p>
+<pre><code>% ./configure --prefix=$HOME/ppaml/installTree</code></pre>
+<p>Build and install it with the following two commands:</p>
+<pre><code>% make
+% make install</code></pre>
+<p>Now, we need to set up a couple of environment variables that are used by the PPAML tools to find the shared library that we just built. Be sure to set both of these variables:</p>
+<pre><code>% export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/ppaml/installTree/lib
+% export LIBRARY_PATH=$LIBRARY_PATH:$HOME/ppaml/installTree/lib</code></pre>
+<p>If you are on OSX, you need to set the DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH. The value that you assign to the variable is the same as above.</p>
+<p>These will need to be set each time you run the PPAML tools, so be sure to add them to your ~/.bashrc or other script that is used to set up your environment.</p>
+<p>Now, unpack and configure the ppamltracer library.</p>
+<pre><code>% cd ~/ppaml
+% tar xzvf ~/Downloads/ppamltracer-X.tar.gz
+% cd ppamltracer-X</code></pre>
+<p>We will install to the same place we installed libotf, and must indicate where the configure script can find the otfconfig program.</p>
+<pre><code>% OTFCONFIG=$HOME/ppaml/installTree/bin/otfconfig ./configure \
+    --prefix=$HOME/ppaml/installTree</code></pre>
+<p>Now we can build and install:</p>
+<pre><code>% make
+% make install</code></pre>
+<p>At this point, we will need to also install the ppamltracer python bindings. All language bindings are provided in the bindings subdirectory of the ppamltracer archive. These can be installed via pip:</p>
+<pre><code>% cd bindings/python
+% pip install --user .</code></pre>
+<p>We now have all of the prerequisite software installed for both the PPAML toolchain as well as the example solution to Challenge Problem 1.</p>
+<h2 id="basic-usage">Basic usage</h2>
+<p>Now that you’ve got everything installed, you can actually use the PPAML tools. To keep the system extensible and to avoid polluting your <code>PATH</code>, we’ve bundled a number of PPAML-related tasks into a single, top-level command. (This concept should be quite familiar to users of <a href="http://git-scm.com/">Git</a> or <a href="http://mercurial.selenic.com/">Mercurial</a>.) To ensure that everything was installed correctly, try running <code>ppaml version</code>, which prints the version of the <code>ppaml</code> executable and library to standard output, or <code>ppaml help</code>, which prints a usage message.</p>
+<h2 id="extended-example-evaluating-an-artifact">Extended example: Evaluating an artifact</h2>
+<p>When we speak of an artifact, we mean both the source code of a machine-learning solution and the executable that source code describes. The <code>ppaml</code> tools are all about evaluating artifacts, which proceeds in two steps:</p>
+<ol type="1">
+<li><p>Data collection. This means running the executable, watching CPU and RAM usage, and collecting its output.</p></li>
+<li><p>Correctness evaluation. This means running some <em>evaluator</em>, which compares the output with a reference solution to produce a series of numerical scores.</p></li>
+</ol>
+<p>The end result is a <a href="#package-format"><em>package</em></a>, a standardized file system tree, which can be trivially archived, compressed, and transferred. To illustrate artifact evaluation, let’s consider a not-so-hypothetical solution for challenge problem 1: a Kalman filter. All the files used in this example (modulo one data set, which needs to be downloaded from MIDAS) are in the <code>ekm_slam_solution</code> directory of this distribution.</p>
+<h3 id="data-collection">Data collection</h3>
+<p>The evaluation process is best performed by creating a working directory where you place the artifact to evaluate and any related data files.</p>
+<pre><code>% mkdir ~/ppaml-sandbox
+% cd ~/ppaml-sandbox</code></pre>
+<p>In this document, we will work through the CP1 solution that is included with the PPAML tools distribution. Copy the files from the ekm_slam_solution/ subdirectory of the tools distribution to your sandbox:</p>
+<pre><code>% cp -a (location of PPAML tools)/ekm_slam_solution/{csv_helper,slam,slamutil,test-slamutil}.py .
+% python slam.py
+USAGE: slam.py END_TIME INPUT_DATA_DIR OUTPUT_DATA_DIR</code></pre>
+<p>This example is instrumented with the PPAML tracing library, so invocation requires us to indicate where traces are to be stored when the code is run. Before we can try it out, download one of the data sets that are provided for Challenge Problem 1, such as the basic straight path set. The data, <a href="http://ppaml.kitware.com/midas/item/4388">1_straight.tar.bz2</a>, come from MIDAS.</p>
+<pre><code>% tar xvf ~/Downloads/1_straight.tar.bz2
+1_straight/
+[... other output elided ...]
+% mkdir /tmp/slam_out
+% PPAMLTRACER_TRACE_BASE=/tmp/slam_out/trace python slam.py 10 1_straight/data/ground /tmp/slam_out
+% ls /tmp/slam_out
+slam_out_landmarks.csv
+slam_out_path.csv
+trace.otf
+trace.0.def
+trace.1.events
+% tail -n 3 /tmp/slam_out/slam_out_path.csv
+9.51017,-5.41752988766,0.672891535838
+9.720175,-5.39463311078,0.684530275571
+9.93518,-5.38026736461,0.666373478798</code></pre>
+<p>The interface that slam.py presents is not the interface that <code>ppaml</code> expects. This is likely to be true with most challenge problem solutions, as each solution likely adopts its own parameter set and parameter passing style. To solve this, each solution must be wrapped with a small layer of shell or Python code that translates the argument set that the PPAML tools present to those that are used by the specific probabalistic program. The SLAM example used here is a good model for how to approach this problem.</p>
+<p>The basic calling pattern that PPAML assumes is:</p>
+<pre><code>/path/to/artifact_executable config_file input_dir output_path log_path</code></pre>
+<p><code>ppaml</code> does not create <code>output_path</code> and <code>log_path</code>; it merely reserves the names. The user or executable itself is responsible for creating either files or directories at those paths. However, a bit of shell can easily bridge the gap between <code>ppaml</code> and slam.py. We can create a shell script called &quot;run_slam&quot; that contains the following:</p>
+<pre><code>#!/bin/bash -eu
+if (( $# != 4 )); then
+    printf &quot;Usage: %s config_file input_dir output_path log_path\n&quot; &quot;$0&quot; &gt;&amp;2
+    exit 1
+fi
+mkdir &quot;$3&quot;
+exec python &quot;$(dirname &quot;$0&quot;)&quot;/slam.py 10 &quot;$2&quot; &quot;$3&quot;</code></pre>
+<p>Be sure to make this file executable using chmod.</p>
+<p>Now it’s time to write a run configuration file. This master configuration file drives all the client tools. To get a configuration file skeleton, go ahead and run</p>
+<pre><code>% ppaml init</code></pre>
+<p>to generate a skeleton <code>run.conf</code>, and have a look. The fields are fairly simple:</p>
+<ul>
+<li><p>The <code>artifact</code> section describes the artifact you’re trying to run.</p>
+<ul>
+<li><p><code>paths</code> identifies the files used in the artifact. The client scripts will use these paths to generate a unique identifier for the artifact, so it is important that you list all of them! The scripts assume that the first file listed is the artifact executable.</p></li>
+<li><p><code>config</code> specifies the artifact configuration file, if any. If your PPS requires a configuration file, this is the place to put it. This field is optional; if you omit it, <code>ppaml</code> will pass <code>/dev/null</code> to the artifact executable.</p></li>
+<li><p><code>input</code> specifies the input path.</p></li>
+</ul></li>
+<li><p>The <code>package</code> section describes attributes related to packaging run data. Currently, it supports only one key – <code>base</code> – which sets where the output data from the executable will go.</p></li>
+<li><p>The <code>evaluation</code> section tells <code>ppaml</code> how to evaluate a run. Don’t worry about it just yet – we’ll look at it again in a minute.</p></li>
+</ul>
+<p>All paths are specified relative to the directory containing the configuration file, and <code>~</code> will get expanded to <code>$HOME</code>, but no other environment variable expansion occurs.</p>
+<p>For this example, you should set</p>
+<ul>
+<li><code>paths</code> to <code>run_slam, *.py</code>,</li>
+<li><code>config</code> to <code>/dev/null</code> (or just comment it out),</li>
+<li><code>input</code> to <code>1_straight/data/ground</code>, and</li>
+<li><code>base</code> to <code>/tmp/my_runs</code> (or some other directory of your choice).</li>
+</ul>
+<p>Comment out the <code>evaluation</code> section for now.</p>
+<p>We can now actually run the executable.</p>
+<pre><code>% ppaml run run.conf
+/tmp/my_runs/001</code></pre>
+<p>The <code>ppaml run</code> script runs the artifact executable according to the specified configuration file, all the while monitoring system load, memory usage, and other useful metrics for evaluation. When the executable is finished, <code>ppaml run</code> bundles all the data (including the executable output) into a package, stores it in a directory under <code>base</code>, and prints that directory name to the console.</p>
+<pre><code>% tree /tmp/my_runs/001
+/tmp/my_runs/001
++-- files
+|   +-- output
+|   |   +-- slam_out_landmarks.csv
+|   |   `-- slam_out_path.csv
+|   `-- trace
+|       +-- trace.0.def
+|       +-- trace.1.events
+|       `-- trace.otf
+`-- index.json
+
+2 directories, 4 files</code></pre>
+<h3 id="correctness-evaluation">Correctness evaluation</h3>
+<p>Now that we’ve done a run or three, it’s time to evaluate how well our results perform. Our Kalman-filter SLAM implementation comes with an evaluator, which (not coincidentally) expects exactly the command-line arguments <code>ppaml evaluate</code> will pass it – namely,</p>
+<ul>
+<li><p>the output file or directory generated by the run (in our ongoing example, <code>/tmp/my_runs/001/files/output</code>)</p></li>
+<li><p>whatever ground-truth data path we specify in our configuration file</p></li>
+<li><p>where the evaluator should place its results</p></li>
+</ul>
+<p>Like the runner, the evaluator must create either a file or directory at the specified output path.</p>
+<pre><code>% cp -a &quot;$example&quot;/slam_eval .</code></pre>
+<p>We now need to update our configuration file so it can tell <code>ppaml</code> which file is the evaluator. Open up <code>run.conf</code> again, and check out the <code>evaluation</code> section, which has two directives:</p>
+<ul>
+<li><p><code>evaluator</code>, like <code>paths</code> in the <code>artifact</code> section, is a list of all files which are part of the evaluator.</p></li>
+<li><p><code>ground_truth</code> points to a directory containing the ground truth data files against which the run results will be compared; the contents of this key get passed as the second argument to the evaluator.</p></li>
+</ul>
+<p>For this example, set</p>
+<ul>
+<li><code>evaluator</code> to <code>slam_eval</code> and</li>
+<li><code>ground_truth</code> to <code>1_straight</code>.</li>
+</ul>
+<p>Now we can run the evaluator.</p>
+<pre><code>% ppaml evaluate run.conf 1</code></pre>
+<p>Note that we must specify an extra argument – <code>1</code> – to <code>ppaml evaluate</code>; this identifies the run inside the output directory (<code>/tmp/my_runs</code>). We don’t need leading zeros, though <code>ppaml evaluate</code> won’t complain if we include them.</p>
+<p>Once the evaluator finishes, <code>ppaml evaluate</code> will mutate the run package to include the evaluator output.</p>
+<h2 id="package-format">Package format</h2>
+<p>This section is really an appendix; if all you want to do is evaluate artifacts, it’s not important that you read it. If, on the other hand, you want to see the results of a run, you need to know a bit about how packages are structured.</p>
+<p>A package is effectively a userspace file system. It consists of an <em>index</em> and any number of <em>files</em>, arranged into a directory tree. For example, a PPS run might translate to the following package:</p>
+<pre><code>/package/
++-- files/
+|   +-- file_1.txt
+|   +-- file_2.dat
+|   `-- file_3.gif
+`-- index.json</code></pre>
+<p>The index is a single file named <code>index.ext</code>, where <code>ext</code> is some extension. The extension determines the format of the file. Valid extensions are</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">extension</th>
+<th style="text-align: left;">format</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">db</td>
+<td style="text-align: left;"><a href="https://sqlite.org/">SQLite</a> database</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">json</td>
+<td style="text-align: left;">ASCII-JSON</td>
+</tr>
+</tbody>
+</table>
+<p>Here, ‘ASCII-JSON’ means a subset of JSON where all keys are ASCII strings.</p>
+<h3 id="ascii-json-indices">ASCII-JSON indices</h3>
+<p>An ASCII-JSON index contains a single JSON object with three keys.</p>
+<ul>
+<li>The <code>&quot;version&quot;</code> key maps to a single integer which indicates the version of the standard to which the index adheres. The current standard is version 3.</li>
+<li>The <code>&quot;data&quot;</code> key maps to a key-value store. Values may be any valid JSON type.</li>
+<li>The <code>&quot;files&quot;</code> key maps to a dictionary of file names. Each value is the name of a file in the <code>files</code> directory.</li>
+</ul>
+<p>No key may appear in both the <code>&quot;data&quot;</code> and <code>&quot;files&quot;</code> sections.</p>
+<h3 id="sqlite-indices">SQLite indices</h3>
+<p>The schema for SQLite indices remains to be standardized. Check back later.</p>
+<h3 id="license-and-copyright">License and Copyright</h3>
+<p>Copyright © 2014 Galois, Inc.</p>
+<p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
+<ol type="1">
+<li>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</li>
+<li>Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.</li>
+<li>Neither Galois’s name nor the names of other contributors may be used to endorse or promote products derived from this documentation without specific prior written permission.</li>
+</ol>
+<p><strong>This documentation is provided by Galois and other contributors “as is” and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall Galois or other contributors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this documentation, even if advised of the possibility of such damage.</strong></p>
+<!-- References -->
+
+</body>
+</html>
