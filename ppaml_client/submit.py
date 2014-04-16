@@ -84,12 +84,12 @@ def create_tables_to_submit(tmpdir, table_entries):
                 entry = session.merge(entry) # attach entry to current session
                 session.add(entry)
 
-SUBMIT = "submit.tar.gz"
+SUBMIT = "submit.tar.bz2"
 
 def package_directory(submitdir):
     contents = os.listdir(submitdir)
     path = os.path.join(submitdir, SUBMIT)
-    with tarfile.open(path, "w:gz") as tar:
+    with tarfile.open(path, "w:bz2") as tar:
         for item in contents:
             tar.add(os.path.join(submitdir, item))
     return path
