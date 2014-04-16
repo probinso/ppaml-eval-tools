@@ -420,6 +420,15 @@ class Index(_Database):
     ##### Saving files #####
 
     @staticmethod
+    def migrate_file(path):
+        """Migrate a single file into the database directory.
+
+        Return a blob id.
+
+        """
+        return Index.migrate((path,), os.path.dirname(path))
+
+    @staticmethod
     def migrate(paths, strip_prefix):
         """Migrate files into the database directory.
 
@@ -431,7 +440,11 @@ class Index(_Database):
             tarball_path = os.path.join(sandbox, 'data.tar.bz2')
             with tarfile.open(tarball_path, 'w:bz2') as tar:
                 for source_path in sorted(paths):
-                    assert source_path.startswith(strip_prefix)
+                    assert source_path.startswith(strip_prefix), \
+                        '"{}" does not start with "{}"'.format(
+                            source_path,
+                            strip_prefix,
+                            )
                     short_path = source_path[len(strip_prefix):]
                     tar.add(source_path, short_path)
 
