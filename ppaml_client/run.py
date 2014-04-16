@@ -66,6 +66,23 @@ def main(arguments):
                          ('artifact', 'paths'),
                          ('artifact', 'input')),
         )
+    try:
+        artifact_config_path = conf['artifact']['config']
+    except KeyError:
+        # No configuration file specified, so we'll end up using
+        # /dev/null.  No big deal.
+        pass
+    else:
+        if not (os.path.isfile(artifact_config_path) or
+                os.path.isdir(artifact_config_path)):
+            raise utility.FatalError(textwrap.fill(
+                    textwrap.dedent("""\
+                        Configuration error: artifact configuration file
+                        "{}" is invalid""".format(
+                            artifact_config_path,
+                            )),
+                    80,
+                    ))
 
     # Register the artifact.
     try:
@@ -193,11 +210,12 @@ def _save_run(index, session, artifact_id, conf, sandbox, run_result):
 
     # Save the artifact configuration.
     try:
+        artifact_config_path = os.path.abspath(run_result.config_file_path)
         run.artifact_configuration = db.Index.migrate(
-            run_result.config_file_path,
-            conf.base_dir,
+            (artifact_config_path,),
+            _deepest_common_component((artifact_config_path,)),
             )
-    except TypeError:
+    except AttributeError:
         assert run_result.config_file_path is None
 
     # Save the artifact output, log, and trace.
@@ -439,3 +457,25 @@ def _for_process_and_descendants(function, proc):
 def _favg(sequence):
     """Averages a sequence of floats."""
     return math.fsum(sequence) / len(sequence)
+
+
+def _deepest_common_component(paths):
+    """Find the deepest parent directory of a sequence of paths.
+
+    This algorithm is entirely syntactic, so it will likely be confused
+    by links and other file system features.  It should, however, work
+    on non-Unix systems.
+
+    """
+    paths = list(paths)
+
+    # Get rid of any files; use only directories.
+    for i in xrange(len(paths)):
+        paths[i] = os.path.abspath(paths[i])
+        if not os.path.isdir(paths[i]):
+            paths[i] = os.path.dirname(paths[i])
+
+    result = os.sep.join(
+        os.path.commonprefix([path.split(os.sep) for path in paths]),
+        )
+    return result if result else os.sep
