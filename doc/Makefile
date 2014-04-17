@@ -31,7 +31,9 @@ else
 X := @
 endif
 
-all: getting-started.html getting-started.pdf
+default: getting-started.html
+
+all: getting-started.html  getting-started.pdf
 
 clean:
 	@echo "  RM      getting-started.html"
