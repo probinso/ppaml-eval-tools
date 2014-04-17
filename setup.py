@@ -92,7 +92,7 @@ setup(
     version='0.1.1',
     description="PPAML client scripts",
     author="Benjamin Barenblat",
-    author_email="bbarenblat@galois.com",
+    author_email="ppaml-support@comunity.-galois.com",
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Environment :: Console',
@@ -106,10 +106,6 @@ setup(
     package_data={'ppaml_client': ['*.sql']},
     scripts=['scripts/ppaml'],
     data_files=[
-        ('doc', [
-                'doc/getting-started.html',
-                'doc/getting-started.pdf',
-                ]),
         ('example', [
                 'ekm_slam_solution/csv_helper.py',
                 'ekm_slam_solution/README',
