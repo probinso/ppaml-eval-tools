@@ -265,6 +265,17 @@ be installed via pip:
     % cd bindings/python
     % pip install --user .
 
+To test this
+
+    % cd examples/
+    % python simple.py
+
+If you get 
+    
+    ValueError: python: undefined symbol: ppaml_tracer_t_size 
+
+Then please be sure to export your LD_LIBRARY_PATH and LIBRARY_PATH. 
+
 We now have all of the prerequisite software installed for both the PPAML toolchain as well
 as the example solution to Challenge Problem 1.
 
