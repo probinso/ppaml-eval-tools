@@ -189,9 +189,11 @@ later, so keep the directory after you do the installation.
     % tar xzvf ~/Downloads/ppaml-eval-tools-X.tar.gz
     % cd ppaml-eval-tools-X
 
+## `ppaml install` ##
+
 The PPAML tools are easy to install in your home directory using pip.
 
-    % pip install --user .
+    % pip install -I --user .
 
 If the directory that pip installs binaries is not in your path, such
 as ~/.local/bin, then you must add it now.
@@ -263,7 +265,7 @@ bindings are provided in the bindings subdirectory of the ppamltracer archive.  
 be installed via pip:
 
     % cd bindings/python
-    % pip install --user .
+    % pip install -I --user .
 
 To test this
 
