@@ -338,3 +338,52 @@ CREATE TRIGGER software_updated AFTER UPDATE ON software
 		SET meta_updated = CURRENT_TIMESTAMP
 		WHERE software_id = NEW.software_id;
 	END;
+
+/*
+There are certain tables that we would like to force to exist
+*/
+
+INSERT INTO
+	"team" ('institution', 'contact_name', 'contact_email')
+	VALUES('Galois Inc.','Philip Robinson','probinson@galois.com');
+
+INSERT INTO
+	"team" ('institution', 'contact_name', 'contact_email')
+	VALUES('Applied Communications Sciences','Dr. Akshay Vashist','avashist@appcomsci.com');
+
+INSERT INTO
+	"team" ('institution', 'contact_name', 'contact_email')
+	VALUES('BAE Systems Information','Dr. Gregory Sullivan','gregory.sullivan@baesystems.com');
+
+INSERT INTO
+	"team" ('institution', 'contact_name', 'contact_email')
+	VALUES('Charles River Analytics','Dr. Avi Pfeffer','apfeffer@cra.com');
+
+INSERT INTO
+	"team" ('institution', 'contact_name', 'contact_email')
+	VALUES('Gamelan Labs, Inc.','Dr. Ben Vigoda','ben.vigoda@gamelanlabs.com');
+
+INSERT INTO
+	"team" ('institution', 'contact_name', 'contact_email')
+	VALUES('Indiana University','Dr. Chung-Chieh Shan','ccshan@indiana.edu');
+
+INSERT INTO
+	"team" ('institution', 'contact_name', 'contact_email')
+	VALUES('Massachusetetts Institute of Technology','Dr. Vikash Mansingka','vkm@mit.edu');
+
+INSERT INTO
+	"team" ('institution', 'contact_name', 'contact_email')
+	VALUES('Princeton University','Dr. David Blei','blei@cs.princeton.edu');
+
+INSERT INTO
+	"team" ('institution', 'contact_name', 'contact_email')
+	VALUES('SRI International','Dr. Rodrigo de Salvo Braz','rodrigo.desalvobraz@sri.com');
+
+INSERT INTO
+	"team" ('institution', 'contact_name', 'contact_email')
+	VALUES('Stanford University','Dr. Noah Goodman','ngoodman@stanford.edu');
+
+INSERT INTO
+	"team" ('institution', 'contact_name', 'contact_email')
+	VALUES('University of California Riverside','Dr. Christian Shelton','cshelton@cs.ucr.edu');
+
