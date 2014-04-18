@@ -215,6 +215,7 @@ library must be compiled from sources.
 The first step is to build and install libotf.  Un-tar the libotf file
 into the sandbox and enter the directory.
 
+    % cd $HOME/ppaml/
     % tar xzvf ~/Downloads/OTF-1.12.4salmon.tar.gz
     % cd OTF-1.12.4salmon
 
@@ -306,8 +307,8 @@ you place the artifact to evaluate and any related data files.
     % mkdir ~/ppaml-sandbox
     % cd ~/ppaml-sandbox
 
-In this document, we will work through the CP1 solution that is
-included with the PPAML tools distribution.  Copy the files from the
+In this document, we will work through the CP1 solution that is distributed
+to ppaml-eval-tools-X/ .  Copy the files from the
 ekm_slam_solution/ subdirectory of the tools distribution to your
 sandbox:
 
