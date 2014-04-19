@@ -325,7 +325,7 @@ to ppaml-eval-tools-X/ .  Copy the files from the
 ekm_slam_solution/ subdirectory of the tools distribution to your
 sandbox:
 
-    % cp -a (location of PPAML tools)/ekm_slam_solution/{csv_helper,slam,slamutil,test-slamutil}.py .
+    % ln (location of PPAML tools)/ekm_slam_solution/{csv_helper,slam,slamutil,test-slamutil}.py .
     % python slam.py
     USAGE: slam.py END_TIME INPUT_DATA_DIR OUTPUT_DATA_DIR
 
