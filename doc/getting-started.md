@@ -217,7 +217,7 @@ library must be compiled from sources.
 The first step is to build and install libotf.  Un-tar the libotf file
 into the sandbox and enter the directory.
 
-    % cd $HOME/ppaml/
+    % cd ~/ppaml/
     % tar xzvf ~/Downloads/OTF-1.12.4salmon.tar.gz
     % cd OTF-1.12.4salmon
 
@@ -246,7 +246,7 @@ to your ~/.bashrc or other script that is used to set up your environment.
 Now, unpack and configure the ppamltracer library.  
 
     % cd ~/ppaml
-    % tar xzvf ~/Downloads/ppamltracer-X.tar.gz
+    % tar xzvf ~/Downloads/ppaml-tracer-X.tar.gz
     % cd ppamltracer-X
 
 We will install to the same place we installed libotf, and must
