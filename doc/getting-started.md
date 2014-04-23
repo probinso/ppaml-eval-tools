@@ -376,7 +376,7 @@ that contains the following:
         printf "Usage: %s config_file input_dir output_path log_path\n" "$0" >&2
         exit 1
     fi
-    mkdir "$3"
+    mkdir -p "$3"
     exec python "$(dirname "$0")"/slam.py 10 "$2" "$3"
 
 Be sure to make this file executable using chmod.
