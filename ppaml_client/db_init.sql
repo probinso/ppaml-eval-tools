@@ -340,7 +340,7 @@ CREATE TRIGGER software_updated AFTER UPDATE ON software
 	END;
 
 /*
-There are certain tables that we would like to force to exist
+INSERT TEAMS
 */
 
 INSERT INTO
@@ -386,6 +386,58 @@ INSERT INTO
 INSERT INTO
 	"team" ('institution', 'contact_name', 'contact_email')
 	VALUES('University of California Riverside','Dr. Christian Shelton','cshelton@cs.ucr.edu');
+
+/*
+INSERT PPS STUBS
+*/
+INSERT INTO
+	"pps" ('pps_id', 'team_id', 'description', 'version')
+	VALUES(1, 1, 'Galois #1', 1);
+
+INSERT INTO
+	"pps" ('pps_id', 'team_id', 'description', 'version')
+	VALUES(2, 2, 'ACS #1', 1);
+
+INSERT INTO
+	"pps" ('pps_id', 'team_id', 'description', 'version')
+	VALUES(3, 3, 'BSI #1', 1);
+
+INSERT INTO
+	"pps" ('pps_id', 'team_id', 'description', 'version')
+	VALUES(4, 4, 'CRA #1', 1);
+
+INSERT INTO
+	"pps" ('pps_id', 'team_id', 'description', 'version')
+	VALUES(5, 5, 'GL #1', 1);
+
+INSERT INTO
+	"pps" ('pps_id', 'team_id', 'description', 'version')
+	VALUES(6, 6, 'IU #1', 1);
+
+INSERT INTO
+	"pps" ('pps_id', 'team_id', 'description', 'version')
+	VALUES(7, 7, 'MIT #1', 1);
+
+INSERT INTO
+	"pps" ('pps_id', 'team_id', 'description', 'version')
+	VALUES(8, 8, 'PU #1', 1);
+
+INSERT INTO
+	"pps" ('pps_id', 'team_id', 'description', 'version')
+	VALUES(9, 9, 'SRII #1', 1);
+
+INSERT INTO
+	"pps" ('pps_id', 'team_id', 'description', 'version')
+	VALUES(10, 10, 'SU #1', 1);
+
+INSERT INTO
+	"pps" ('pps_id', 'team_id', 'description', 'version')
+	VALUES(11, 11, 'UCR #1', 1);
+
+
+/*
+CHALLENGE 1 PROBLEMS
+*/
 
 INSERT INTO
 	"challenge_problem" ('description', 'url', 'revision')
