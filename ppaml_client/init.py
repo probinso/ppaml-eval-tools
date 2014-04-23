@@ -70,19 +70,20 @@ def main(arguments):
         "The problem the artifact is going to solve",
         ]
     # challenge_problem_id
-    conf['problem']['challenge_problem_id'] = 1
+    conf['problem']['challenge_problem_id'] = arguments.challenge_problem_id
     conf['problem'].comments['challenge_problem_id'] = [
         '',
         "What challenge problem the artifact is associated with",
         ]
     # team_id
-    conf['problem']['team_id'] = 3
+    conf['problem']['team_id'] = arguments.team_id
     conf['problem'].comments['team_id'] = [
         '',
         "What team produced the artifact",
         ]
     # pps_id
-    conf['problem']['pps_id'] = 4
+    pps_id = arguments.pps if arguments.pps else arguments.team_id
+    conf['problem']['pps_id'] = pps_id
     conf['problem'].comments['pps_id'] = [
         '',
         "What PPS the artifact runs under",
@@ -102,7 +103,7 @@ def main(arguments):
         "A brief description of the artifact (optional)",
         ]
     # version
-    conf['artifact']['version'] = "v1.7.2"
+    conf['artifact']['version'] = arguments.version
     conf['artifact'].comments['version'] = [
         '',
         "The artifact version as a free-form string (optional)",
@@ -120,7 +121,7 @@ def main(arguments):
             identifier for the artifact.  You should thus list the primary
             executable first, followed by all of its source files.""")
     # config
-    conf['artifact']['config'] = '/dev/null'
+    conf['artifact']['config'] = arguments.configure
     conf['artifact'].comments['config'] = [
         '',
         "Path to the artifact configuration file",
@@ -162,7 +163,7 @@ def main(arguments):
     if arguments.output == '-':
         conf.write(sys.stdout)
     else:
-        if os.path.exists(arguments.output):
+        if os.path.exists(arguments.output) and not arguments.force:
             raise utility.FatalError(
                 'refusing to overwrite configuration file "{0}"'.format(
                     arguments.output,
@@ -175,10 +176,29 @@ def main(arguments):
             raise utility.FatalError(io_error)
 
 
-
 def add_subparser(subparsers):
     """Register the 'init' subcommand."""
     parser = subparsers.add_parser('init', help="generate configuration file")
+
+    parser.add_argument('team_id', type=int,
+      help="your team number")
+
+    parser.add_argument('challenge_problem_id', type=int,
+      help="your the 'challenge problem' identifier number")
+
+    parser.add_argument('-c', '--configure', default='/dev/null', type=str,
+      help="path to your configuration scripts to be passed to a run.")
+
+    parser.add_argument('--pps', type=int,
+      help="your 'pps_id', defaults to your team number")
+
     parser.add_argument('-o', '--output', default='run.conf', type=str,
-                        help="where to place the configuration file")
+      help="where to place the configuration file")
+
+    parser.add_argument('-f', '--force', default=False, action="store_true",
+      help="Force override of run.conf")
+
+    parser.add_argument('--version', default="", type=str,
+      help="your pps version")
+
     parser.set_defaults(func=main)
