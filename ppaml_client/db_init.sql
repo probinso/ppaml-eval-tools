@@ -388,14 +388,14 @@ INSERT INTO
 	VALUES('University of California Riverside','Dr. Christian Shelton','cshelton@cs.ucr.edu');
 
 INSERT INTO
-	"challenge_problem" ('description', 'url')
-	VALUES('Quad-Rotor Sensor Fusion', 'http://ppaml.galois.com/wiki/wiki/CP1QuadRotor');
+	"challenge_problem" ('description', 'url', 'revision')
+	VALUES('Quad-Rotor Sensor Fusion', 'http://ppaml.galois.com/wiki/wiki/CP1QuadRotor', 1);
 
 INSERT INTO
-	"challenge_problem" ('description', 'url')
-	VALUES('Continent-Scale Bird Migration Modeling', 'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
+	"challenge_problem" ('description', 'url', 'revision')
+	VALUES('Continent-Scale Bird Migration Modeling', 'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration', 1);
 
 INSERT INTO
-	"challenge_problem" ('description', 'url')
-	VALUES('Wide Area Motion Imagery Track Linking', 'http://ppaml.galois.com/wiki/wiki/CP3WAMITrackLinking');
+	"challenge_problem" ('description', 'url', 'revision')
+	VALUES('Wide Area Motion Imagery Track Linking', 'http://ppaml.galois.com/wiki/wiki/CP3WAMITrackLinking', 1);
 
