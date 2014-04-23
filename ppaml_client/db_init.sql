@@ -111,6 +111,7 @@ CREATE TABLE pps (
 		DEFERRABLE INITIALLY DEFERRED,
 
 	description VARCHAR(255) NOT NULL,
+	version VARCHAR(255) NOT NULL,
 
 	meta_created BIGINT NOT NULL
 		DEFAULT CURRENT_TIMESTAMP,
@@ -118,7 +119,7 @@ CREATE TABLE pps (
 		DEFAULT CURRENT_TIMESTAMP,
 
 	CHECK (meta_created <= meta_updated),
-	UNIQUE (team_id, description));
+	UNIQUE (team_id, description, version));
 
 CREATE TRIGGER pps_updated AFTER UPDATE ON pps
 	FOR EACH ROW
@@ -340,8 +341,6 @@ CREATE TRIGGER software_updated AFTER UPDATE ON software
 
 /*
 There are certain tables that we would like to force to exist
-
-ATTENTION: static.py inserts the challenge problems into the database
 */
 
 INSERT INTO
@@ -349,86 +348,42 @@ INSERT INTO
 	VALUES('Galois Inc.','Philip Robinson','probinson@galois.com');
 
 INSERT INTO
-	"pps" ('pps_id', 'team_id', 'description')
-	VALUES(1, 1, 'Galois #1');
-
-INSERT INTO
 	"team" ('institution', 'contact_name', 'contact_email')
 	VALUES('Applied Communications Sciences','Dr. Akshay Vashist','avashist@appcomsci.com');
-
-INSERT INTO
-	"pps" ('pps_id', 'team_id', 'description')
-	VALUES(2, 2, 'ACS #1');
 
 INSERT INTO
 	"team" ('institution', 'contact_name', 'contact_email')
 	VALUES('BAE Systems Information','Dr. Gregory Sullivan','gregory.sullivan@baesystems.com');
 
 INSERT INTO
-	"pps" ('pps_id', 'team_id', 'description')
-	VALUES(3, 3, 'BSI #1');
-
-INSERT INTO
 	"team" ('institution', 'contact_name', 'contact_email')
 	VALUES('Charles River Analytics','Dr. Avi Pfeffer','apfeffer@cra.com');
-
-INSERT INTO
-	"pps" ('pps_id', 'team_id', 'description')
-	VALUES(4, 4, 'CRA #1');
 
 INSERT INTO
 	"team" ('institution', 'contact_name', 'contact_email')
 	VALUES('Gamelan Labs, Inc.','Dr. Ben Vigoda','ben.vigoda@gamelanlabs.com');
 
 INSERT INTO
-	"pps" ('pps_id', 'team_id', 'description')
-	VALUES(5, 5, 'GL #1');
-
-INSERT INTO
 	"team" ('institution', 'contact_name', 'contact_email')
 	VALUES('Indiana University','Dr. Chung-Chieh Shan','ccshan@indiana.edu');
-
-INSERT INTO
-	"pps" ('pps_id', 'team_id', 'description')
-	VALUES(6, 6, 'IU #1');
 
 INSERT INTO
 	"team" ('institution', 'contact_name', 'contact_email')
 	VALUES('Massachusetetts Institute of Technology','Dr. Vikash Mansingka','vkm@mit.edu');
 
 INSERT INTO
-	"pps" ('pps_id', 'team_id', 'description')
-	VALUES(7, 7, 'MIT #1');
-
-INSERT INTO
 	"team" ('institution', 'contact_name', 'contact_email')
 	VALUES('Princeton University','Dr. David Blei','blei@cs.princeton.edu');
-
-INSERT INTO
-	"pps" ('pps_id', 'team_id', 'description')
-	VALUES(8, 8, 'PU #1');
 
 INSERT INTO
 	"team" ('institution', 'contact_name', 'contact_email')
 	VALUES('SRI International','Dr. Rodrigo de Salvo Braz','rodrigo.desalvobraz@sri.com');
 
 INSERT INTO
-	"pps" ('pps_id', 'team_id', 'description')
-	VALUES(9, 9, 'SRII #1');
-
-INSERT INTO
 	"team" ('institution', 'contact_name', 'contact_email')
 	VALUES('Stanford University','Dr. Noah Goodman','ngoodman@stanford.edu');
 
 INSERT INTO
-	"pps" ('pps_id', 'team_id', 'description')
-	VALUES(10, 10, 'SU #1');
-
-INSERT INTO
 	"team" ('institution', 'contact_name', 'contact_email')
 	VALUES('University of California Riverside','Dr. Christian Shelton','cshelton@cs.ucr.edu');
-
-INSERT INTO
-	"pps" ('pps_id', 'team_id', 'description')
-	VALUES(11, 11, 'UCR #1');
 
