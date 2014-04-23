@@ -200,6 +200,7 @@ class RunConfiguration(configobj.ConfigObj):
         list; it is merely guaranteed to return a Sequence.
 
         """
+        #TODO PMR: does it matter that this doesn't check existance of paths
         try:
             result = self[section][field]
         except KeyError:
