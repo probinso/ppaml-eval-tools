@@ -387,3 +387,15 @@ INSERT INTO
 	"team" ('institution', 'contact_name', 'contact_email')
 	VALUES('University of California Riverside','Dr. Christian Shelton','cshelton@cs.ucr.edu');
 
+INSERT INTO
+	"challenge_problem" ('description', 'url')
+	VALUES('Quad-Rotor Sensor Fusion', 'http://ppaml.galois.com/wiki/wiki/CP1QuadRotor');
+
+INSERT INTO
+	"challenge_problem" ('description', 'url')
+	VALUES('Continent-Scale Bird Migration Modeling', 'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
+
+INSERT INTO
+	"challenge_problem" ('description', 'url')
+	VALUES('Wide Area Motion Imagery Track Linking', 'http://ppaml.galois.com/wiki/wiki/CP3WAMITrackLinking');
+
