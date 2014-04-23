@@ -53,7 +53,12 @@ from . import utility
 
 
 #################################### Main #####################################
-
+def testpath(path):
+    if not os.path.exists(path):
+        raise utility.FatalError(textwrap.fill(
+          textwrap.dedent("""\
+          Configuration error: artifact configuration file
+          "{}" is invalid""".format(path)), 80))
 
 def main(arguments):
     """Run an artifact."""
@@ -68,21 +73,14 @@ def main(arguments):
         )
     try:
         artifact_config_path = conf['artifact']['config']
+        artifact_input_path = conf['artifact']['input']
     except KeyError:
         # No configuration file specified, so we'll end up using
         # /dev/null.  No big deal.
         pass
     else:
-        if not (os.path.isfile(artifact_config_path) or
-                os.path.isdir(artifact_config_path)):
-            raise utility.FatalError(textwrap.fill(
-                    textwrap.dedent("""\
-                        Configuration error: artifact configuration file
-                        "{}" is invalid""".format(
-                            artifact_config_path,
-                            )),
-                    80,
-                    ))
+        testpath(artifact_config_path)
+        testpath(artifact_input_path)
 
     # Register the artifact.
     try:
@@ -282,7 +280,7 @@ class RunProcedure(object):
             config_file_path = self._config['artifact']['config']
             result.config_file_path = config_file_path
         except KeyError:
-            config_file_path = '/dev/null'
+            config_file_path = '/dev/null' #TODO: LOOK AT THIS
             result.config_file_path = None
 
         # Stick the tracer path into the environment.
