@@ -383,9 +383,9 @@ Be sure to make this file executable using chmod.
 
 Now it’s time to write a run configuration file.  This master configuration
 file drives all the client tools.  To get a configuration file skeleton, go
-ahead and run
+ahead and run.
 
-    % ppaml init
+    % ppaml init <team-id> <challenge-problem-id>
 
 to generate a skeleton `run.conf`, and have a look.  The fields are fairly
 simple:
@@ -404,10 +404,6 @@ simple:
 
       - `input` specifies the input path.
 
-  - The `package` section describes attributes related to packaging run data.
-    Currently, it supports only one key – `base` – which sets where the output
-    data from the executable will go.
-
   - The `evaluation` section tells `ppaml` how to evaluate a run.  Don’t worry
     about it just yet – we’ll look at it again in a minute.
 
@@ -418,11 +414,8 @@ expansion occurs.
 For this example, you should set
 
   - `paths` to `run_slam, *.py`,
-  - `config` to `/dev/null` (or just comment it out),
-  - `input` to `1_straight/data/ground`, and
-  - `base` to `/tmp/my_runs` (or some other directory of your choice).
-
-Comment out the `evaluation` section for now.
+  - `config` to `/dev/null` (or just comment it out), and
+  - `input` to `1_straight/data/ground`
 
 We can now actually run the executable.
 

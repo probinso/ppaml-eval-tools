@@ -37,11 +37,45 @@ import os.path
 import textwrap
 import sys
 
+from . import db
+
 from . import configuration
 from . import utility
 from . import __version__
 
+def print_init_info(team_id, challenge_problem_id):
+    try:
+        index = db.Index.open_user_index()
+    except db.SchemaMismatch as exception:
+        raise utility.FatalError(exception)
 
+    else:
+        with index.session() as session:
+            # Ensure UNIQUE constraint is satisfied; if the user tries
+            # to add a duplicate tag, update the one already in the
+            # database.
+            team = session.query(index.Team).filter_by(
+              team_id=team_id,
+              ).scalar()
+
+            if not team:
+                raise utility.FatalError(
+                  "team_id {0} is invalid".format(team_id)
+                )
+
+            cp = session.query(index.ChallengeProblem).filter_by(
+              challenge_problem_id=challenge_problem_id,
+              ).scalar()
+
+            if not cp:
+                raise utility.FatalError("""\
+                  challenge_problem_id {0}\
+                  is invalid""".format(challenge_problem_id)
+                )
+
+            print("  Team              :: {0}".format(team.institution))
+            print("  Challenge Problem :: {0}".format(cp.description))
+            print("")
 
 #################################### Main #####################################
 
@@ -159,6 +193,8 @@ def main(arguments):
         '',
         "Path to ground truth data",
         ]
+
+    print_init_info(arguments.team_id, arguments.challenge_problem_id)
 
     if arguments.output == '-':
         conf.write(sys.stdout)
