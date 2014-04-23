@@ -59,6 +59,7 @@ def testpath(path):
           textwrap.dedent("""\
           Configuration error: artifact configuration file
           "{}" is invalid""".format(path)), 80))
+    return path
 
 def main(arguments):
     """Run an artifact."""
@@ -128,6 +129,7 @@ def main(arguments):
             artifact.interpreted = 1
 
             # Capture the artifact source code.
+            # XXX: DOES NOT CHECK PATH EXISTANCE, and sqashes NONEXISTANT PATHS
             artifact.artifact_id = db.Index.migrate(
                 conf.expand_path_list('artifact', 'paths'),
                 conf.base_dir
