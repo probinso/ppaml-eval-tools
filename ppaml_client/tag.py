@@ -79,7 +79,7 @@ def main(arguments):
 
 
 def add_subparser(subparsers):
-    """Register the 'add-team' subcommand."""
+    """Register the 'tag' subcommand."""
     parser = subparsers.add_parser(
       'tag',
       help="Tag a 'run id' with a label. Use of existing labels overites tag.")
