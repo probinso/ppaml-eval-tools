@@ -56,7 +56,7 @@ def main(arguments):
             # PPSs have a many-to-many relationship with challenge
             # problems, so make sure the challenge problems are all in
             # the database.
-            static.populate_db(session, index, commit=True)
+            # static.populate_db(session, index, commit=True) #XXX: delete
 
             # Add the PPS.
             pps = index.PPS()
