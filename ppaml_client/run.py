@@ -96,7 +96,7 @@ def main(arguments):
 
             # Ensure that all challenge problems, teams, &c. are in the
             # database.
-            static.populate_db(session, index, commit=True)
+            # static.populate_db(session, index, commit=True) #XXX: delete
 
             artifact.challenge_problem_id = index.require_foreign_key(
                 index.ChallengeProblem,
