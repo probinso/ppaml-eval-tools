@@ -61,6 +61,7 @@ def main(arguments):
             # Add the PPS.
             pps = index.PPS()
             pps.description = arguments.name
+            pps.version = arguments.version
             try:
                 pps.team_id = index.require_foreign_key(
                     index.Team,
@@ -72,10 +73,11 @@ def main(arguments):
             else:
                 # Ensure UNIQUE constraint is satisfied.
                 if index.contains(index.PPS, team_id=arguments.team_id,
-                                  description=arguments.name):
+                                  description=arguments.name,
+                                  version=arguments.version):
                     raise utility.FatalError(textwrap.fill(textwrap.dedent("""\
                         Duplicate PPS: This PPS is already registered.  Are
-                        you sure you've set your description
+                        you sure you've set your description and version
                         correctly?""")))
 
                 session.add(pps)
@@ -90,6 +92,6 @@ def add_subparser(subparsers):
 
     parser.add_argument('team_id', type=str, help="the team's database ID")
     parser.add_argument('name', type=str, help="the PPS's name")
-
+    parser.add_argument('version', type=str, help="the PPS's version string")
 
     parser.set_defaults(func=main)
