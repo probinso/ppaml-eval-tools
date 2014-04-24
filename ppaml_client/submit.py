@@ -39,8 +39,6 @@ from shutil import move
 import xdg.BaseDirectory
 import os.path
 
-import tarfile
-
 from . import db
 from . import utility
 
@@ -71,7 +69,6 @@ def copy_files_to_submit(srcdir, dstdir, filenames):
         dstpath = os.path.join(dstdir, filename)
         copyfile(srcpath, dstpath)
 
-
 def create_tables_to_submit(tmpdir, table_entries):
     try:
         index = db.Index(path=os.path.join(tmpdir, "submit.db"))
@@ -84,19 +81,10 @@ def create_tables_to_submit(tmpdir, table_entries):
                 entry = session.merge(entry) # attach entry to current session
                 session.add(entry)
 
-SUBMIT = "submit.tar.bz2"
-
-def package_directory(submitdir):
-    contents = os.listdir(submitdir)
-    path = os.path.join(submitdir, SUBMIT)
-    with tarfile.open(path, "w:bz2") as tar:
-        for item in contents:
-            tar.add(os.path.join(submitdir, item))
-    return path
-
-def submit_package(srcdir, dstdir):
+def submit_package(srcpath, dstdir):
+    _, SUBMIT = os.path.split(srcpath)
     send = os.path.join(dstdir, SUBMIT)
-    move(os.path.join(srcdir, SUBMIT), send)
+    move(srcpath, send)
     print("please e-mail \"{0}\" to the contact ".format(SUBMIT),
       "e-mail address for the challenge problem")
 
@@ -147,8 +135,8 @@ def main(arguments):
         create_tables_to_submit(dstdir, artifacts)
         copy_files_to_submit(srcdir, dstdir, filenames)
 
-        package = package_directory(dstdir)
-        submit_package(dstdir, arguments.path)
+        package = utility.tarball_directory(dstdir, "submit.tar.bz2")
+        submit_package(package, arguments.path)
 
     print("submit successful!")
 
