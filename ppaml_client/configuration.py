@@ -33,7 +33,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import collections
 import glob
 import os.path
 import textwrap
@@ -226,7 +225,6 @@ class RunConfiguration(configobj.ConfigObj):
         result = [os.path.normpath(path) for path in result]
 
         # Perform final sanity checks and return.
-        assert isinstance(result, collections.Sequence)
         for path in result:
             assert isinstance(path, (str, unicode)), \
                 "path {0!r} is not a string".format(path)
