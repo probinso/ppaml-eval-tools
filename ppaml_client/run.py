@@ -65,11 +65,12 @@ def main(arguments):
     # Read and validate configuration.
     conf = configuration.read_from_file(
         arguments.run_config,
-        required_fields=(('problem', 'challenge_problem_id'),
-                         ('problem', 'team_id'),
-                         ('problem', 'pps_id'),
-                         ('artifact', 'paths'),
-                         ('artifact', 'input')),
+        required_fields=(
+          ('problem', 'challenge_problem_id'),
+          ('problem', 'team_id'),
+          ('problem', 'pps_id'),
+          ('artifact', 'paths'),
+          ('artifact', 'input')),
         )
     try:
         artifact_config_path = conf['artifact']['config']
