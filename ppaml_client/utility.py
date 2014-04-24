@@ -36,6 +36,64 @@ from __future__ import (absolute_import, division, print_function)
 import contextlib
 import tempfile
 import shutil
+import hashlib
+
+import os
+import tarfile
+
+def simple_list(li):
+    return sorted(set(li))
+
+"""
+  TAR FILE OPERATIONS HAPPEN HERE
+"""
+
+def untar_to_directory(src, dest):
+    """
+      Untars a tar.bz2 file to a directory
+    """
+    with tarfile.open(src) as tar:
+        tar.extractall(dest)
+
+def tarball_directory(dirpath, RESULT = "result.tar.bz2"):
+    """
+      Takes in a directory path, then produces a tar.bz2 file of it,
+      then returns the path to RESULT.tar.bz2
+    """
+    contents = [os.path.join(dirpath, elm) for elm in os.listdir(dirpath)]
+    return tarball_list(contents, dirpath, RESULT, prefix=dirpath)
+
+def tarball_list(contents, destpath, RESULT, prefix=""):
+    """
+      Takes in list of paths, and tarballs the contents uniquely ordered
+      then returns the path to RESULT.tar.bz2
+    """
+    contents = simple_list(contents)
+    path = os.path.join(destpath, RESULT)
+    with tarfile.open(path, "w:bz2") as tar:
+        for item in contents:
+            if prefix: assert(item.startswith(prefix))
+            arcitem = item[len(prefix):]
+            tar.add(item, arcitem)
+    return path
+
+"""
+  FILE OPERATIONS HAPPEN HERE
+"""
+
+def copy_directory_files(srcdir, dstdir, filenames):
+    """
+      copies [filenames] from srcdir to dstdir
+    """
+    for filename in filenames:
+        srcpath = os.path.join(srcdir, filename)
+        dstpath = os.path.join(dstdir, filename)
+        shutil.copyfile(srcpath, dstpath)
+
+""""""
+def digest(path):
+    with open(path, 'rb') as fd:
+        return hashlib.md5(fd.read()).hexdigest()
 
 
 class FatalError(Exception):
