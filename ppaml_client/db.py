@@ -48,7 +48,6 @@ import os
 import pkgutil
 import shutil
 import sqlite3
-import tarfile
 import textwrap
 import time
 
@@ -440,39 +439,28 @@ class Index(_Database):
         """
         # TODO: Handle single paths as well as lists of paths.
         with utility.TemporaryDirectory(prefix='ppaml.db.') as sandbox:
-            tarball_path = os.path.join(sandbox, 'data.tar.bz2')
-            with tarfile.open(tarball_path, 'w:bz2') as tar:
-                for source_path in sorted(paths):
-                    assert source_path.startswith(strip_prefix), \
-                        '"{}" does not start with "{}"'.format(
-                            source_path,
-                            strip_prefix,
-                            )
-                    short_path = source_path[len(strip_prefix):]
-                    tar.add(source_path, short_path)
+            tarball_path = utility.tarball_list(
+              paths, sandbox, 'data.tar.bz2', strip_prefix)
 
-            with open(tarball_path, 'rb') as tarball:
-                blob_id = hashlib.md5(tarball.read()).hexdigest()
+            blob_id = utility.digest(tarball_path)
 
             # TODO: Throw an exception if the file is already there?
-            shutil.copyfile(
-                tarball_path,
-                os.path.join(
-                    xdg.BaseDirectory.save_data_path('ppaml'),
-                    blob_id,
-                    ),
-                )
+            dstpath = os.path.join(
+              xdg.BaseDirectory.save_data_path('ppaml'),
+              blob_id
+              )
+            shutil.copyfile(tarball_path, dstpath)
 
         return blob_id
 
     @staticmethod
     def extract_blob(blob_id, dest_dir):
         """Extracts the contents of a blob into a directory."""
-        with tarfile.open(os.path.join(
-                xdg.BaseDirectory.save_data_path('ppaml'),
-                blob_id,
-                )) as tar:
-            tar.extractall(dest_dir)
+        tar_path = os.path.join(
+          xdg.BaseDirectory.save_data_path('ppaml'),
+          blob_id,
+          )
+        utility.untar_to_directory(tar_dir, path_dest)
 
 
     @staticmethod
