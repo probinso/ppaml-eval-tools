@@ -26,7 +26,11 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""Miscellaneous utility code that didn't seem to fit anywhere else."""
+"""
+    Miscellaneous utility code that didn't seem to fit anywhere else.
+    Prevents modules from making non-formant decisions
+    Also can be run interactive mode to clearly test functionality
+"""
 
 
 # __init__.py ensured Python 2.6 or 2.7 is running.
@@ -95,7 +99,7 @@ def digest(path):
     with open(path, 'rb') as fd:
         return hashlib.md5(fd.read()).hexdigest()
 
-
+""""""
 class FatalError(Exception):
     """An unrecoverable condition from which the program must exit."""
 

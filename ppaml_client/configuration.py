@@ -83,22 +83,22 @@ class RunConfiguration(configobj.ConfigObj):
     """Configuration file for an artifact run."""
 
     _CONFIG_SPEC = (
-        "[problem]",
-        "challenge_problem_id = int",
-        "team_id = int",
-        "pps_id = int",
+      "[problem]",
+      "challenge_problem_id = int",
+      "team_id = int",
+      "pps_id = int",
 
-        "[artifact]",
-        "description = string",
-        "version = string",
-        "paths = force_list",
-        "config = string",
-        "input = string",
+      "[artifact]",
+      "description = string",
+      "version = string",
+      "paths = force_list",
+      "config = string",
+      "input = string",
 
-        "[evaluation]",
-        "evaluator = force_list",
-        "ground_truth = string",
-        )
+      "[evaluation]",
+      "evaluator = force_list",
+      "ground_truth = string",
+      )
 
     def __init__(self, **kwargs):
         """Parse a config file or create a config file object.
