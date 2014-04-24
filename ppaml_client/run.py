@@ -47,7 +47,6 @@ import psutil
 from . import configuration
 from . import db
 from . import fingerprint
-from . import static
 from . import utility
 
 
