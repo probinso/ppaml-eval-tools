@@ -37,7 +37,6 @@ import errno
 import os
 import subprocess
 import textwrap
-import sys
 
 from . import configuration
 from . import db
