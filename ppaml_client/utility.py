@@ -108,7 +108,7 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
   FILE OPERATIONS HAPPEN HERE
 """
 
-def path_walk(srcpath, hidden=False):
+def path_walk(srcpath):
     """
       Takes in dirpath and returns list of non-hidden files and subdirectories
     """
