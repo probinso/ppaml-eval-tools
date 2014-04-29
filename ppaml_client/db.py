@@ -43,7 +43,6 @@ from __future__ import (absolute_import, division, print_function)
 from abc import ABCMeta, abstractproperty
 import contextlib
 import errno
-import hashlib
 import os
 import pkgutil
 import shutil
