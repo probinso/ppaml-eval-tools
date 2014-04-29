@@ -40,13 +40,33 @@ from __future__ import (absolute_import, division, print_function)
 import contextlib
 import tempfile
 import shutil
+
 import hashlib
 
 import os
+import glob
 import tarfile
+
 
 def simple_list(li):
     return sorted(set(li))
+
+
+def split_filter(li, cond, op=lambda x:x):
+    retval = [[],[]]
+    for elm in li:
+        retval[cond(elm)].append(op(elm))
+    return retval
+
+
+def FormatMessage(message, *args):
+    """
+      usage :: FormatMessage("{0} {1} {3} {2}", "cat", 2, 3, 4)
+    """
+    from textwrap import dedent, fill
+    message = fill(dedent(message), 78).format(*args)
+    return message
+
 
 """
   TAR FILE OPERATIONS HAPPEN HERE
@@ -59,18 +79,20 @@ def untar_to_directory(src, dest):
     with tarfile.open(src) as tar:
         tar.extractall(dest)
 
+
 def tarball_directory(dirpath, RESULT = "result.tar.bz2"):
     """
       Takes in a directory path, then produces a tar.bz2 file of it,
       then returns the path to RESULT.tar.bz2
     """
-    contents = [os.path.join(dirpath, elm) for elm in os.listdir(dirpath)]
+    contents = path_walk(dirpath)
     return tarball_list(contents, dirpath, RESULT, prefix=dirpath)
+
 
 def tarball_list(contents, destpath, RESULT, prefix=""):
     """
       Takes in list of paths, and tarballs the contents uniquely ordered
-      then returns the path to RESULT.tar.bz2
+      then returns the path to RESULT as a tar.bz2 archive
     """
     contents = simple_list(contents)
     path = os.path.join(destpath, RESULT)
@@ -81,9 +103,26 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
             tar.add(item, arcitem)
     return path
 
+
 """
   FILE OPERATIONS HAPPEN HERE
 """
+
+def path_walk(srcpath, hidden=False):
+    """
+      Takes in dirpath and returns list of non-hidden files and subdirectories
+    """
+
+    # glob ignores hidden files
+    paths = glob.glob(os.path.join(srcpath,'*'))
+
+    [others, files] = split_filter(paths, os.path.isfile)
+
+    for directory in filter(os.path.isdir, others):
+        files += path_walk(directory)
+
+    return files
+
 
 def copy_directory_files(srcdir, dstdir, filenames):
     """
@@ -102,10 +141,16 @@ def digest(path):
 """"""
 class FatalError(Exception):
     """An unrecoverable condition from which the program must exit."""
-
     def __init__(self, message, exit_status=9):
         super(FatalError, self).__init__(message)
         self.exit_status = exit_status
+
+
+class FormatedError(FatalError):
+    """An unrecoverable condition from which the program must exit."""
+    def __init__(self, message, *elms):
+       message = FormatMessage(message, *elms)
+       super(FatalError, self).__init__(message)
 
 
 @contextlib.contextmanager
