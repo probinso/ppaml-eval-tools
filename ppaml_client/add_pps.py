@@ -72,7 +72,7 @@ def main(arguments):
                 if index.contains(index.PPS, team_id=arguments.team_id,
                                   description=arguments.name,
                                   version=arguments.version):
-                    raise utility.FormatMessage("""\
+                    raise utility.FormatError("""\
                         Duplicate PPS: This PPS is already registered.  Are
                         you sure you've set your description and version
                         correctly?""")
