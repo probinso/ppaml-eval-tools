@@ -48,7 +48,6 @@ import pkgutil
 import shutil
 import sqlite3
 import textwrap
-import time
 
 import sqlalchemy
 import sqlalchemy.ext.declarative as sqlalchemy_declarative
@@ -400,7 +399,7 @@ class Index(_Database):
         """
           takes in possible run tag or id and returns corresponding run.
           returns None if label does not exist.
-          
+
           This requires an active session
         """
         self._require_active_session()

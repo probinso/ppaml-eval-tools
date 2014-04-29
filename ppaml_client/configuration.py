@@ -91,6 +91,7 @@ class RunConfiguration(configobj.ConfigObj):
       "[artifact]",
       "description = string",
       "version = string",
+      "base = string",
       "paths = force_list",
       "config = string",
       "input = string",

@@ -54,10 +54,9 @@ from . import utility
 #################################### Main #####################################
 def testpath(path):
     if not os.path.exists(path):
-        raise utility.FatalError(textwrap.fill(
-          textwrap.dedent("""\
+        raise utility.FormatedError("""\
           Configuration error: artifact configuration file
-          "{}" is invalid""".format(path)), 80))
+          "{}" is invalid""", path)
     return path
 
 def main(arguments):
@@ -282,7 +281,7 @@ class RunProcedure(object):
             config_file_path = self._config['artifact']['config']
             result.config_file_path = config_file_path
         except KeyError:
-            config_file_path = '/dev/null' #TODO: LOOK AT THIS
+            config_file_path = os.devnull # '/dev/null'
             result.config_file_path = None
 
         # Stick the tracer path into the environment.

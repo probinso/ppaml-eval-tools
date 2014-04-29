@@ -143,7 +143,7 @@ def main(arguments):
         "The artifact version as a free-form string (optional)",
         ]
     # paths
-    conf['artifact']['paths'] = ['artifact', 'support_files', '*.blah']
+    conf['artifact']['paths'] = ['artifact_exe', 'support_files', '*.blah']
     conf['artifact'].comments['paths'] = [
         '',
         "All the paths which contribute to this artifact",
@@ -154,6 +154,8 @@ def main(arguments):
             the executable), but it's also used to generate a unique
             identifier for the artifact.  You should thus list the primary
             executable first, followed by all of its source files.""")
+    conf['artifact']['base'] = os.getcwd()
+
     # config
     conf['artifact']['config'] = arguments.configure
     conf['artifact'].comments['config'] = [
@@ -222,7 +224,7 @@ def add_subparser(subparsers):
     parser.add_argument('challenge_problem_id', type=int,
       help="your the 'challenge problem' identifier number")
 
-    parser.add_argument('-c', '--configure', default='/dev/null', type=str,
+    parser.add_argument('-c', '--configure', default=os.devnull, type=str,
       help="path to your configuration scripts to be passed to a run.")
 
     parser.add_argument('--pps', type=int,
