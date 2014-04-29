@@ -47,6 +47,10 @@ import os
 import glob
 import tarfile
 
+def write(message=""):
+    from sys import __stderr__ as std
+    std.write('  ' + message + '\n')
+    return message
 
 def simple_list(li):
     return sorted(set(li))
@@ -94,6 +98,7 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
       Takes in list of paths, and tarballs the contents uniquely ordered
       then returns the path to RESULT as a tar.bz2 archive
     """
+    write(prefix)
     contents = simple_list(contents)
     path = os.path.join(destpath, RESULT)
     with tarfile.open(path, "w:bz2") as tar:
@@ -101,6 +106,7 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
             if prefix: assert(item.startswith(prefix))
             arcitem = item[len(prefix):]
             tar.add(item, arcitem)
+    write()
     return path
 
 
@@ -135,8 +141,9 @@ def copy_directory_files(srcdir, dstdir, filenames):
 
 """"""
 def digest(path):
+    write(path)
     with open(path, 'rb') as fd:
-        return hashlib.md5(fd.read()).hexdigest()
+        return write(hashlib.md5(fd.read()).hexdigest())
 
 """"""
 class FatalError(Exception):
