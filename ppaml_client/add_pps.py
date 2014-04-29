@@ -33,8 +33,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import textwrap
-
 from . import db
 from . import utility
 
@@ -74,10 +72,10 @@ def main(arguments):
                 if index.contains(index.PPS, team_id=arguments.team_id,
                                   description=arguments.name,
                                   version=arguments.version):
-                    raise utility.FatalError(textwrap.fill(textwrap.dedent("""\
+                    raise utility.FormatMessage("""\
                         Duplicate PPS: This PPS is already registered.  Are
                         you sure you've set your description and version
-                        correctly?""")))
+                        correctly?""")
 
                 session.add(pps)
                 session.commit()
