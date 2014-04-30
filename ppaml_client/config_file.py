@@ -73,6 +73,11 @@ class RunConfiguration(configobj.ConfigObj):
     """
 
     def __init__(self, **kwargs):
+        """
+          TODO: Description of init
+
+          if 'infile' is set, then this does data checking aswell
+        """
 
         self._CONFIG_SPEC = (
           "[problem]",
@@ -100,7 +105,17 @@ class RunConfiguration(configobj.ConfigObj):
         kwargs['configspec'] = self._CONFIG_SPEC
 
         # XXX: old version caught 'ParseErrror', be sure this is nessicary
-        super(RunConfiguration, self).__init__(**kwargs)
+        try:
+            super(RunConfiguration, self).__init__(**kwargs)
+        except IOError as io_error:
+            raise utility.FormatedError("""\
+              {0}  Did you remember to create the configuration file?  Use
+              "ppaml init" to create one.""",
+              io_error
+            )
+
+        if kwargs.has_key['infile']:
+            self.require_no_extra_fields()
 
 
     @property
@@ -108,10 +123,16 @@ class RunConfiguration(configobj.ConfigObj):
         return self.filename
 
     @property
-    def base_dir(self):
-        return os.path.abspath(os.path.expanduser(self['artifact']['base']))
+    def base_dir(self, section='artifact'):
+        try:
+            return self[section]['base']
+        except KeyError:
+            raise MissingField(section, 'base')
 
     def require_no_extra_feilds(self):
+        """
+          raises ExtraField exception when extra fields exist in config file
+        """
         self.reload()
         self.validate(validate.Validator())
         extras = configobj.get_extra_values(self)
@@ -136,26 +157,13 @@ class RunConfiguration(configobj.ConfigObj):
         except (KeyError, IndexError):
             raise MissingField(section, field)
 
+    # it could be valuable to overload __getitem__ to throw missing field
+    # this should be addressed.
 
-    def expand_path_list(self, section, field):
+    def expand_list(self, section, field):
         try:
-            result = self[section][field]
+            paths = self[section][field]
         except KeyError:
             raise MissingField(section, field)
-
-        for i, path in enumerate(result):
-            pass
-
-def read_from_file(infile):
-    try:
-        conf = RunConfiguration(infile=infile)
-
-    except IOError as io_error:
-        raise utility.FormatedError("""\
-          {0}  Did you remember to create the configuration file?  Use
-          "ppaml init" to create one.""",
-          io_error
-          )
-
-
-    return conf
+        else:
+            return utility.expand_list(paths, self.base_dir(section))
