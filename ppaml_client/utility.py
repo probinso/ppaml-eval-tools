@@ -97,9 +97,14 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
     """
       Takes in list of paths, and tarballs the contents uniquely ordered
       then returns the path to RESULT as a tar.bz2 archive
+
+      if prefix undefined, then defaults to not remove any of the path
+      if prefix is set to None then os.path.commonprefix is removed
     """
     write(prefix)
+
     contents = simple_list(contents)
+
     path = os.path.join(destpath, RESULT)
     with tarfile.open(path, "w:bz2") as tar:
         for item in contents:
@@ -110,17 +115,23 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
     return path
 
 
+def tarball_abslists(contents, destpath, RESULT):
+    from os.path import commonprefix, isabs
+    assert(not filter(lambda x: not isabs(x), contents))
+    return tarball_list(contents, destpath, RESULT, commonprefix(contents)
+
+
 """
   FILE OPERATIONS HAPPEN HERE
 """
 
-def path_walk(srcpath):
+def path_walk(srcpath, suffix='*'):
     """
       Takes in dirpath and returns list of non-hidden files and subdirectories
     """
 
-    # glob ignores hidden files
-    paths = glob.glob(os.path.join(srcpath,'*'))
+    # glob ignores hidden filesx.
+    paths = glob.glob(os.path.join(srcpath, suffix))
 
     [others, files] = split_filter(paths, os.path.isfile)
 
@@ -138,6 +149,25 @@ def copy_directory_files(srcdir, dstdir, filenames):
         srcpath = os.path.join(srcdir, filename)
         dstpath = os.path.join(dstdir, filename)
         shutil.copyfile(srcpath, dstpath)
+
+
+def expand_path_list(paths, prefix='.', test=False):
+    """
+      takes in list of relative path expressions, then expands them to abspaths
+      TODO: incorperate 'existance testing'
+    """
+    prefix = os.path.expanduser(prefix)
+    paths = map(lambda elm: os.path.join(prefix, elm), paths)
+    for i, path in enumerate(paths):
+        if path[-1] == '*':
+            d, f = os.path.split(path)
+            paths[i] = path_walk(d, suffix=f)
+        else:
+            paths[i] = glob.glob(path)
+        paths[i] = map(os.path.abspath, paths[i])
+
+    return simple_list(reduce(lambda a,b: a+b, paths))
+
 
 """"""
 def digest(path):
