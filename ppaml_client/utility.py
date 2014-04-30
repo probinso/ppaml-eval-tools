@@ -49,7 +49,7 @@ import tarfile
 
 def write(message=""):
     from sys import __stderr__ as std
-    std.write('  ' + message + '\n')
+    std.write('  ' + message.__str__() + '\n')
     return message
 
 def simple_list(li):
