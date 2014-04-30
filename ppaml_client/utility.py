@@ -118,7 +118,7 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
 def tarball_abslists(contents, destpath, RESULT):
     from os.path import commonprefix, isabs
     assert(not filter(lambda x: not isabs(x), contents))
-    return tarball_list(contents, destpath, RESULT, commonprefix(contents)
+    return tarball_list(contents, destpath, RESULT, commonprefix(contents))
 
 
 """
@@ -149,7 +149,6 @@ def copy_directory_files(srcdir, dstdir, filenames):
         srcpath = os.path.join(srcdir, filename)
         dstpath = os.path.join(dstdir, filename)
         shutil.copyfile(srcpath, dstpath)
-
 
 def expand_path_list(paths, prefix='.', test=False):
     """
