@@ -108,7 +108,6 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
       if prefix undefined, then defaults to not remove any of the path
       if prefix is set to None then os.path.commonprefix is removed
     """
-    write(prefix)
 
     contents = simple_list(contents)
 
@@ -118,7 +117,7 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
             if prefix: assert(item.startswith(prefix))
             arcitem = item[len(prefix):]
             tar.add(item, arcitem)
-    write()
+
     return path
 
 
@@ -185,9 +184,8 @@ def expand_path_list(paths, prefix='.', test=False):
 
 """"""
 def digest(path):
-    write(path)
     with open(path, 'rb') as fd:
-        return write(hashlib.md5(fd.read()).hexdigest())
+        return hashlib.md5(fd.read()).hexdigest()
 
 """"""
 class FatalError(Exception):
