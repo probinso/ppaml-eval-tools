@@ -109,5 +109,6 @@ def main(version):
         arguments.func(arguments)
     except utility.FatalError as fatal_error:
         print(fatal_error, file=sys.stderr)
+        print("",file=sys.stderr)
         sys.exit(fatal_error.exit_status)
 
