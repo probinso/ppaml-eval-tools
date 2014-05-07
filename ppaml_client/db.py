@@ -462,3 +462,48 @@ class Index(_Database):
             os.path.join(xdg.BaseDirectory.save_data_path('ppaml'), blob_id),
             )
 
+
+def print_table_info(team_id, pps_id, challenge_problem_id):
+    try:
+        index = Index.open_user_index()
+    except SchemaMismatch as exception:
+        raise utility.FatalError(exception)
+
+    else:
+        with index.session() as session:
+            # Ensure UNIQUE constraint is satisfied; if the user tries
+            # to add a duplicate tag, update the one already in the
+            # database.
+            team = session.query(index.Team).filter_by(
+              team_id=team_id,
+              ).scalar()
+
+            if not team:
+                raise utility.FatalError(
+                  "team_id {0} is invalid".format(team_id)
+                )
+
+            cp = session.query(index.ChallengeProblem).filter_by(
+              challenge_problem_id=challenge_problem_id,
+              ).scalar()
+
+            if not cp:
+                raise utility.FatalError("""\
+                  challenge_problem_id {0}\
+                  is invalid""".format(challenge_problem_id)
+                )
+
+            pps = session.query(index.PPS).filter_by(
+              pps_id=pps_id,
+              ).scalar()
+
+            if not pps:
+                raise utility.FatalError("""\
+                  pps_id {0}\
+                  is invalid""".format(pps_id)
+                )
+
+            print("  Team              :: {0}".format(team.institution))
+            print("  PPS               :: {0}".format(pps.description))
+            print("  Challenge Problem :: {0}".format(cp.description))
+            print("")
