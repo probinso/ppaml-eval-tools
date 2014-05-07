@@ -420,25 +420,19 @@ class Index(_Database):
     ##### Saving files #####
 
     @staticmethod
-    def migrate_file(path):
-        """Migrate a single file into the database directory.
-
-        Return a blob id.
-
-        """
-        return Index.migrate((path,), os.path.dirname(path))
-
-    @staticmethod
-    def migrate(paths, strip_prefix):
+    def migrate(paths):
         """Migrate files into the database directory.
 
         Return a blob ID.
 
         """
+        if not hasattr(paths, '__iter__'):
+            paths = [paths]
         # TODO: Handle single paths as well as lists of paths.
         with utility.TemporaryDirectory(prefix='ppaml.db.') as sandbox:
-            tarball_path = utility.tarball_list(
-              paths, sandbox, 'data.tar.bz2', strip_prefix)
+
+            tarball_path = utility.tarball_abslists(paths, sandbox,
+              'data.tar.bz2')
 
             blob_id = utility.digest(tarball_path)
 
