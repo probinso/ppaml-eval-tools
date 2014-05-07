@@ -116,8 +116,15 @@ class ProblemSolutionConfig(configobj.ConfigObj):
     @property
     def executable(self):
         self.require_fields(('files', 'paths'),('files', 'basedir'))
-        return os.path.abspath(os.path.join(
+        retval = os.path.abspath(os.path.join(
           self['files']['basedir'], self['files']['paths'][0]))
+        if not os.path.exists(retval):
+            raise utility.FormatedError("""\
+              Executable path \"{0}\" does not exist. Be sure you have
+              correctly configured 'files+basedir' and 'files+paths'
+              in configuration file '{1}'
+            """,retval, self.path)
+        return retval
 
     def require_fields(self, *fields):
         """
@@ -152,6 +159,8 @@ class ProblemSolutionConfig(configobj.ConfigObj):
         """
           return list of files referenced by this configuration file
         """
+        from os.path import isfile
+
         assert(self.path)
 
         basedir = self['files']['basedir']
@@ -165,7 +174,13 @@ class ProblemSolutionConfig(configobj.ConfigObj):
                 files += [tmp] if not isinstance(tmp, list) else tmp
 
         # filter removes system devices like '/dev/null/' and directories
-        return filter(os.path.isfile, utility.expand_path_list(files, basedir))
+        retval = filter(isfile, utility.expand_path_list(files, basedir))
+        if not retval:
+            raise utility.FormatedError("""\
+              'files+paths' points to no valid entries, please insure it is
+              filled out correctly in configuration file '{0}'
+            """, self.path)
+        return retval
 
 
     def populate_defaults(self):
