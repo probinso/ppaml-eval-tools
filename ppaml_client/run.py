@@ -220,7 +220,7 @@ def _save_run(index, session, artifact_id, conf, sandbox, run_result):
 def add_subparser(subparsers):
     """Register the 'run' subcommand."""
     parser = subparsers.add_parser('run', help="run artifact")
-    parser.add_argument('run_config', default='run.conf',
+    parser.add_argument('run_config', default='cps.ini',
                         help="run configuration file")
     parser.set_defaults(func=main)
 
