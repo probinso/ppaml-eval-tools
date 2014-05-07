@@ -73,6 +73,12 @@ def main(arguments):
         ('files', 'input')
     )
 
+    db.print_table_info(
+      conf['identifiers']['team_id'],
+      conf['identifiers']['pps_id'],
+      conf['identifiers']['challenge_problem_id']
+    )
+
     try:
         index = db.Index.open_user_index()
     except db.SchemaMismatch as exception:
@@ -186,7 +192,7 @@ def _save_run(index, session, artifact_id, conf, sandbox, run_result):
                 return None
             else:
                 raise
-    utility.write(run_result.output_path)
+
     run.output = save(run_result.output_path)
     run.log = save(run_result.log_path)
     run.trace = save(
@@ -258,16 +264,11 @@ class RunProcedure(object):
 
     def __go__(self, sandbox):
 
-        utility.write()
         artifact_path = self._config.executable
 
-        utility.write(artifact_path)
         result = _RunResult(sandbox)
 
-        utility.write()
         result.environment_id = fingerprint.insert_current()
-
-        utility.write()
 
         try:
             config_file_path = self._config['files']['config']
@@ -276,14 +277,11 @@ class RunProcedure(object):
             config_file_path = os.devnull # '/dev/null'
             result.config_file_path = None
 
-        utility.write()
-
         # Stick the tracer path into the environment.
         proc_env = os.environ.copy()
         proc_env['PPAMLTRACER_TRACE_BASE'] = os.path.join(result.trace_dir,
                                                           'trace')
 
-        utility.write()
         # Start the artifact running.
         result.start_time = time.time()
         proc = subprocess.Popen(
@@ -295,8 +293,6 @@ class RunProcedure(object):
                 ],
             env=proc_env,
             )
-
-        utility.write()
 
         # Poll for CPU and RAM usage.
         # Load samples will always be relatively small floating-point
@@ -314,8 +310,6 @@ class RunProcedure(object):
         # help disturb the environment as little as possible during the
         # sampling.
         proc_entry = psutil.Process(proc.pid)
-
-        utility.write()
 
         while True:
             try:
@@ -344,7 +338,6 @@ class RunProcedure(object):
                 # waited.  We're done.
                 break
         result.stop_time = time.time()
-        utility.write()
 
         return result
 
