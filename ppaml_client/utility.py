@@ -47,9 +47,16 @@ import os
 import glob
 import tarfile
 
+import inspect
+
 def write(message=""):
-    from sys import __stderr__ as std
-    std.write('  ' + message.__str__() + '\n')
+    DEBUG = True
+    if DEBUG:
+        from sys import __stderr__ as std
+        _lineno = inspect.currentframe().f_back.f_lineno
+        _name = inspect.currentframe().f_back.f_code.co_filename
+        _name = os.path.split(_name)[1]
+        std.write('% '+str(_lineno)+'-'+_name+' : '+str(message)+'\n')
     return message
 
 def simple_list(li):
@@ -150,13 +157,22 @@ def copy_directory_files(srcdir, dstdir, filenames):
         dstpath = os.path.join(dstdir, filename)
         shutil.copyfile(srcpath, dstpath)
 
+
 def expand_path_list(paths, prefix='.', test=False):
     """
       takes in list of relative path expressions, then expands them to abspaths
+      if abspaths are included in 'paths', the prefix is not prepended
+
+      returns list that has no doubles, and is sorted alphabetically
+
       TODO: incorperate 'existance testing'
     """
     prefix = os.path.expanduser(prefix)
-    paths = map(lambda elm: os.path.join(prefix, elm), paths)
+
+    complete_path = \
+    lambda elm: os.path.join(prefix, elm) if not os.path.isabs(elm) else elm
+
+    paths = map(complete_path, paths)
     for i, path in enumerate(paths):
         if path[-1] == '*':
             d, f = os.path.split(path)
@@ -166,7 +182,6 @@ def expand_path_list(paths, prefix='.', test=False):
         paths[i] = map(os.path.abspath, paths[i])
 
     return simple_list(reduce(lambda a,b: a+b, paths))
-
 
 """"""
 def digest(path):
@@ -187,6 +202,14 @@ class FormatedError(FatalError):
     def __init__(self, message, *elms):
        message = FormatMessage(message, *elms)
        FatalError.__init__(self, message, exit_status=9)
+
+
+def testpath(path):
+    if not os.path.exists(path):
+        raise FormatedError("""\
+          Configuration error: artifact configuration file
+          "{}" is invalid""", path)
+    return path
 
 
 @contextlib.contextmanager
