@@ -234,12 +234,10 @@ class RunProcedure(object):
         try:
             return self.__go__(sandbox)
 
-        except (configuration.MissingField,
-                configuration.EmptyField) as missing_field:
-            raise utility.FatalError("Configuration error: {0}".format(
-                    missing_field,
-                    ),
-                                     10)
+        except (configuration.MissingField, configuration.EmptyField)\
+          as missing_field:
+            raise utility.FormatError("Configuration error: {0}\n{1}",
+                    missing_field, "have you filled out the configuration file?")
 
         except IndexError:
             raise utility.FormatedError("""\
