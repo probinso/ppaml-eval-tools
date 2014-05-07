@@ -60,6 +60,22 @@ class ExtraField(utility.FormatedError):
           field,
           section)
 
+class EmptyField(utility.FormatedError):
+    """A required field was empty."""
+
+    def __init__(self, section, field):
+        super(EmptyField, self).__init__(
+            'required field "{0}" (in section "{1}") was empty',
+                field,
+                section,
+                )
+
+"""
+  TODO : The exception identification and handling is very lazy
+    and should be taken more seriously. Presently malformed data
+    returns non-helpful error messages, and often continues
+    running.
+"""
 
 class ProblemSolutionConfig(configobj.ConfigObj):
     def __init__(self, **kwargs):
