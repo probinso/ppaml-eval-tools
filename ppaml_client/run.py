@@ -34,17 +34,16 @@
 from __future__ import (absolute_import, division, print_function)
 
 import array
-import contextlib
+from contextlib import nested
 import errno
 import math
 import os
 import subprocess
 import time
-import textwrap
 
 import psutil
 
-from . import configuration
+from . import ps as configuration
 from . import db
 from . import fingerprint
 from . import utility
@@ -61,64 +60,57 @@ def testpath(path):
 
 def main(arguments):
     """Run an artifact."""
-    # Read and validate configuration.
-    conf = configuration.read_from_file(
-        arguments.run_config,
-        required_fields=(
-          ('problem', 'challenge_problem_id'),
-          ('problem', 'team_id'),
-          ('problem', 'pps_id'),
-          ('artifact', 'paths'),
-          ('artifact', 'input')),
-        )
-    try:
-        artifact_config_path = conf['artifact']['config']
-        artifact_input_path = conf['artifact']['input']
-    except KeyError:
-        # No configuration file specified, so we'll end up using
-        # /dev/null.  No big deal.
-        pass
-    else:
-        testpath(artifact_config_path)
-        testpath(artifact_input_path)
+    # load configuration file
+    conf = configuration.CPSConfig(infile=arguments.run_config)
 
-    # Register the artifact.
+    # reserve fields required by this method
+    conf.require_fields(
+        ('identifiers', 'challenge_problem_id'),
+        ('identifiers', 'team_id'),
+        ('identifiers', 'pps_id'),
+        ('files', 'paths'),
+        ('files', 'basedir'),
+        ('files', 'input')
+    )
+
     try:
         index = db.Index.open_user_index()
     except db.SchemaMismatch as exception:
         raise utility.FatalError(exception)
 
     else:
-        with contextlib.nested(utility.TemporaryDirectory(prefix='ppaml.'),
-                               index.session()) as (sandbox, session):
-            artifact = index.Artifact()
+        with nested(
+          utility.TemporaryDirectory(prefix='ppaml.'),
+          index.session()
+        ) as (sandbox, session):
 
+            artifact = index.Artifact()
             # Ensure that all challenge problems, teams, &c. are in the
             # database.
             # static.populate_db(session, index, commit=True) #XXX: delete
 
             artifact.challenge_problem_id = index.require_foreign_key(
                 index.ChallengeProblem,
-                challenge_problem_id=conf['problem']['challenge_problem_id'],
+                challenge_problem_id=conf['identifiers']['challenge_problem_id'],
                 )
 
             artifact.team_id = index.require_foreign_key(
                 index.Team,
-                team_id=conf['problem']['team_id'],
+                team_id=conf['identifiers']['team_id'],
                 )
 
             artifact.pps_id = index.require_foreign_key(
                 index.PPS,
-                pps_id=conf['problem']['pps_id'],
+                pps_id=conf['identifiers']['pps_id'],
                 )
 
             try:
-                artifact.description = conf['artifact']['description']
+                artifact.description = conf['notes']['description']
             except KeyError:
                 pass
 
             try:
-                artifact.version = conf['artifact']['version']
+                artifact.version = conf['notes']['version']
             except KeyError:
                 pass
 
@@ -130,9 +122,7 @@ def main(arguments):
             # Capture the artifact source code.
             # XXX: DOES NOT CHECK PATH EXISTANCE, and sqashes NONEXISTANT PATHS
             artifact.artifact_id = db.Index.migrate(
-                conf.expand_path_list('artifact', 'paths'),
-                conf.base_dir
-                )
+              conf.expanded_files_list)
 
             # Insert the artifact into the database.
             if index.contains(
@@ -148,57 +138,27 @@ def main(arguments):
                     session.commit()
                 except Exception:
                     db.Index.remove_blob(artifact.artifact_id)
-                    raise
+                    raise # this is concerning, and should be better addressed
 
             # Run the artifact.
-            run_data = _run_artifact(RunProcedure(conf), sandbox)
+            my_run = RunProcedure(conf)
+            run_data = my_run.go(sandbox)
 
             # Save the run in the database.
             print(_save_run(index, session, artifact.artifact_id, conf,
                             sandbox, run_data))
 
 
-def _run_artifact(run_procedure, sandbox):
-    """Run the artifact."""
-    try:
-        return run_procedure.go(sandbox)
-
-    except (configuration.MissingField,
-            configuration.EmptyField) as missing_field:
-        raise utility.FatalError("Configuration error: {0}".format(
-                missing_field,
-                ),
-                                 10)
-
-    except IndexError:
-        raise utility.FatalError(
-            textwrap.dedent("""\
-                Configuration error: field "paths" (in section "artifact")
-                does not refer to a file."""),
-            10,
-            )
-
-    except OSError as os_error:
-        error_message = "Error executing artifact: {0}".format(os_error)
-        if os_error.errno == errno.EACCES:
-            # No execute bit on the binary.
-            error_message += ".  Is the artifact executable?"
-        elif os_error.errno == errno.ENOEXEC:
-            # Not a binary.
-            error_message += textwrap.dedent(""".  \
-                Are you sure you're specifying the artifact as the first file
-                in the "paths" field of the configuration file?""")
-        raise utility.FatalError(error_message, 10)
 
 
 def _save_run(index, session, artifact_id, conf, sandbox, run_result):
     """Convert a _RunResult to a index.Run and save it."""
     run = index.Run()
     run.artifact_id = artifact_id
-    run.pps_id = conf['problem']['pps_id']
+    run.pps_id = conf['identifiers']['pps_id']
     run.environment_id = run_result.environment_id
-    run.challenge_problem_id = conf['problem']['challenge_problem_id']
-    run.team_id = conf['problem']['team_id']
+    run.challenge_problem_id = conf['identifiers']['challenge_problem_id']
+    run.team_id = conf['identifiers']['team_id']
 
     run.started = long(run_result.start_time)
     run.duration = run_result.runtime
@@ -211,28 +171,27 @@ def _save_run(index, session, artifact_id, conf, sandbox, run_result):
     try:
         artifact_config_path = os.path.abspath(run_result.config_file_path)
         run.artifact_configuration = db.Index.migrate(
-            (artifact_config_path,),
-            _deepest_common_component((artifact_config_path,)),
+            artifact_config_path
             )
     except AttributeError:
         assert run_result.config_file_path is None
 
     # Save the artifact output, log, and trace.
-    def save(paths, strip_prefix):
+    def save(paths):
         try:
-            return db.Index.migrate(paths, strip_prefix)
+            return db.Index.migrate(paths)
         except OSError as os_error:
             if os_error.errno == errno.ENOENT:
                 # The artifact didn't produce this datum.
                 return None
             else:
                 raise
-    run.output = save([run_result.output_path], sandbox)
-    run.log = save([run_result.log_path], sandbox)
+    utility.write(run_result.output_path)
+    run.output = save(run_result.output_path)
+    run.log = save(run_result.log_path)
     run.trace = save(
         [os.path.join(run_result.trace_dir, p)
-         for p in os.listdir(run_result.trace_dir)],
-        run_result.trace_dir,
+         for p in os.listdir(run_result.trace_dir)]
         )
 
     try:
@@ -272,34 +231,74 @@ class RunProcedure(object):
 
     def go(self, sandbox):
         """Run an artifact, collecting and returning the results."""
-        artifact_paths = self._config.expand_path_list('artifact', 'paths')
-        artifact_path = artifact_paths[0]
-
-        result = _RunResult(sandbox)
-        result.environment_id = fingerprint.insert_current()
         try:
-            config_file_path = self._config['artifact']['config']
+            return self.__go__(sandbox)
+
+        except (configuration.MissingField,
+                configuration.EmptyField) as missing_field:
+            raise utility.FatalError("Configuration error: {0}".format(
+                    missing_field,
+                    ),
+                                     10)
+
+        except IndexError:
+            raise utility.FormatedError("""\
+                    Configuration error: field "paths" (in section "artifact")
+                    does not refer to a file.""")
+
+        except OSError as os_error:
+            error_message = "Error executing artifact: {0}".format(os_error)
+            if os_error.errno == errno.EACCES:
+                # No execute bit on the binary.
+                error_message += ".  Is the artifact executable?"
+            elif os_error.errno == errno.ENOEXEC:
+                # Not a binary.
+                error_message += """.  \
+                    Are you sure you're specifying the artifact as the first file
+                    in the "paths" field of the configuration file?"""
+            raise utility.FormatedError(error_message)
+
+    def __go__(self, sandbox):
+
+        utility.write()
+        artifact_path = self._config.executable
+
+        utility.write(artifact_path)
+        result = _RunResult(sandbox)
+
+        utility.write()
+        result.environment_id = fingerprint.insert_current()
+
+        utility.write()
+
+        try:
+            config_file_path = self._config['files']['config']
             result.config_file_path = config_file_path
         except KeyError:
             config_file_path = os.devnull # '/dev/null'
             result.config_file_path = None
+
+        utility.write()
 
         # Stick the tracer path into the environment.
         proc_env = os.environ.copy()
         proc_env['PPAMLTRACER_TRACE_BASE'] = os.path.join(result.trace_dir,
                                                           'trace')
 
+        utility.write()
         # Start the artifact running.
         result.start_time = time.time()
         proc = subprocess.Popen(
             [   artifact_path,
                 config_file_path,
-                self._config['artifact']['input'],
+                self._config['files']['input'],
                 result.output_path,
                 result.log_path,
                 ],
             env=proc_env,
             )
+
+        utility.write()
 
         # Poll for CPU and RAM usage.
         # Load samples will always be relatively small floating-point
@@ -317,6 +316,9 @@ class RunProcedure(object):
         # help disturb the environment as little as possible during the
         # sampling.
         proc_entry = psutil.Process(proc.pid)
+
+        utility.write()
+
         while True:
             try:
                 load_sample = _sample_load(proc_entry)
@@ -344,6 +346,7 @@ class RunProcedure(object):
                 # waited.  We're done.
                 break
         result.stop_time = time.time()
+        utility.write()
 
         return result
 

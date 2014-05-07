@@ -34,16 +34,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os.path
-import textwrap
-import sys
 
 from . import db
 
-from . import configuration
+from . import ps as configuration
 from . import utility
-from . import __version__
 
-def print_init_info(team_id, challenge_problem_id):
+def print_init_info(team_id, pps_id, challenge_problem_id):
     try:
         index = db.Index.open_user_index()
     except db.SchemaMismatch as exception:
@@ -73,7 +70,18 @@ def print_init_info(team_id, challenge_problem_id):
                   is invalid""".format(challenge_problem_id)
                 )
 
+            pps = session.query(index.PPS).filter_by(
+              pps_id=pps_id,
+              ).scalar()
+
+            if not pps:
+                raise utility.FatalError("""\
+                  pps_id {0}\
+                  is invalid""".format(pps_id)
+                )
+
             print("  Team              :: {0}".format(team.institution))
+            print("  PPS               :: {0}".format(pps.description))
             print("  Challenge Problem :: {0}".format(cp.description))
             print("")
 
@@ -82,137 +90,38 @@ def print_init_info(team_id, challenge_problem_id):
 
 def main(arguments):
     """Create a configuration file."""
-    def _format(text):
-        # Format all comment text at 78 characters so that when the
-        # configurator prepends '# ', we'll get a nice block of text
-        # wrapped at 80 characters.
-        return textwrap.fill(textwrap.dedent(text), width=78).split('\n')
 
-    conf = configuration.RunConfiguration()
+    cps_conf = configuration.CPSConfig()
+    arguments.team_id
 
-    conf.initial_comment = [
-        "Configuration file for PPAML run",
-        "Created by ppaml init v{0}".format(__version__),
-        "All paths are relative to the directory this file is stored in.",
-        ]
+    arguments.challenge_problem_id
+    arguments.configure
+    cps_conf.populate_defaults(
+      cp_id = arguments.challenge_problem_id,
+      team_id = arguments.team_id,
+      pps_id = arguments.pps if arguments.pps else arguments.team_id,
+      configpath = arguments.configure
+      )
 
+    print_init_info(
+      cps_conf['identifiers']['team_id'],
+      cps_conf['identifiers']['pps_id'],
+      cps_conf['identifiers']['challenge_problem_id']
+    )
 
-    # [problem]
-    conf['problem'] = {}
-    conf.comments['problem'] = [
-        '', '',
-        "The problem the artifact is going to solve",
-        ]
-    # challenge_problem_id
-    conf['problem']['challenge_problem_id'] = arguments.challenge_problem_id
-    conf['problem'].comments['challenge_problem_id'] = [
-        '',
-        "What challenge problem the artifact is associated with",
-        ]
-    # team_id
-    conf['problem']['team_id'] = arguments.team_id
-    conf['problem'].comments['team_id'] = [
-        '',
-        "What team produced the artifact",
-        ]
-    # pps_id
-    pps_id = arguments.pps if arguments.pps else arguments.team_id
-    conf['problem']['pps_id'] = pps_id
-    conf['problem'].comments['pps_id'] = [
-        '',
-        "What PPS the artifact runs under",
-        ]
-
-
-    # [artifact]
-    conf['artifact'] = {}
-    conf.comments['artifact'] = [
-        '', '',
-        "Fundamental properties of the artifact",
-        ]
-    # description
-    conf['artifact']['description'] = "My cool probabilistic program"
-    conf['artifact'].comments['description'] = [
-        '',
-        "A brief description of the artifact (optional)",
-        ]
-    # version
-    conf['artifact']['version'] = arguments.version
-    conf['artifact'].comments['version'] = [
-        '',
-        "The artifact version as a free-form string (optional)",
-        ]
-    # paths
-    conf['artifact']['paths'] = ['artifact_exe', 'support_files', '*.blah']
-    conf['artifact'].comments['paths'] = [
-        '',
-        "All the paths which contribute to this artifact",
-        '#'
-        ] + _format("""\
-            This field gets used for two purposes.  It's used to determine
-            which executable to run (the first file listed is assumed to be
-            the executable), but it's also used to generate a unique
-            identifier for the artifact.  You should thus list the primary
-            executable first, followed by all of its source files.""")
-    conf['artifact']['base'] = os.getcwd()
-
-    # config
-    conf['artifact']['config'] = arguments.configure
-    conf['artifact'].comments['config'] = [
-        '',
-        "Path to the artifact configuration file",
-        '#',
-        ] + _format("""\
-            This path will get passed to the artifact.  It's optional; if
-            you don't specify it, the artifact will receive
-            '/dev/null'.""")
-    # input
-    conf['artifact']['input'] = 'path/to/my_dataset'
-    conf['artifact'].comments['input'] = [
-        '',
-        "Path to the artifact input",
-        ]
-
-
-    # [evaluation]
-    conf['evaluation'] = {}
-    conf.comments['evaluation'] = [
-        '', '',
-        "Evaluating runs",
-        ]
-    # evaluator
-    conf['evaluation']['evaluator'] = ['evaluator.py', '*.h']
-    conf['evaluation'].comments['evaluator'] = [
-        '',
-        "All the paths which contribute to the evaluator",
-        '#',
-        ] + _format("""\
-            This field is interpreted in the same way as the "paths" field
-            in the "artifact" section.""")
-    # ground_truth
-    conf['evaluation']['ground_truth'] = 'path/to/ground'
-    conf['evaluation'].comments['ground_truth'] = [
-        '',
-        "Path to ground truth data",
-        ]
-
-    print_init_info(arguments.team_id, arguments.challenge_problem_id)
-
-    if arguments.output == '-':
-        conf.write(sys.stdout)
-    else:
+    if not arguments.output == '-':
         if os.path.exists(arguments.output) and not arguments.force:
             raise utility.FatalError(
                 'refusing to overwrite configuration file "{0}"'.format(
                     arguments.output,
                     ),
                 )
-        conf.filename = arguments.output
-        try:
-            conf.write()
-        except IOError as io_error:
-            raise utility.FatalError(io_error)
+        cps_conf.filename = arguments.output
 
+    try:
+        cps_conf.write()
+    except IOError as io_error:
+        raise utility.FatalError(io_error)
 
 def add_subparser(subparsers):
     """Register the 'init' subcommand."""
@@ -230,7 +139,7 @@ def add_subparser(subparsers):
     parser.add_argument('--pps', type=int,
       help="your 'pps_id', defaults to your team number")
 
-    parser.add_argument('-o', '--output', default='run.conf', type=str,
+    parser.add_argument('-o', '--output', default='cps.ini', type=str,
       help="where to place the configuration file")
 
     parser.add_argument('-f', '--force', default=False, action="store_true",

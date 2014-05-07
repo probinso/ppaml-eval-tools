@@ -39,11 +39,10 @@ import configobj
 import validate
 
 
-#from . import utility
-#from . import __version__
-import utility
+from . import utility
+from . import __version__
 
-__version__ = "x.y.z"
+#__version__ = "x.y.z"
 
 class MissingField(utility.FormatedError):
     def __init__(self, section, field):
@@ -90,13 +89,19 @@ class ProblemSolutionConfig(configobj.ConfigObj):
               "ppaml init" to create one.""",
               io_error
             )
-        utility.write(kwargs['configspec'])
+
         if 'infile' in kwargs:
             self.require_no_extra_fields()
 
     @property
     def path(self):
         return self.filename
+
+    @property
+    def executable(self):
+        self.require_fields(('files', 'paths'),('files', 'basedir'))
+        return os.path.abspath(os.path.join(
+          self['files']['basedir'], self['files']['paths'][0]))
 
     def require_fields(self, *fields):
         """
@@ -105,11 +110,12 @@ class ProblemSolutionConfig(configobj.ConfigObj):
         """
         try:
             for section, field in fields:
-                self[section][field][0]
+                if not self[section][field]:
+                    raise KeyError
         except (KeyError, IndexError):
             raise MissingField(section, field)
 
-    def require_no_extra_feilds(self):
+    def require_no_extra_fields(self):
         """
           raises ExtraField exception when extra fields exist in config file
         """
@@ -136,17 +142,18 @@ class ProblemSolutionConfig(configobj.ConfigObj):
         files = []
         for field in self['files']:
             if field == 'basedir':
-                pass
+                # basedir is special case
+                continue
             elif field: # ignore empty fields
                 tmp = self['files'][field]
                 files += [tmp] if not isinstance(tmp, list) else tmp
 
-        return utility.expand_list(files, basedir)
+        # filter removes system devices like '/dev/null/' and directories
+        return filter(os.path.isfile, utility.expand_path_list(files, basedir))
 
 
     def populate_defaults(self):
-        from utility import FormatMessage
-        _format = lambda x: FormatMessage(x).split("\n")
+        _format = lambda x: utility.FormatMessage(x).split("\n")
 
         self.initial_comment = [
           "Configuration file for PPAML ",
@@ -171,43 +178,65 @@ class ProblemSolutionConfig(configobj.ConfigObj):
             which executable to run (the first file listed is assumed to be
             the executable), but it's also used to generate a unique
             identifier for the artifact.  You should thus list the primary
-            executable first, followed by all of its source files.""")
+            executable first, followed by all of its source files.""") + ['']
         #basedir
         self['files']['basedir'] = os.getcwd()
-        self['files'].comments['basedir'] = ['','',
+        self['files'].comments['basedir'] = ['',
           "all paths are relative to this"]
 
-        utility.write(self.validate(validate.Validator()))
+        self.validate(validate.Validator())
 
 
 class CPSConfig(ProblemSolutionConfig):
+    """
+      This is a class used to read and write to Challenge Problem Solutions
+      to and from disk.
+    """
     def __init__(self, **kwargs):
         self._CONFIG_SPEC = (
           "[identifiers]",
           "challenge_problem_id = integer",
           "challenge_problem_level = integer",
           "pps_id = integer",
+          "team_id = integer",
+
+          "[notes]",
+          "version = string",
+          "description = string",
 
           "[files]",
           "config = string",
+          "input = string"
         )
 
         kwargs['configspec'] = self._CONFIG_SPEC
 
         ProblemSolutionConfig.__init__(self, **kwargs)
 
-    def populate_defaults(self, cps_id=int(1), cps_level=int(1), pps_id=int(1),
-      configpath=os.devnull):
+    def populate_defaults(self, cp_id=int(1), cp_level=int(1), pps_id=int(1),
+      team_id=int(1), configpath=os.devnull):
 
         # [identifiers]
         self['identifiers'] = {}
-        self['identifiers']['challenge_problem_id'] = cps_id
-        self['identifiers']['challenge_problem_level'] = cps_level
+        self.comments['identifiers'] = ['','',
+          "Identifiers are integer values that coorespond to elements already",
+          "in the program store"]
+        self['identifiers']['challenge_problem_id'] = cp_id
+        self['identifiers']['challenge_problem_level'] = cp_level
         self['identifiers']['pps_id'] = pps_id
+        self['identifiers']['team_id'] = team_id
+
+        # [notes]
+        self['notes'] = {}
+        self.comments['notes'] = ['','',
+          "This is where you can add human readable descriptors"]
+        self['notes']['version'] = ""
+        self['notes']['description'] = ""
 
         # [files]
         self['files'] = {}
         self['files']['config'] = configpath
+        self['files']['input'] = "path/to/input/data"
         ProblemSolutionConfig.populate_defaults(self)
 
 
