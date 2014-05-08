@@ -49,7 +49,11 @@ import tarfile
 
 import inspect
 
+
 def write(message=""):
+    """
+      debugging tool prints out message and other helper data
+    """
     DEBUG = True
     if DEBUG:
         from sys import __stderr__ as std
@@ -60,13 +64,22 @@ def write(message=""):
     return message
 
 def simple_list(li):
+    """
+      takes in a list li
+      returns a sorted list without doubles
+    """
     return sorted(set(li))
 
 
 def split_filter(li, cond, op=lambda x:x):
+    """
+      takes in list and conditional
+      returns [[False], [True]] split list in O(n) time
+    """
     retval = [[],[]]
     for elm in li:
-        retval[cond(elm)].append(op(elm))
+        index = cond(elm)
+        retval[index].append(op(elm) if index else elm)
     return retval
 
 
@@ -122,6 +135,9 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
 
 
 def tarball_abslists(contents, destpath, RESULT):
+    """
+      does what it says on the tin
+    """
     from os.path import commonprefix, isabs
     assert(not filter(lambda x: not isabs(x), contents))
     return tarball_list(contents, destpath, RESULT, commonprefix(contents))
@@ -211,16 +227,19 @@ def testpath(path):
 
 
 @contextlib.contextmanager
-def TemporaryDirectory(suffix='', prefix='tmp', dir=None):
-    """Like tempfile.NamedTemporaryFile, but creates a directory.
+def TemporaryDirectory(suffix='', prefix='tmp', dir=None, delete=True):
+    """
+      Like tempfile.NamedTemporaryFile, but creates a directory.
 
-    This object appears in Python 3 but is unfortunately absent from
-    releases of Python 2.
-
+      This object appears in Python 3 but is unfortunately absent from
+      releases of Python 2.
     """
     tree = tempfile.mkdtemp(suffix, prefix, dir)
     try:
         yield tree
     finally:
-        shutil.rmtree(tree)
+        if delete:
+            shutil.rmtree(tree)
+        else:
+            print("run info persists at :: " + tree)
 

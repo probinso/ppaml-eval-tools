@@ -49,7 +49,6 @@ from . import fingerprint
 from . import utility
 
 
-
 #################################### Main #####################################
 def testpath(path):
     if not os.path.exists(path):
@@ -86,7 +85,10 @@ def main(arguments):
 
     else:
         with nested(
-          utility.TemporaryDirectory(prefix='ppaml.'),
+          utility.TemporaryDirectory(
+            prefix='ppaml.',
+            delete=not arguments.persist
+          ),
           index.session()
         ) as (sandbox, session):
 
@@ -221,9 +223,11 @@ def add_subparser(subparsers):
     """Register the 'run' subcommand."""
     parser = subparsers.add_parser('run', help="run artifact")
     parser.add_argument('run_config', default='cps.ini',
-                        help="run configuration file")
-    parser.set_defaults(func=main)
+      help="run configuration file")
+    parser.add_argument('-p', '--persist', action="store_true", default=False,
+      help="where to place the configuration file")
 
+    parser.set_defaults(func=main)
 
 
 #################################### Runs #####################################
@@ -343,11 +347,11 @@ class RunProcedure(object):
 
 
 class _RunResult(object):
-    """A single execution of an artifact, as it exists on disk.
+    """
+      A single execution of an artifact, as it exists on disk.
 
-    Instances of this class get converted to instances of index.Run as
-    appropriate.
-
+      Instances of this class get converted to instances of index.Run as
+      appropriate.
     """
 
     def __init__(self, sandbox):
