@@ -87,7 +87,7 @@ def main(arguments):
         with nested(
           utility.TemporaryDirectory(
             prefix='ppaml.',
-            delete=not arguments.persist
+            persist=arguments.persist
           ),
           index.session()
         ) as (sandbox, session):
@@ -153,8 +153,10 @@ def main(arguments):
             run_data = my_run.go(sandbox)
 
             # Save the run in the database.
-            print(_save_run(index, session, artifact.artifact_id, conf,
-                            sandbox, run_data))
+
+            run_id = _save_run(index, session, artifact.artifact_id, conf,
+                            sandbox, run_data)
+            print(utility.FormatMessage("run_id #{0} saved", run_id))
 
 
 
@@ -225,7 +227,7 @@ def add_subparser(subparsers):
     parser.add_argument('run_config', default='cps.ini',
       help="run configuration file")
     parser.add_argument('-p', '--persist', action="store_true", default=False,
-      help="where to place the configuration file")
+      help="to persist data, dont delete sandbox after use")
 
     parser.set_defaults(func=main)
 
