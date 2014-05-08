@@ -227,7 +227,7 @@ def testpath(path):
 
 
 @contextlib.contextmanager
-def TemporaryDirectory(suffix='', prefix='tmp', dir=None, delete=True):
+def TemporaryDirectory(suffix='', prefix='tmp', dir=None, persist=False):
     """
       Like tempfile.NamedTemporaryFile, but creates a directory.
 
@@ -238,8 +238,8 @@ def TemporaryDirectory(suffix='', prefix='tmp', dir=None, delete=True):
     try:
         yield tree
     finally:
-        if delete:
-            shutil.rmtree(tree)
+        if persist:
+            print("data persists : " + tree)
         else:
-            print("run info persists at :: " + tree)
+            shutil.rmtree(tree)
 
