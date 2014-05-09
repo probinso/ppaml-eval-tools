@@ -387,15 +387,17 @@ ahead and run.
 
     % ppaml init <team-id> <challenge-problem-id>
 
-to generate a skeleton `run.conf`, and have a look.  The fields are fairly
+to generate a skeleton `cps.ini`, and have a look.  The fields are fairly
 simple:
 
-  - The `artifact` section describes the artifact you’re trying to run.
+  - The `identifiers` section describes the challenge problem solution you're
+    trying to run, by listing the id numbers that coorespond to entries in
+    the database
 
-      - `paths` identifies the files used in the artifact.  The client scripts
-        will use these paths to generate a unique identifier for the artifact,
-        so it is important that you list all of them!  The scripts assume that
-        the first file listed is the artifact executable.
+  - The `notes` section allows you to add human readable descriptors to your 
+    challenge problem solution
+
+  - The `files` section denotes all of the files required to execute a run
 
       - `config` specifies the artifact configuration file, if any.  If your
         PPS requires a configuration file, this is the place to put it.  This
@@ -403,6 +405,16 @@ simple:
         artifact executable.
 
       - `input` specifies the input path.
+
+      - `paths` identifies the files used in creation of the artifact.  The 
+        client scripts will use these paths to generate a unique identifier for 
+        the artifact, so it is important that you list all of them!  The scripts
+        assume that the first file listed is the challenge problem executable.
+
+      - `basedir` gives a relative startpoint for all the files you have listed.
+        If you need to include a file that is not in the basedir, then please
+        precede it with '/' to denote an absolute path (ie.  '/home/xxx.sh')
+
 
   - The `evaluation` section tells `ppaml` how to evaluate a run.  Don’t worry
     about it just yet – we’ll look at it again in a minute.
@@ -419,29 +431,31 @@ For this example, you should set
 
 We can now actually run the executable.
 
-    % ppaml run run.conf
-    /tmp/my_runs/001
+    % ppaml run cps.ini -p
+    1
+    /tmp/ppaml.nPivkz
+
+XXX: THIS SECTION NEEDS TO BE MODIFIED FOR NEW OUTPUT 
 
 The `ppaml run` script runs the artifact executable according to the specified
 configuration file, all the while monitoring system load, memory usage, and
 other useful metrics for evaluation.  When the executable is finished, `ppaml
 run` bundles all the data (including the executable output) into a package,
-stores it in a directory under `base`, and prints that directory name to the
-console.
+stores it in a directory under `~/.local/share/ppaml`, and prints the run_id
+number to the console. (the -p parameter allows you to request the generated
+data persists)
 
-    % tree /tmp/my_runs/001
-    /tmp/my_runs/001
-    +-- files
-    |   +-- output
-    |   |   +-- slam_out_landmarks.csv
-    |   |   `-- slam_out_path.csv
-    |   `-- trace
-    |       +-- trace.0.def
-    |       +-- trace.1.events
-    |       `-- trace.otf
-    `-- index.json
 
-    2 directories, 4 files
+    % tree /tmp/ppaml.nPivkz
+    +-- output
+    |   +-- slam_out_landmarks.csv
+    |   `-- slam_out_path.csv
+    `-- trace
+        +-- trace.0.def
+        +-- trace.1.events
+        `-- trace.otf
+
+    2 directories, 5 files
 
 
 ## Correctness evaluation ##
