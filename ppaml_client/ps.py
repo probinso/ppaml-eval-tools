@@ -188,9 +188,9 @@ class ProblemSolutionConfig(configobj.ConfigObj):
         if not os.path.exists(retval):
             raise utility.FormatedError("""\
               Executable path \"{0}\" does not exist. Be sure you have
-              correctly configured 'files+basedir' and 'files+paths'
+              correctly configured 'files+basedir' and '{2}+{3}'
               in configuration file '{1}'
-            """,retval, self.path)
+            """,retval, self.path, section, field)
         return retval
 
     def populate_defaults(self):
