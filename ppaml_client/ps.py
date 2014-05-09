@@ -78,6 +78,13 @@ class EmptyField(utility.FormatedError):
 """
 
 class ProblemSolutionConfig(configobj.ConfigObj):
+    """
+      virtual class provides methods that apply to all that file readable
+      Config Objects.
+
+      NOTE :: THIS OBJECT HEIRARCHY IS POORLY DESIGNED, IT WILL SQUASH CERTAIN
+      FEATURES BECAUSE IT __init__ MUST BE CALLED ON PSC AFTER CLASS TMP(PSC)
+    """
     def __init__(self, **kwargs):
         assert(type(self) != ProblemSolutionConfig)
         # Set options.
@@ -115,24 +122,15 @@ class ProblemSolutionConfig(configobj.ConfigObj):
 
     @property
     def executable(self):
-        self.require_fields(('files', 'paths'),('files', 'basedir'))
-        retval = os.path.abspath(os.path.join(
-          self['files']['basedir'], self['files']['paths'][0]))
-        if not os.path.exists(retval):
-            raise utility.FormatedError("""\
-              Executable path \"{0}\" does not exist. Be sure you have
-              correctly configured 'files+basedir' and 'files+paths'
-              in configuration file '{1}'
-            """,retval, self.path)
-        return retval
+        return self.expand_executable()
 
-    def require_fields(self, *fields):
+    def require_fields(self, *tomes):
         """
           Checks that the requested fields are present and nonempty.
           Throws MissingField as appropriate.
         """
         try:
-            for section, field in fields:
+            for section, field in tomes:
                 if not self[section][field]:
                     raise KeyError
         except (KeyError, IndexError):
@@ -155,7 +153,7 @@ class ProblemSolutionConfig(configobj.ConfigObj):
             raise ExtraField(section, field)
 
     @property
-    def expanded_files_list(self):
+    def expanded_files_list(self, section='files'):
         """
           return list of files referenced by this configuration file
         """
@@ -165,12 +163,13 @@ class ProblemSolutionConfig(configobj.ConfigObj):
 
         basedir = self['files']['basedir']
         files = []
-        for field in self['files']:
+
+        for field in self[section]:
             if field == 'basedir':
                 # basedir is special case
                 continue
             elif field: # ignore empty fields
-                tmp = self['files'][field]
+                tmp = self[section][field]
                 files += [tmp] if not isinstance(tmp, list) else tmp
 
         # filter removes system devices like '/dev/null/' and directories
@@ -182,6 +181,17 @@ class ProblemSolutionConfig(configobj.ConfigObj):
             """, self.path)
         return retval
 
+    def expand_executable(self, section='files', field='paths'):
+        self.require_fields((section, field),('files', 'basedir'))
+        retval = os.path.abspath(os.path.join(
+          self['files']['basedir'], self[section][field][0]))
+        if not os.path.exists(retval):
+            raise utility.FormatedError("""\
+              Executable path \"{0}\" does not exist. Be sure you have
+              correctly configured 'files+basedir' and 'files+paths'
+              in configuration file '{1}'
+            """,retval, self.path)
+        return retval
 
     def populate_defaults(self):
         _format = lambda x: utility.FormatMessage(x).split("\n")
@@ -196,9 +206,9 @@ class ProblemSolutionConfig(configobj.ConfigObj):
           '','',
           "This is where all solution files required will be listed"
           ]
-       # paths
+        # paths
         self['files']['paths'] = [
-          'artifact_exe', 'support_files', '*.blah', 'all/subdirs/*'
+          'path_exe', 'support_file(s)', '*.blah', 'all/subdirs/*'
           ]
         self['files'].comments['paths'] = [
         '','',
@@ -235,6 +245,10 @@ class CPSConfig(ProblemSolutionConfig):
           "version = string",
           "description = string",
 
+          "[evaluation]",
+          "evaluator = force_list",
+          "ground_truth = string",
+
           "[files]",
           "config = string",
           "input = string"
@@ -263,6 +277,19 @@ class CPSConfig(ProblemSolutionConfig):
           "This is where you can add human readable descriptors"]
         self['notes']['version'] = ""
         self['notes']['description'] = ""
+
+        # [evaluation]
+        self['evaluation'] = {}
+        self.comments['evaluation'] = ['','',
+          "Evaluating runs"]
+        self['evaluation']['evaluator'] = "path/to/evaluator"
+        self['evaluation'].comments['evaluator'] = [
+          "All the paths which contribute to the evaluator",'',
+          'This field is interpreted in the same way as the "paths" field in',
+          ' the "files" section.']
+        self['evaluation']['ground_truth'] = "path/to/ground/data"
+        self['evaluation'].comments['ground_truth'] = ['',
+          'Path to ground truth data']
 
         # [files]
         self['files'] = {}

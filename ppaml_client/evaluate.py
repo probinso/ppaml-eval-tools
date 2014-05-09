@@ -38,7 +38,7 @@ import os
 import subprocess
 import textwrap
 
-from . import configuration
+from . import ps as configuration
 from . import db
 from . import utility
 
@@ -50,13 +50,10 @@ from . import utility
 def main(arguments):
     """Run an artifact evaluator."""
     # Read and validate configuration.
-    conf = configuration.read_from_file(
-        arguments.run_config,
-        required_fields=(('evaluation', 'evaluator'),
-                         ('evaluation', 'ground_truth')),
-        )
+    conf = configuration.CPSConfig(infile=arguments.run_config)
+    conf.require_fields(('evaluation', 'evaluator'),
+                         ('evaluation', 'ground_truth'))
 
-    # What are we evaluating?
     try:
         index = db.Index.open_user_index()
     except db.SchemaMismatch as exception:
@@ -69,13 +66,12 @@ def main(arguments):
                     "nonexistent run identifier {}".format(arguments.run_tid),
                     )
 
-            else:
-                evaluator = Evaluator(conf, run_to_evaluate)
-                with utility.TemporaryDirectory(prefix='ppaml.') as sandbox:
-                    results = _run_evaluator(evaluator, sandbox)
+            evaluator = Evaluator(conf, run_to_evaluate)
+            with utility.TemporaryDirectory(prefix='ppaml.') as sandbox:
+                results = _run_evaluator(evaluator, sandbox)
 
-                    # Save data.
-                    _record_evaluation(index, results, sandbox)
+                # Save data.
+                _record_evaluation(index, results, sandbox)
 
 
 def _run_evaluator(evaluator, sandbox):
@@ -112,13 +108,13 @@ def _record_evaluation(index, evaluation, sandbox):
         else:
             raise
 
-    evaluation.run.quant_score = db.Index.migrate(output_paths, sandbox)
+    evaluation.run.quant_score = db.Index.migrate(output_paths)
 
 
 def add_subparser(subparsers):
     """Register the 'evaluate' subcommand."""
     parser = subparsers.add_parser('evaluate', help="evaluate artifact result")
-    parser.add_argument('run_config', default='run.conf',
+    parser.add_argument('run_config', default='cps.ini',
                         help="run configuration file")
     parser.add_argument('run_tid', default='1', help="tag or run ID")
     parser.set_defaults(func=main)
@@ -137,14 +133,19 @@ class Evaluator(object):
 
     def go(self, sandbox):
         """Run an evaluator, collecting and returning the results."""
-        evaluator_paths = self._config.expand_path_list('evaluation',
-                                                        'evaluator')
-        evaluator_path = evaluator_paths[0]
+        evaluator_path = self._config.expand_executable(
+          'evaluation',
+          'evaluator'
+          )
+
+
 
         # Reproduce the output from the run so the evaluator can look at
         # it.
         run_output_dir = os.path.join(sandbox, 'run_output')
+
         db.Index.extract_blob(self._run.output, run_output_dir)
+
 
         # Run the evaluator.
         result = Evaluation(self._run, sandbox)
