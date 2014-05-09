@@ -475,7 +475,7 @@ evaluate` will pass it – namely,
 Like the runner, the evaluator must create either a file or directory at the
 specified output path.
 
-    % cp -a "$example"/slam_eval .
+    % ln (location of PPAML tools)/ekm_slam_solution/slam_eval .
 
 We now need to update our configuration file so it can tell `ppaml` which file
 is the evaluator.  Open up `run.conf` again, and check out the `evaluation`
