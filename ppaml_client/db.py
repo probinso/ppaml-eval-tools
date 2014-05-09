@@ -452,8 +452,7 @@ class Index(_Database):
           xdg.BaseDirectory.save_data_path('ppaml'),
           blob_id,
           )
-        utility.untar_to_directory(tar_dir, path_dest)
-
+        utility.untar_to_directory(tar_path, dest_dir)
 
     @staticmethod
     def remove_blob(blob_id):
