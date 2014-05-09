@@ -67,7 +67,10 @@ def main(arguments):
                     )
 
             evaluator = Evaluator(conf, run_to_evaluate)
-            with utility.TemporaryDirectory(prefix='ppaml.') as sandbox:
+            with utility.TemporaryDirectory(
+              prefix='ppaml.',
+              persist=arguments.persist
+            ) as sandbox:
                 results = _run_evaluator(evaluator, sandbox)
 
                 # Save data.
@@ -117,6 +120,8 @@ def add_subparser(subparsers):
     parser.add_argument('run_config', default='cps.ini',
                         help="run configuration file")
     parser.add_argument('run_tid', default='1', help="tag or run ID")
+    parser.add_argument('-p', '--persist', action="store_true", default=False,
+      help="to persist data, dont delete sandbox after use")
     parser.set_defaults(func=main)
 
 
