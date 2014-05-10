@@ -452,7 +452,7 @@ class Index(_Database):
           xdg.BaseDirectory.save_data_path('ppaml'),
           blob_id,
           )
-        utility.untar_to_directory(tar_path, dest_dir)
+        return utility.untar_to_directory(tar_path, dest_dir)
 
     @staticmethod
     def remove_blob(blob_id):
@@ -462,7 +462,7 @@ class Index(_Database):
             )
 
 
-def print_table_info(team_id, pps_id, challenge_problem_id):
+def print_table_info(team_id=None, pps_id=None, challenge_problem_id=None):
     try:
         index = Index.open_user_index()
     except SchemaMismatch as exception:
@@ -473,36 +473,39 @@ def print_table_info(team_id, pps_id, challenge_problem_id):
             # Ensure UNIQUE constraint is satisfied; if the user tries
             # to add a duplicate tag, update the one already in the
             # database.
-            team = session.query(index.Team).filter_by(
-              team_id=team_id,
-              ).scalar()
+            if team_id:
+                team = session.query(index.Team).filter_by(
+                  team_id=team_id,
+                  ).scalar()
 
-            if not team:
-                raise utility.FatalError(
-                  "team_id {0} is invalid".format(team_id)
-                )
+                if not team:
+                    raise utility.FormatedError(
+                      "team_id {0} is invalid", team_id)
 
-            cp = session.query(index.ChallengeProblem).filter_by(
-              challenge_problem_id=challenge_problem_id,
-              ).scalar()
+                print("  Team              :: {0}".format(team.institution))
 
-            if not cp:
-                raise utility.FatalError("""\
-                  challenge_problem_id {0}\
-                  is invalid""".format(challenge_problem_id)
-                )
+            if pps_id:
+                pps = session.query(index.PPS).filter_by(
+                  pps_id=pps_id,
+                  ).scalar()
 
-            pps = session.query(index.PPS).filter_by(
-              pps_id=pps_id,
-              ).scalar()
+                if not pps:
+                    raise utility.FormatedError("""\
+                      pps_id {0}\
+                      is invalid""", pps_id)
 
-            if not pps:
-                raise utility.FatalError("""\
-                  pps_id {0}\
-                  is invalid""".format(pps_id)
-                )
+                print("  PPS               :: {0}".format(pps.description))
 
-            print("  Team              :: {0}".format(team.institution))
-            print("  PPS               :: {0}".format(pps.description))
-            print("  Challenge Problem :: {0}".format(cp.description))
+            if challenge_problem_id:
+                cp = session.query(index.ChallengeProblem).filter_by(
+                  challenge_problem_id=challenge_problem_id,
+                  ).scalar()
+
+                if not cp:
+                    raise utility.FormatedError("""\
+                      challenge_problem_id {0}\
+                      is invalid""", challenge_problem_id)
+
+                print("  Challenge Problem :: {0}".format(cp.description))
+
             print("")
