@@ -335,3 +335,22 @@ class PPSConfig(ProblemSolutionConfig):
           ]
         ProblemSolutionConfig.populate_defaults(self)
 
+class CPEConfig(ProblemSolutionConfig):
+    """
+      This is a class used to read and write to Challenge Problem Solutions
+      to and from disk.
+    """
+    def __init__(self, **kwargs):
+        self._CONFIG_SPEC = (
+          "[identifiers]",
+          "challenge_problem_id = integer",
+          "challenge_problem_level = integer",
+
+          "[files]",
+          "ground_truth = string",
+
+        )
+
+        kwargs['configspec'] = self._CONFIG_SPEC
+
+        ProblemSolutionConfig.__init__(self, **kwargs)
