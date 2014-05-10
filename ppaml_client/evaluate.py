@@ -33,15 +33,14 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import errno
 import os
 import subprocess
-import textwrap
 
 from . import ps as configuration
 from . import db
-from . import utility
 
+from . import utility
+from contextlib import nested
 
 
 #################################### Main #####################################
@@ -58,60 +57,33 @@ def main(arguments):
         index = db.Index.open_user_index()
     except db.SchemaMismatch as exception:
         raise utility.FatalError(exception)
-    else:
-        with index.session():
-            run_to_evaluate = index.run_specified_by(arguments.run_tid)
-            if not run_to_evaluate:
-                raise utility.FatalError(
-                    "nonexistent run identifier {}".format(arguments.run_tid),
-                    )
 
-            evaluator = Evaluator(conf, run_to_evaluate)
-            with utility.TemporaryDirectory(
-              prefix='ppaml.',
-              persist=arguments.persist
-            ) as sandbox:
-                results = _run_evaluator(evaluator, sandbox)
+    with nested(
+      utility.TemporaryDirectory(
+        prefix='ppaml.',
+        persist=arguments.persist
+      ),
+      index.session()
+    ) as (sandbox, session):
 
-                # Save data.
-                _record_evaluation(index, results, sandbox)
-
-
-def _run_evaluator(evaluator, sandbox):
-    try:
-        return evaluator.go(sandbox)
-
-    except (configuration.MissingField,
-            configuration.EmptyField) as missing_field:
-        raise utility.FatalError("Configuration error: {0}".format(
-                missing_field,
-                ),
-                                 10)
-
-    except IndexError:
-        raise utility.FatalError(
-            textwrap.dedent("""\
-                Configuration error: field "evaluator" (in section
-                "evaluation") does not refer to a file."""),
-            10,
+        run_db_entry = index.run_specified_by(arguments.run_tid)
+        if not run_db_entry:
+            raise utility.FormatedError(
+              "nonexistent run identifier {}",
+              arguments.run_tid
             )
 
-    except IOError as io_error:
-        raise utility.FatalError(io_error)
+        evaluator = Evaluator(conf, run_db_entry)
 
+        eval_output_paths = evaluator.go(sandbox)
 
-def _record_evaluation(index, evaluation, sandbox):
-    """Package an evaluation."""
-    try:
-        output_paths = os.listdir(evaluation.output_path)
-    except OSError as os_error:
-        if os_error.errno == errno.ENOTDIR:
-            # The evaluator created a file, not a directory.
-            output_paths = (evaluation.output_path,)
-        else:
-            raise
+        # Save data.
+        if os.path.isdir(eval_output_paths):
+            eval_output_paths = utility.path_walk(eval_output_paths)
+        elif not os.path.isfile(eval_output_paths):
+            raise IOError
 
-    evaluation.run.quant_score = db.Index.migrate(output_paths)
+        run_db_entry.quant_score = db.Index.migrate(eval_output_paths)
 
 
 def add_subparser(subparsers):
@@ -132,56 +104,44 @@ def add_subparser(subparsers):
 class Evaluator(object):
     """A template describing how to run an evaluator."""
 
-    def __init__(self, run_config, run_to_evaluate):
-        self._config = run_config
-        self._run = run_to_evaluate
+    def __init__(self, run_config, run_db_entry):
+        self.config = run_config
+        self.run_db_entry = run_db_entry
 
     def go(self, sandbox):
-        """Run an evaluator, collecting and returning the results."""
-        evaluator_path = self._config.expand_executable(
-          'evaluation',
-          'evaluator'
-          )
 
+        self.config.require_fields(
+          ('evaluation', 'evaluator'),
+          ('evaluation', 'ground_truth')
+        )
+        try:
+            """Run an evaluator, collecting and returning the results."""
+            evaluator_path = self.config.expand_executable(
+              'evaluation',
+              'evaluator'
+              )
 
+            # Reproduce the output from the run so the evaluator can look at
+            # it.
+            run_output_path = os.path.join(sandbox, 'run_output')
+            run_output_path = db.Index.extract_blob(
+              self.run_db_entry.output,
+              run_output_path)
 
-        # Reproduce the output from the run so the evaluator can look at
-        # it.
-        run_output_dir = os.path.join(sandbox, 'run_output')
+            ground_truth_path = self.config['evaluation']['ground_truth']
+            eval_output_path = os.path.join(sandbox, 'output')
+            # Run the evaluator.
 
-        db.Index.extract_blob(self._run.output, run_output_dir)
+            subprocess.call(
+                [   evaluator_path,
+                    run_output_path,
+                    ground_truth_path,
+                    eval_output_path
+                    ]
+                )
 
+            return eval_output_path
 
-        # Run the evaluator.
-        result = Evaluation(self._run, sandbox)
-        subprocess.call(
-            [   evaluator_path,
-                os.path.join(run_output_dir, 'output'),
-                self._config['evaluation']['ground_truth'],
-                result.output_path,
-                ]
-            )
+        except IOError as io_error:
+            raise utility.FatalError(io_error)
 
-        return result
-
-
-class Evaluation(object):
-    """Data produced by an Evaluator."""
-
-    def __init__(self, run, sandbox):
-        self._run = run
-        self._sandbox = sandbox
-
-    @property
-    def run(self):
-        """The run this evaluation was performed on."""
-        return self._run
-
-    @property
-    def output_path(self):
-        """The path to the evaluator's output data."""
-        return os.path.join(self._sandbox, 'output')
-
-    def as_mapping(self):
-        """Convert self to a Mapping."""
-        return {'output': self.output_path}
