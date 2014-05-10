@@ -103,9 +103,9 @@ def untar_to_directory(src, dest):
       Untars a tar.bz2 file to a directory then returns the appropriate dest
     """
     with tarfile.open(src) as tar:
-        li = write(map(lambda x: x.path, tar.getmembers()))
+        li = map(lambda x: x.path, tar.getmembers())
         tar.extractall(dest)
-        return os.path.join(dest, write(os.path.commonprefix(li)))
+        return os.path.join(dest, os.path.commonprefix(li))
 
 
 def tarball_directory(dirpath, RESULT = "result.tar.bz2"):
