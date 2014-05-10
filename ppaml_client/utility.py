@@ -38,6 +38,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 import contextlib
+from contextlib import nested
+
 import tempfile
 import shutil
 
@@ -98,10 +100,12 @@ def FormatMessage(message, *args):
 
 def untar_to_directory(src, dest):
     """
-      Untars a tar.bz2 file to a directory
+      Untars a tar.bz2 file to a directory then returns the appropriate dest
     """
     with tarfile.open(src) as tar:
+        li = write(map(lambda x: x.path, tar.getmembers()))
         tar.extractall(dest)
+        return os.path.join(dest, write(os.path.commonprefix(li)))
 
 
 def tarball_directory(dirpath, RESULT = "result.tar.bz2"):
