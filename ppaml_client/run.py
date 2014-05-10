@@ -46,6 +46,7 @@ import psutil
 from . import ps as configuration
 from . import db
 from . import fingerprint
+
 from . import utility
 
 
@@ -73,9 +74,9 @@ def main(arguments):
     )
 
     db.print_table_info(
-      conf['identifiers']['team_id'],
-      conf['identifiers']['pps_id'],
-      conf['identifiers']['challenge_problem_id']
+      team_id=conf['identifiers']['team_id'],
+      pps_id=conf['identifiers']['pps_id'],
+      challenge_problem_id=conf['identifiers']['challenge_problem_id']
     )
 
     try:
