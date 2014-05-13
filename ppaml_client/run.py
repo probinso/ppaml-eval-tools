@@ -93,25 +93,26 @@ def main(arguments):
           index.session()
         ) as (sandbox, session):
 
+
+
             artifact = index.Artifact()
             # Ensure that all challenge problems, teams, &c. are in the
             # database.
-            # static.populate_db(session, index, commit=True) #XXX: delete
 
             artifact.challenge_problem_id = index.require_foreign_key(
-                index.ChallengeProblem,
-                challenge_problem_id=conf['identifiers']['challenge_problem_id'],
-                )
+              index.ChallengeProblem,
+              challenge_problem_id=conf['identifiers']['challenge_problem_id'],
+            )
 
             artifact.team_id = index.require_foreign_key(
-                index.Team,
-                team_id=conf['identifiers']['team_id'],
-                )
+               index.Team,
+               team_id=conf['identifiers']['team_id'],
+            )
 
             artifact.pps_id = index.require_foreign_key(
-                index.PPS,
-                pps_id=conf['identifiers']['pps_id'],
-                )
+              index.PPS,
+              pps_id=conf['identifiers']['pps_id'],
+            )
 
             try:
                 artifact.description = conf['notes']['description']
@@ -129,9 +130,7 @@ def main(arguments):
             artifact.interpreted = 1
 
             # Capture the artifact source code.
-            # XXX: DOES NOT CHECK PATH EXISTANCE, and sqashes NONEXISTANT PATHS
-            artifact.artifact_id = db.Index.migrate(
-              conf.expanded_files_list)
+            artifact.artifact_id = db.Index.migrate(conf.expanded_files_list)
 
             # Insert the artifact into the database.
             if index.contains(
@@ -149,17 +148,18 @@ def main(arguments):
                     db.Index.remove_blob(artifact.artifact_id)
                     raise # this is concerning, and should be better addressed
 
+
+            """
+              We have successfuly recorded the source / execution files by now
+            """
+
             # Run the artifact.
             my_run = RunProcedure(conf)
             run_data = my_run.go(sandbox)
 
-            # Save the run in the database.
-
             run_id = _save_run(index, session, artifact.artifact_id, conf,
                             sandbox, run_data)
             print(utility.FormatMessage("run_id #{0} saved", run_id))
-
-
 
 
 def _save_run(index, session, artifact_id, conf, sandbox, run_result):
@@ -197,19 +197,15 @@ def _save_run(index, session, artifact_id, conf, sandbox, run_result):
                 return None
             else:
                 raise
-
-    run.output = save(run_result.output_path)
+    run.output = save(utility.path_walk(run_result.output_dir))
     run.log = save(run_result.log_path)
-    run.trace = save(
-        [os.path.join(run_result.trace_dir, p)
-         for p in os.listdir(run_result.trace_dir)]
-        )
+    run.trace = save(utility.path_walk(run_result.trace_dir))
 
     try:
         session.add(run)
         session.commit()
         return run.run_id
-    except Exception:
+    except Exception as e:
         # Clear the saved data.
         for blob_id in (run.artifact_configuration, run.output, run.log,
                         run.trace):
@@ -219,7 +215,7 @@ def _save_run(index, session, artifact_id, conf, sandbox, run_result):
             # anyway.
             if blob_id:
                 db.Index.remove_blob(blob_id)
-        raise
+        raise e
 
 
 def add_subparser(subparsers):
@@ -249,7 +245,7 @@ class RunProcedure(object):
 
         except (configuration.MissingField, configuration.EmptyField)\
           as missing_field:
-            raise utility.FormatError("Configuration error: {0}\n{1}",
+            raise utility.FormatedError("Configuration error: {0}\n{1}",
                     missing_field, "have you filled out the configuration file?")
 
         except IndexError:
@@ -291,11 +287,12 @@ class RunProcedure(object):
 
         # Start the artifact running.
         result.start_time = time.time()
+
         proc = subprocess.Popen(
             [   artifact_path,
                 config_file_path,
                 self._config['files']['input'],
-                result.output_path,
+                result.output_dir,
                 result.log_path,
                 ],
             env=proc_env,
@@ -368,9 +365,9 @@ class _RunResult(object):
         self.ram_samples = []
 
     @property
-    def output_path(self):
+    def output_dir(self):
         """The path to the artifact's output data."""
-        return os.path.join(self._sandbox, 'output')
+        return os.path.join(self._sandbox, 'output' + os.path.sep)
 
     @property
     def log_path(self):
@@ -380,7 +377,7 @@ class _RunResult(object):
     @property
     def trace_dir(self):
         """The path to the artifact's OTF trace, if it exists."""
-        return os.path.join(self._sandbox, 'trace')
+        return os.path.join(self._sandbox, 'trace' + os.path.sep)
 
     @property
     def runtime(self):
@@ -457,25 +454,3 @@ def _for_process_and_descendants(function, proc):
 def _favg(sequence):
     """Averages a sequence of floats."""
     return math.fsum(sequence) / len(sequence)
-
-
-def _deepest_common_component(paths):
-    """Find the deepest parent directory of a sequence of paths.
-
-    This algorithm is entirely syntactic, so it will likely be confused
-    by links and other file system features.  It should, however, work
-    on non-Unix systems.
-
-    """
-    paths = list(paths)
-
-    # Get rid of any files; use only directories.
-    for i in xrange(len(paths)):
-        paths[i] = os.path.abspath(paths[i])
-        if not os.path.isdir(paths[i]):
-            paths[i] = os.path.dirname(paths[i])
-
-    result = os.sep.join(
-        os.path.commonprefix([path.split(os.sep) for path in paths]),
-        )
-    return result if result else os.sep
