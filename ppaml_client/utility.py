@@ -96,6 +96,8 @@ def FormatMessage(message, *args):
 """
   TAR FILE OPERATIONS HAPPEN HERE
 """
+def dircommonprefix(li):
+    return os.path.commonprefix(map(os.path.dirname, li))
 
 def untar_to_directory(src, dest):
     """
@@ -105,7 +107,7 @@ def untar_to_directory(src, dest):
         li = map(lambda x: x.path, tar.getmembers())
         tar.extractall(dest)
         dirnames = lambda x: os.path.dirname(x)
-        return os.path.join(dest, os.path.commonprefix(map(dirnames,li)))
+        return os.path.join(dest, dircommonprefix(li))
 
 
 def tarball_directory(dirpath, RESULT = "result.tar.bz2"):
@@ -144,7 +146,7 @@ def tarball_abslists(contents, destpath, RESULT):
     """
     from os.path import commonprefix, isabs
     assert(not filter(lambda x: not isabs(x), contents))
-    return tarball_list(contents, destpath, RESULT, commonprefix(contents))
+    return tarball_list(contents, destpath, RESULT, dircommonprefix(contents))
 
 
 """
