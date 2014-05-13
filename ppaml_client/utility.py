@@ -203,8 +203,9 @@ def expand_path_list(paths, prefix='.', test=False):
 
 """"""
 def digest(path):
+    #takes path to tar.bz2 and returns digest.tar.bz2 to insure unique naming
     with open(path, 'rb') as fd:
-        return hashlib.md5(fd.read()).hexdigest()
+        return hashlib.md5(fd.read()).hexdigest() + '.tar.bz2'
 
 """"""
 class FatalError(Exception):
