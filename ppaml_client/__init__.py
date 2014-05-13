@@ -46,4 +46,4 @@ del sys
 
 __all__ = ['fingerprint']
 
-from fingerprint import HeterogeneousSystemException
+#from fingerprint import HeterogeneousSystemException
