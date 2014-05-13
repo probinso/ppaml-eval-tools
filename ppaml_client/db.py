@@ -421,13 +421,15 @@ class Index(_Database):
 
     @staticmethod
     def migrate(paths):
-        """Migrate files into the database directory.
-
-        Return a blob ID.
-
         """
+          Migrate files into the database directory.
+          Return a blob ID.
+        """
+        if not paths:
+            raise utility.FormatedError("Invalid database Migration !! ")
         if not hasattr(paths, '__iter__'):
             paths = [paths]
+
         # TODO: Handle single paths as well as lists of paths.
         with utility.TemporaryDirectory(prefix='ppaml.db.') as sandbox:
 
@@ -448,6 +450,7 @@ class Index(_Database):
     @staticmethod
     def extract_blob(blob_id, dest_dir):
         """Extracts the contents of a blob into a directory."""
+
         tar_path = os.path.join(
           xdg.BaseDirectory.save_data_path('ppaml'),
           blob_id,
@@ -481,7 +484,6 @@ def print_table_info(team_id=None, pps_id=None, challenge_problem_id=None):
                 if not team:
                     raise utility.FormatedError(
                       "team_id {0} is invalid", team_id)
-
                 print("  Team              :: {0}".format(team.institution))
 
             if pps_id:
@@ -493,7 +495,6 @@ def print_table_info(team_id=None, pps_id=None, challenge_problem_id=None):
                     raise utility.FormatedError("""\
                       pps_id {0}\
                       is invalid""", pps_id)
-
                 print("  PPS               :: {0}".format(pps.description))
 
             if challenge_problem_id:
@@ -505,7 +506,6 @@ def print_table_info(team_id=None, pps_id=None, challenge_problem_id=None):
                     raise utility.FormatedError("""\
                       challenge_problem_id {0}\
                       is invalid""", challenge_problem_id)
-
                 print("  Challenge Problem :: {0}".format(cp.description))
 
             print("")
