@@ -104,7 +104,8 @@ def untar_to_directory(src, dest):
     with tarfile.open(src) as tar:
         li = map(lambda x: x.path, tar.getmembers())
         tar.extractall(dest)
-        return os.path.join(dest, os.path.commonprefix(li))
+        dirnames = lambda x: os.path.dirname(x)
+        return os.path.join(dest, os.path.commonprefix(map(dirnames,li)))
 
 
 def tarball_directory(dirpath, RESULT = "result.tar.bz2"):
