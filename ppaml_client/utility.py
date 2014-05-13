@@ -38,7 +38,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import contextlib
-from contextlib import nested
 
 import tempfile
 import shutil
