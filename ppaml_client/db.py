@@ -425,6 +425,7 @@ class Index(_Database):
           Migrate files into the database directory.
           Return a blob ID.
         """
+
         if not paths:
             raise utility.FormatedError("Invalid database Migration !! ")
         if not hasattr(paths, '__iter__'):

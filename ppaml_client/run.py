@@ -357,6 +357,7 @@ class _RunResult(object):
     def __init__(self, sandbox):
         self._sandbox = sandbox
         os.mkdir(self.trace_dir)
+        os.mkdir(self.output_dir)
 
         self.config_file_path = None
         self.start_time = None
