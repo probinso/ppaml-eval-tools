@@ -166,7 +166,7 @@ def path_walk(srcpath, suffix='*'):
     for directory in filter(os.path.isdir, others):
         files += path_walk(directory)
 
-    return files
+    return files + [srcpath] # if directory is empty, must include srcpath
 
 
 def copy_directory_files(srcdir, dstdir, filenames):
