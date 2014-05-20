@@ -127,6 +127,13 @@ class NoActiveSession(Exception):
         super(NoActiveSession, self).__init__("no presently active session")
 
 
+class Empty_Migrate(utility.FormatedError):
+    def __init__(self, *args):
+        if not args:
+            args = "EMPTY"
+        utility.FormatedError.__init__(self,
+          "Invalid database Migration !! {}", args)
+
 ############################### Index database ################################
 
 
@@ -427,9 +434,13 @@ class Index(_Database):
         """
 
         if not paths:
-            raise utility.FormatedError("Invalid database Migration !! ")
+            raise Empty_Migrate
         if not hasattr(paths, '__iter__'):
             paths = [paths]
+
+        fail, _  = utility.split_filter(paths, os.path.exists)
+        if fail:
+            raise Empty_Migrate(fail)
 
         # TODO: Handle single paths as well as lists of paths.
         with utility.TemporaryDirectory(prefix='ppaml.db.') as sandbox:
