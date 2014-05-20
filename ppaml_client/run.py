@@ -335,7 +335,8 @@ class RunProcedure(object):
                 # Polling failed.  This probably means that we've
                 # exited, but it could also mean that one of the
                 # artifact's children is a zombie.
-                if proc.poll() is None:
+                rc = proc.poll()
+                if rc is None:
                     # We have not exited yet.  Discard the samples.
                     continue
                 else:
@@ -347,7 +348,7 @@ class RunProcedure(object):
             result.ram_samples.append(ram_sample)
 
             try:
-                proc_entry.wait(timeout=0.1) # seconds
+                rc = proc_entry.wait(timeout=0.1) # seconds
             except psutil.TimeoutExpired:
                 # Our timeout expired, but the process still exists.
                 # Keep going.
@@ -357,13 +358,12 @@ class RunProcedure(object):
                 # waited.  We're done.
                 break
         result.stop_time = time.time()
-        rc = proc.poll()
         """
           It looks as if certain operating sytstems allow 'None' as a successful
           reutrn code, rather than just '0' . We only want to raise an error on
           not 'None' or '0'
         """
-        if rc not in [0, None]:
+        if rc not in [0]:
             raise utility.FormatedError("Failed artifact execute: {}",rc)
 
         return result
