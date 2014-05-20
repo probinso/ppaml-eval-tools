@@ -357,9 +357,14 @@ class RunProcedure(object):
                 # waited.  We're done.
                 break
         result.stop_time = time.time()
-        ret_code = proc.poll()
-        if ret_code != 0:
-            raise utility.FormatedError("Failed artifact execute: {}",ret_code)
+        rc = proc.poll()
+        """
+          It looks as if certain operating sytstems allow 'None' as a successful
+          reutrn code, rather than just '0' . We only want to raise an error on
+          not 'None' or '0'
+        """
+        if rc not in [0, None]:
+            raise utility.FormatedError("Failed artifact execute: {}",rc)
 
         return result
 
