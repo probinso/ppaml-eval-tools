@@ -155,7 +155,7 @@ def main(arguments):
 
             # Run the artifact.
             my_run = RunProcedure(conf)
-            run_data = my_run.go(sandbox)
+            run_data = my_run.go(sandbox, artifact.artifact_id)
 
             run_id = _save_run(index, session, artifact.artifact_id, conf,
                             sandbox, run_data)
@@ -187,19 +187,25 @@ def _save_run(index, session, artifact_id, conf, sandbox, run_result):
     except AttributeError:
         assert run_result.config_file_path is None
 
-    # Save the artifact output, log, and trace.
-    def save(paths):
-        try:
-            return db.Index.migrate(paths)
-        except OSError as os_error:
-            if os_error.errno == errno.ENOENT:
-                # The artifact didn't produce this datum.
-                return None
-            else:
-                raise
-    run.output = save(utility.path_walk(run_result.output_dir))
-    run.log = save(run_result.log_path)
-    run.trace = save(utility.path_walk(run_result.trace_dir))
+    """
+      XXX : we were catching 'NOENT' OS_EXCEPTION
+    """
+
+    # output should always have content
+    run.output = db.Index.migrate(utility.path_walk(run_result.output_dir))
+
+    # it is not required that logs file/directory is populated
+    try:
+        run.log = db.Index.migrate(run_result.log_path)
+    except db.Empty_Migrate:
+        run.log = None
+
+    # it is not required that trace file/directory is populated
+    try:
+        run.trace = db.Index.migrate(utility.path_walk(run_result.trace_dir))
+    except db.Empty_Migrate:
+        run.trace = None
+
 
     try:
         session.add(run)
@@ -238,9 +244,10 @@ class RunProcedure(object):
     def __init__(self, run_config):
         self._config = run_config
 
-    def go(self, sandbox):
+    def go(self, sandbox, artifact_blob):
         """Run an artifact, collecting and returning the results."""
         try:
+            db.Index.extract_blob(artifact_blob,sandbox)
             return self.__go__(sandbox)
 
         except (configuration.MissingField, configuration.EmptyField)\
@@ -266,7 +273,11 @@ class RunProcedure(object):
             raise utility.FormatedError(error_message)
 
     def __go__(self, sandbox):
-
+        self._config['files']['input'] = os.path.join(
+          self._config['files']['basedir'],
+          self._config['files']['input']
+          )
+        self._config['files']['basedir'] = sandbox
         artifact_path = self._config.executable
 
         result = _RunResult(sandbox)
@@ -316,6 +327,7 @@ class RunProcedure(object):
         proc_entry = psutil.Process(proc.pid)
 
         while True:
+
             try:
                 load_sample = _sample_load(proc_entry)
                 ram_sample = _sample_ram(proc_entry)
@@ -329,8 +341,11 @@ class RunProcedure(object):
                 else:
                     # We've actually exited.
                     break
+
+
             result.load_samples.append(load_sample)
             result.ram_samples.append(ram_sample)
+
             try:
                 proc_entry.wait(timeout=0.1) # seconds
             except psutil.TimeoutExpired:
@@ -342,6 +357,9 @@ class RunProcedure(object):
                 # waited.  We're done.
                 break
         result.stop_time = time.time()
+        ret_code = proc.poll()
+        if ret_code != 0:
+            raise utility.FormatedError("Failed artifact execute: {}",ret_code)
 
         return result
 
@@ -357,7 +375,9 @@ class _RunResult(object):
     def __init__(self, sandbox):
         self._sandbox = sandbox
         os.mkdir(self.trace_dir)
-        os.mkdir(self.output_dir)
+
+        # this violates problem description contract but happens to satisfy team
+        #os.mkdir(self.output_dir)
 
         self.config_file_path = None
         self.start_time = None
