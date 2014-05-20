@@ -326,6 +326,7 @@ class RunProcedure(object):
         # sampling.
         proc_entry = psutil.Process(proc.pid)
 
+        rc = None # this variable is used to store process return code
         while True:
 
             try:
@@ -358,13 +359,11 @@ class RunProcedure(object):
                 # waited.  We're done.
                 break
         result.stop_time = time.time()
-        """
-          It looks as if certain operating sytstems allow 'None' as a successful
-          reutrn code, rather than just '0' . We only want to raise an error on
-          not 'None' or '0'
-        """
-        if rc not in [0]:
-            raise utility.FormatedError("Failed artifact execute: {}",rc)
+
+        # insure that the return code of the called process is 0
+        if rc != 0:
+            raise utility.FormatedError(
+              "Failed artifact execute: return code {}",rc)
 
         return result
 
