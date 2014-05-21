@@ -365,6 +365,7 @@ The basic calling pattern that PPAML assumes is:
 
     /path/to/artifact_executable config_file input_dir output_dir log_path
 
+PLEASE NOTE THE PARAGRAPH BELOW:
 `ppaml` does not create `output_dir` and `log_path`; it merely
 reserves the names.  The user or executable itself is responsible for creating either
 files or directories at those paths.  However, a bit of shell can easily bridge
