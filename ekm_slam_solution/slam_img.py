@@ -33,76 +33,56 @@ import os
 import sys
 
 import numpy as np
-
 from slam_csv import read_floats_csv_file
 
 
 ################################# Evaluation ##################################
-
-def gps_euclidean_distance(result, ground):
-    # presupposes that the input has identical time stamps and samples
-    strip_xy  = lambda x: np.array([x[1], x[2]])
-    result_xy = map(strip_xy, result)
-    ground_xy = map(strip_xy, ground)
-
-    dist = lambda (a, b): np.linalg.norm(a-b)
-    distance_xy = map(dist, zip(result_xy, ground_xy))
-    return sum(distance_xy)
-
-EPSILON  = 10**-4
-MIN_TIME =  1.0 - EPSILON
-MAX_TIME =  10.0 + EPSILON
-
-def gps_time_bounds(result, ground):
-    # this should be applied after time_match
-    # some lines come in empty for some reason
-    bound = lambda vec : bool(vec) and vec[0] <= MAX_TIME and vec[0] >= MIN_TIME
-    result = filter(bound, result)
-    ground = filter(bound, ground)
-
-    assert(len(result) == len(ground)) # TODO: raise exception
-
-    delta_check = lambda (a, b): np.abs(a[0]-b[0]) > EPSILON
-    tst = filter(delta_check, zip(result, ground))
-    # tst should be an empty list
-    assert(not tst) # TODO: raise exception
-
-    return result, ground
+from matplotlib import pyplot
 
 
-def gps_compare(result, ground):
-    result, ground = gps_time_bounds(result, ground)
-    return gps_euclidean_distance(result, ground)
+def get_lat_lon(dataset):
+    """
+      [time, lat, lon, ...] data format
+    """
+    # some lines come in empty, for some reason.
+    lat = np.asarray([row[1] for row in dataset if row])
+    lon = np.asarray([row[2] for row in dataset if row])
+    return lat, lon
 
 
-def gaussian2(a, bx, by, c, x, y):
-    return a * np.exp(-(np.sqrt((x-bx)**2 + (y-by)**2)) / (2*c*c))
+def gps_graphic(ax, path, label='Truth', color='k', startpoint=True):
+    # gps_graphic(ax, results, 'm', False)
 
-def map_pointset(points, x_range, y_range, width):
-    xs, ys = np.meshgrid(x_range, y_range)
-    (npts, _junk) = points.shape
-    result = np.zeros(xs.shape)
-    for i in xrange(0, npts):
-        result = np.maximum(result,
-                            gaussian2(1.0,
-                                      points[i,0], points[i,1],
-                                      width,
-                                      xs, ys))
-    return result
+    p_x, p_y = get_lat_lon(path)
+    PLOT = ax.plot(p_y, p_x, marker = '.', label=label, color=color)
+    pyplot.setp(PLOT, linestyle='-', markersize=2)
 
-def map_metric(points1, points2, x_range, y_range, width):
-    map1 = map_pointset(points1, x_range, y_range, width)
-    map2 = map_pointset(points2, x_range, y_range, width)
-    return np.sum(np.abs(map1 - map2))
+    if startpoint:
+        start_pos = ax.plot(p_y[0], p_x[0], marker='x', color='r')
+        pyplot.setp(start_pos, markersize = 20, markeredgewidth=3.5)
 
-def obsticle_compare(result, ground):
-    # How many extra points were found?
-    n_extras = np.abs(len(result) - len(ground))
-    # How close were the found points?
-    score = map_metric(np.array(list(result)), np.array(list(ground)),
-                       np.arange(-5, 5, 0.1), np.arange(-5, 5, 0.1),
-                       1.0)
-    return (n_extras, score)
+    return ax
+
+
+def gps_compare_graphic(result, ground):
+    """
+    """
+    fig   = pyplot.figure(figsize=(8,8))
+    ax    = fig.add_subplot(111)
+    pyplot.title("result - compare")
+
+    ax = gps_graphic(ax, result, "Reconstructed", 'm', False)
+    ax = gps_graphic(ax, ground, "Truth")
+
+    SIZE = 15 # originally ten
+    ax.set_xlim([-SIZE, SIZE])
+    ax.set_ylim([-SIZE, SIZE])
+
+    handles, labels = ax.get_legend_handles_labels()
+
+    ax.legend(handles, labels, loc=3)
+
+    return fig
 
 
 #################################### Main #####################################
@@ -129,10 +109,8 @@ def main():
     paths_ground = read_floats_csv_file(
       ground_path, "data/ground/slam_gps.csv", 4)
 
-    with open(output_path, 'w') as output:
-        extras, score = obsticle_compare(objects_result, objects_ground)
-        dist = gps_compare(paths_result, paths_ground)
-        output.writelines(str(val) + '\n' for val in (extras, score, dist))
+    fig = gps_compare_graphic(paths_result, paths_ground)
+    fig.savefig(output_path+".png")
 
 
 if __name__ == '__main__':
