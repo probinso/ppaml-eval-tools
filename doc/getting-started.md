@@ -477,7 +477,7 @@ Like the runner, the evaluator must create either a file or directory at the
 specified output path.
 
     % cd ~/ppaml-sandbox
-    % ln (location of PPAML tools)/ekm_slam_solution/{slam_eval,slam_csv.py} .
+    % ln (location of PPAML tools)/ekm_slam_solution/{slam_eval,slam_eval.py,slam_csv.py} .
 
 We now need to update our configuration file so it can tell `ppaml` which file
 is the evaluator.  Open up `run.conf` again, and check out the `evaluation`
@@ -492,7 +492,7 @@ section, which has two directives:
 
 For this example, set
 
-  - `evaluator` to `slam_eval` and
+  - `evaluator` to `slam_eval, slam_eval.py, slam_csv.py` and
   - `ground_truth` to `1_straight`.
 
 Now we can run the evaluator.
