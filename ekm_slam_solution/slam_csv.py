@@ -55,6 +55,5 @@ def read_floats_csv_file(path, filename, cols):
             return processed
     except Exception as e:
         print e, "  ::  ", os.path.join(path,filename)
-        # ask about this, effectively we are squashing null output
-        return [[float(-10000)]*cols]*2
+        raise e
 

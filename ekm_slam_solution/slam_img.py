@@ -27,9 +27,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import csv
 import optparse
-import os
 import sys
 
 import numpy as np
@@ -99,12 +97,14 @@ def read_cli():
 
 def main():
     result_path, ground_path, output_path = read_cli()
-
+    
+    """
     objects_result = read_floats_csv_file(
       result_path,
       "slam_out_landmarks.csv", 2)
     objects_ground = read_floats_csv_file(ground_path, "obstacles.csv", 2)
-
+    """
+    
     paths_result = read_floats_csv_file(result_path, "slam_out_path.csv", 3)
     paths_ground = read_floats_csv_file(
       ground_path, "data/ground/slam_gps.csv", 4)
