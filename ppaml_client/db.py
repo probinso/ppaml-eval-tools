@@ -55,7 +55,6 @@ import xdg.BaseDirectory
 
 from . import utility
 
-
 class _Database:
     """A connection to a database."""
     __metaclass__ = ABCMeta
