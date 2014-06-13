@@ -66,6 +66,7 @@ def main(arguments):
     # reserve fields required by this method
     conf.require_fields(
         ('identifiers', 'challenge_problem_id'),
+        ('identifiers', 'dataset_label')
         ('identifiers', 'team_id'),
         ('identifiers', 'pps_id'),
         ('files', 'paths'),
@@ -170,6 +171,7 @@ def _save_run(index, session, artifact_id, conf, sandbox, run_result):
     run.environment_id = run_result.environment_id
     run.challenge_problem_id = conf['identifiers']['challenge_problem_id']
     run.team_id = conf['identifiers']['team_id']
+    run.dataset_label = conf['identifiers']['dataset_label']
 
     run.started = long(run_result.start_time)
     run.duration = run_result.runtime

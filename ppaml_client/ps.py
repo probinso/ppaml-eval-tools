@@ -242,6 +242,24 @@ class CPSConfig(ProblemSolutionConfig):
           "challenge_problem_level = integer",
           "pps_id = integer",
           "team_id = integer",
+          """
+            XXXPMR:
+
+            This is kinda sloppy, but it is important to be able to associate
+            an active 'run' with a cooresponding dataset.
+
+            when you update this label you will likely need to update several
+            others aswell
+
+            EX. FOR Challenge Problem 1 on 1_straight:
+
+            #!/bin/bash
+            modini cps.ini identifiers dataset_label 1_straight;
+            modini cps.ini evaluation ground_truth 1_straight;
+            modini cps.ini files input 1_straight/data/noisy;
+            exit;
+          """
+          "dataset_label = string",
 
           "[notes]",
           "version = string",
@@ -272,6 +290,7 @@ class CPSConfig(ProblemSolutionConfig):
         self['identifiers']['challenge_problem_level'] = cp_level
         self['identifiers']['pps_id'] = pps_id
         self['identifiers']['team_id'] = team_id
+        self['identifiers']['dataset_label'] = "unlabeled"
 
         # [notes]
         self['notes'] = {}
