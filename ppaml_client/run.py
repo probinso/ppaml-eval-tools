@@ -162,6 +162,7 @@ def main(arguments):
             run_id = _save_run(index, session, artifact.artifact_id, conf,
                             sandbox, run_data)
             print(utility.FormatMessage("run_id #{0} saved", run_id))
+            return run_id
 
 
 def _save_run(index, session, artifact_id, conf, sandbox, run_result):
