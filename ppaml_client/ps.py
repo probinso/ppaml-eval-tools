@@ -172,7 +172,7 @@ class ProblemSolutionConfig(configobj.ConfigObj):
                 tmp = self[section][field]
                 files += [tmp] if not isinstance(tmp, list) else tmp
 
-        files += [self.path]
+        # files += [self.path] # do not remember the motivation for this line
 
         # filter removes system devices like '/dev/null/' and directories
         retval = filter(isfile, utility.expand_path_list(files, basedir))
