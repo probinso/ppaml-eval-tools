@@ -105,7 +105,7 @@ def main(version):
     """Parse command-line arguments and dispatch appropriately."""
     arguments = _generate_parser(version).parse_args()
     try:
-        arguments.func(arguments)
+        sys.exit(arguments.func(arguments))
     except utility.FatalError as fatal_error:
         print("", file=sys.stderr)
         print("!! ERROR !!    ppaml says - ", file=sys.stderr)
