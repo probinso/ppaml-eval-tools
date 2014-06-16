@@ -236,30 +236,31 @@ class CPSConfig(ProblemSolutionConfig):
       to and from disk.
     """
     def __init__(self, **kwargs):
+        """
+          XXXPMR 1:
+
+          This is kinda sloppy, but it is important to be able to associate
+          an active 'run' with a cooresponding dataset.
+
+          when you update this label you will likely need to update several
+          others aswell
+
+          EX. FOR Challenge Problem 1 on 1_straight:
+
+          #!/bin/bash
+          modini cps.ini identifiers dataset_label 1_straight;
+          modini cps.ini evaluation ground_truth 1_straight;
+          modini cps.ini files input 1_straight/data/noisy;
+          exit;
+        """
         self._CONFIG_SPEC = (
           "[identifiers]",
           "challenge_problem_id = integer",
           "challenge_problem_level = integer",
           "pps_id = integer",
           "team_id = integer",
-          """
-            XXXPMR:
 
-            This is kinda sloppy, but it is important to be able to associate
-            an active 'run' with a cooresponding dataset.
-
-            when you update this label you will likely need to update several
-            others aswell
-
-            EX. FOR Challenge Problem 1 on 1_straight:
-
-            #!/bin/bash
-            modini cps.ini identifiers dataset_label 1_straight;
-            modini cps.ini evaluation ground_truth 1_straight;
-            modini cps.ini files input 1_straight/data/noisy;
-            exit;
-          """
-          "dataset_label = string",
+          "dataset_label = string", # XXXPMR 1
 
           "[notes]",
           "version = string",

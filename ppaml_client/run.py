@@ -66,9 +66,10 @@ def main(arguments):
     # reserve fields required by this method
     conf.require_fields(
         ('identifiers', 'challenge_problem_id'),
-        ('identifiers', 'dataset_label')
+        ('identifiers', 'dataset_label'),
         ('identifiers', 'team_id'),
         ('identifiers', 'pps_id'),
+        ('identifiers', 'dataset_label'),
         ('files', 'paths'),
         ('files', 'basedir'),
         ('files', 'input')
