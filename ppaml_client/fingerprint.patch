@@ -1,0 +1,16 @@
+--- /home/peval/git/ppaml-eval-tools/ppaml_client/fingerprint.py	2014-06-10 18:14:37.617769000 -0700
++++ fingerprint.py	2014-06-02 15:47:02.551003000 -0700
+@@ -130,9 +130,13 @@
+         # Get the CPU speed.  Don't use the cpu_mhz field from
+         # cpuinfo, as this indicates the current CPU speed and will
+         # likely be inaccurate if CPU frequency scaling is enabled.
++        """
+         cpu_speed_spec = first_thread.model_name.split()[-1].lower()
+         hz_re = re.compile('^([-+]?[\d.]+) *([kmgt]?)hz$', re.IGNORECASE)
++        
+         value_str, unit = hz_re.search(cpu_speed_spec).groups()
++        """
++        value_str, unit = first_thread['cpu_mhz'], 'm'
+         result.cpu_clock = int(float(value_str) * _METRIC_PREFIX[unit])
+ 
+     # RAM
