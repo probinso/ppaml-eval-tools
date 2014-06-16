@@ -11,3 +11,6 @@
 # Distutils
 MANIFEST
 dist/
+
+#patch file
+ppaml_client/fingerprint.patch
