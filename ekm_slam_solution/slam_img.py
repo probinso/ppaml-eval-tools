@@ -35,8 +35,11 @@ from slam_csv import read_floats_csv_file
 
 
 ################################# Evaluation ##################################
-from matplotlib import pyplot
 
+
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as pyplot
 
 def get_lat_lon(dataset):
     """
