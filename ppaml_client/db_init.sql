@@ -394,7 +394,7 @@ INSERT PPS STUBS
 */
 INSERT INTO
 	"pps" ('pps_id', 'team_id', 'description', 'version')
-	VALUES(1, 1, 'Galois #1', 1);
+	VALUES(1, 1, 'Galois #1 - WizardMagic', 1);
 
 INSERT INTO
 	"pps" ('pps_id', 'team_id', 'description', 'version')
@@ -406,7 +406,7 @@ INSERT INTO
 
 INSERT INTO
 	"pps" ('pps_id', 'team_id', 'description', 'version')
-	VALUES(4, 4, 'CRA #1', 1);
+	VALUES(4, 4, 'CRA #1 - Figaro', 1);
 
 INSERT INTO
 	"pps" ('pps_id', 'team_id', 'description', 'version')
@@ -436,7 +436,9 @@ INSERT INTO
 	"pps" ('pps_id', 'team_id', 'description', 'version')
 	VALUES(11, 11, 'UCR #1', 1);
 
-
+INSERT INTO
+	"pps" ('pps_id', 'team_id', 'description', 'version')
+	VALUES(4, 4, 'CRA #2 - Blog', 1);
 /*
 CHALLENGE 1 PROBLEMS
 */
