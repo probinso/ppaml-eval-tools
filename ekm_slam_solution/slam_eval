@@ -1,3 +1,6 @@
 #!/bin/bash
 
-./slam_eval.py "$@"
+mkdir -p "$3"
+slam_eval.py "$1" "$2" "$3"/output
+slam_img.py  "$1" "$2" "$3"/out_img
+
