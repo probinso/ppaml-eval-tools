@@ -214,7 +214,7 @@ def digest(path):
 """"""
 class FatalError(Exception):
     """An unrecoverable condition from which the program must exit."""
-    def __init__(self, message, exit_status=9):
+    def __init__(self, message, exit_status=191):
         super(FatalError, self).__init__(message)
         self.exit_status = exit_status
 
