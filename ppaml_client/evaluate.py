@@ -116,10 +116,14 @@ class Evaluator(object):
         )
         try:
             """Run an evaluator, collecting and returning the results."""
-            evaluator_path = self.config.expand_executable(
-              'evaluation',
-              'evaluator'
-              )
+            
+            try:
+                evaluator_path = self.config.expand_executable(
+                  'evaluation',
+                  'evaluator'
+                )
+            except utility.FormatedError:
+                evaluator_path = self.config['evaluation']['evaluator']
 
             # Reproduce the output from the run so the evaluator can look at
             # it.
