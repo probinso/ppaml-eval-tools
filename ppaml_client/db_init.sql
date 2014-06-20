@@ -438,7 +438,8 @@ INSERT INTO
 
 INSERT INTO
 	"pps" ('pps_id', 'team_id', 'description', 'version')
-	VALUES(4, 4, 'CRA #2 - Blog', 1);
+	VALUES(12, 4, 'CRA #2 - Blog', 1);
+
 /*
 CHALLENGE 1 PROBLEMS
 */
