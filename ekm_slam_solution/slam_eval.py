@@ -124,11 +124,11 @@ def main():
             "slam_out_landmarks.csv", 2)
         
         objects_ground = read_floats_csv_file(ground_path, "obstacles.csv", 2)
-
+        # obsicle_compaire has to be moved here because some teams create the file
+        # and partially populate it
+        extras, score = obsticle_compare(objects_result, objects_ground)
     except Exception:
         extras, score = None, None        
-    else:
-        extras, score = obsticle_compare(objects_result, objects_ground)
 
     try:
         paths_result = read_floats_csv_file(result_path, "slam_out_path.csv", 3)
