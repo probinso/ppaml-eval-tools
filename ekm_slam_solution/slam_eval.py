@@ -140,11 +140,14 @@ def main():
             ground_path, "data/ground/slam_gps.csv", 4)
     except Exception:
         dist = None
+        diff = None
     else:
+        #XXXPMR: diff might need to change to use the bounds filter
+        diff = abs(len(paths_result) - len(paths_ground))
         dist = gps_compare(paths_result, paths_ground)
 
     with open(output_path, 'w') as output:
-        output.writelines(str(val) + '\n' for val in (extras, score, dist))
+        output.writelines(str(val) + '\n' for val in (extras, score, dist, diff))
 
 
 if __name__ == '__main__':
