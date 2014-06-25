@@ -2,5 +2,6 @@
 
 mkdir -p "$3"
 slam_eval.py "$1" "$2" "$3"/output
+se=$?
 slam_img.py  "$1" "$2" "$3"/out_img
-
+if [ $[$se*$?] != 0 ]; then rm -rf "$3"; fi;
