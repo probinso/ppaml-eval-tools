@@ -139,15 +139,17 @@ def main():
         paths_ground = read_floats_csv_file(
             ground_path, "data/ground/slam_gps.csv", 4)
     except Exception:
-        dist = None
-        diff = None
+        dist  = None
+        diff  = None
+        lines = None
     else:
         #XXXPMR: diff might need to change to use the bounds filter
-        diff = abs(len(paths_result) - len(paths_ground))
-        dist = gps_compare(paths_result, paths_ground)
+        diff  = abs(len(paths_result) - len(paths_ground))
+        lines = len(paths_ground)
+        dist  = gps_compare(paths_result, paths_ground)
 
     with open(output_path, 'w') as output:
-        output.writelines(str(val) + '\n' for val in (extras, score, dist, diff))
+        output.writelines(str(val) + '\n' for val in (extras, score, dist, diff,lines))
 
 
 if __name__ == '__main__':
