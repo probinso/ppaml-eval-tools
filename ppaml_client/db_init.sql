@@ -441,7 +441,6 @@ INSERT INTO
 	VALUES(12, 4, 'CRA #2 - Blog', 1);
 
 INSERT INTO "pps" ('pps_id', 'team_id', 'description', 'version') VALUES(13, 4, 'CRA #1 - Figaro Sanity', 1);
-update pps set description="CRA #1 - Figaro Normal" where pps_id = 4;
 
 
 /*
