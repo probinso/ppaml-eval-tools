@@ -137,8 +137,14 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
     return path
 
 def dircommonprefix(li):
-    from os.path import commonprefix
-    return commonprefix(map(os.path.dirname, li))
+    from os.path import commonprefix, split
+    cp = commonprefix(map(os.path.dirname, li))
+    x, y = split(cp)
+    if y[:-1] == "dataset":
+        return x
+    else:
+        return cp
+
 
 def tarball_abslists(contents, destpath, RESULT):
     """
