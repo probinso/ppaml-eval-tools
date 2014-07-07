@@ -58,11 +58,13 @@ def gps_time_bounds(result, ground):
     result = filter(bound, result)
     ground = filter(bound, ground)
 
-    
+    s_time = ground[0][0]
+    s_index, _ = min(enumerate(map(lambda a: np.abs(a[0] - s_time), result))), lambda elm: elm[1])
+
     # assert(len(result) == len(ground)) 
     # TODO: raise exception
     # XXXPMR: force same length instead of assert
-    [result, ground] = zip(*zip(result,ground))
+    [result, ground] = zip(*zip(result[s_index:],ground))
 
     delta_check = lambda (a, b): np.abs(a[0]-b[0]) > EPSILON
     tst = filter(delta_check, zip(result, ground))
