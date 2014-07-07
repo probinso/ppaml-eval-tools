@@ -59,7 +59,7 @@ def gps_time_bounds(result, ground):
     ground = filter(bound, ground)
 
     s_time = ground[0][0]
-    s_index, _ = min(enumerate(map(lambda a: np.abs(a[0] - s_time), result))), lambda elm: elm[1])
+    s_index, _ = min(enumerate(map(lambda a: np.abs(a[0] - s_time), result)), lambda elm: elm[1])
 
     # assert(len(result) == len(ground)) 
     # TODO: raise exception
