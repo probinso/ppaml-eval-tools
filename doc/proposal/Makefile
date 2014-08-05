@@ -1,6 +1,6 @@
-default: docs
+default: docs.pdf
 
-docs: peval.png neval.png docs.tex
+docs.pdf: peval.png docs.tex
 	pdflatex docs.tex
 
 peval.png: peval.dot
