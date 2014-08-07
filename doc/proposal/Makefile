@@ -1,4 +1,7 @@
-default: docs.pdf
+default: cases.pdf
+
+cases.pdf: cases.tex
+	pdflatex cases.tex
 
 docs.pdf: peval.png docs.tex
 	pdflatex docs.tex
