@@ -20,6 +20,36 @@
 \usepackage{multicol}
 \usepackage{enumerate}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlength\columnsep{30pt} 
+% this is a hack needed to prevent \item counters from overlapping text
+
+\raggedcolumns
+\makeatletter
+\newcount\branch@start% as \setcounter isn't global
+\newcount\branch@end
+\newenvironment{branch}[1][2]{\begin{multicols}{#1}%
+  \branch@start\c@enumi% save value of enumi for subsequent leaves
+  \branch@end\c@enumi%   need to keep track of largest enumi in all leaves
+  }{%set enumi to largest value in the leaves and close multicols
+  \ifnum\c@enumi<\branch@end%
+    \global\c@enumi\branch@end% we NEED this to take effect globally
+  \fi%
+\end{multicols}}
+\newcommand\newleaf{%
+  \columnbreak%
+  \ifnum\c@enumi>\branch@end%
+    \global\branch@end\c@enumi%
+  \fi%
+  \setcounter{enumi}{\branch@start}%
+}
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \usepackage{color}
 \usepackage{verbatim}
 \usepackage{listings}
@@ -43,8 +73,8 @@
 \newcommand{\Bold}{\mathbf}
 
 
-\setlength{\parskip}{1em}
-\setlength{\parindent}{1em}
+%\setlength{\parskip}{1em}
+%\setlength{\parindent}{1em}
 
 
 \title{Use cases for PPAML-Eval-Tools}
@@ -55,7 +85,6 @@
 \def\pmr{Philip Robinson\xspace}
 \def\ms{Matt Stottile\xspace}
 \def\cf{Chris Fahlbusch\xspace}
-\author{\pmr}
 
 \newenvironment{slimlist}{
   \begin{itemize}
@@ -67,23 +96,22 @@
 
 \newenvironment{mitemize}[1]{
   % designed to prevent labeled lists from being broken up over page or column boundries. 
-  \begin{minipage}{\linewidth}
+  \begin{minipage}{0.9\linewidth}
   \subsubsection*{#1}
   \begin{slimlist}
-    \def\dfn{\item[def{\bf:}]}
 }{\end{slimlist}\end{minipage}}
 
 
 \begin{document}
 \pagestyle{empty}
 \clearpage\maketitle
-%\begin{multicols}{2}
   
 
 \newcommand{\form}[1]{{\em #1}\xspace}
 \def\ptk{\form{peval-toolkit}}
 \def\cp{\form{challenge problem}}
-\def\ev{\form{evaluator}}
+\def\ev{\form{quantitative evaluator}}
+\def\rep{\form{report}}
 \def\ds{\form{dataset}}
 \def\ins{\form{instance}}
 \def\sol{\form{solution}}
@@ -93,6 +121,8 @@
 \def\rn{\form{run}}
 \def\eng{\form{engine}}
 
+\def\G{\form{Galois}}
+\def\D{\form{DARPA}}
 
 \begin{mitemize}{\cp}
 \item add a \cp to \ptk
@@ -134,7 +164,81 @@
 \end{quote}
 \end{mitemize}
 
-\begin{mitemize}{engine}
-\item 
+\def\t24{\form{TA2-4}}
+
+\begin{mitemize}{\eng}
+\item as \t24, I want to submit an \eng, so that it can be used by my \sol{s} in the evaluation process
+  \begin{enumerate}
+  \item \t24 \tm develops an \eng
+  \item \t24 packages \eng for submission
+    \begin{enumerate}
+    \item \t24 needs packaging spec
+      \begin{enumerate}
+        
+      \item tar.bz2 of complete \eng (not partial directory trees)
+      \item git url and tag
+      \end{enumerate}
+    \item \G needs installation instructions
+    \item \G needs configuration instructions
+    \item \G needs a smoke test
+      \begin{enumerate}
+      \item minimal code to verify \eng installation and configuration
+      \item smoketest.sh wrapping minimal code (any Unix shell)
+      \item logs and errors report to stderr
+      \item return code is 0 on success, non-zero on failure
+      \end{enumerate}
+    \end{enumerate}
+  \item \t24 submits \eng to \G
+    \begin{enumerate}
+    \item git repository with tagged releases
+    \item our secure site
+    \end{enumerate}
+  \item \G installs and configures \eng
+  
+    \begin{branch}
+    \item \G successfully executes \t24's smoke test manually 
+    \item \G adds \eng to \ptk's database 
+    \item ppaml use pps.ini -- {\bf to be discussed later after understanding cps submission}
+    \item \G informs \t24 team of success smoke test results
+      \begin{enumerate}
+      \item e-mail
+      \end{enumerate}
+      
+      \newleaf
+
+    \item \G cannot successfully execute \t24's smoke test
+    \item \t24 receives failure notification from \G
+      \begin{enumerate}
+      \item e-mail
+      \item crash log
+      \end{enumerate}
+    \end{branch}
+  \item this completes this use case
+  \end{enumerate}
+\item as \G, I want to run an \eng against multiple \sol{s}, so that I can use a \ev
+  %\item as \G, I want to know which \eng{s} have been submitted within a time-period index, so that I can quickly check on \tm{s}' participation status
+  %\item as \t24 and \G, I want to run the \ev, so that I can generate \rep{s} and see my performance status
+\item[backlog::] extend running multiple \eng{s} against a \sol to \tm{s}
 \end{mitemize}
+
+\def\de{\form{domain expert}}
+\begin{mitemize}{\cp}
+\item as a \de, I have been selected to provide a \cp, so that it can be used in the evaluation process
+  \begin{enumerate}
+    
+  \item as a \de, I want to 
+    \begin{enumerate}
+    \item 
+      
+    \item \ds for testing, training, and evaluation
+    \item (optional) dataset  \gen
+    \item \ev description
+    \item \ev implementation
+    \item reference implemenation
+      
+    \end{enumerate}
+  \item 
+  \end{enumerate}
+\end{mitemize}
+  % change enumeration to be engine.value
 \end{document}
