@@ -1,5 +1,8 @@
 default: cases.pdf
 
+erd.pdf: erd.dot
+	dot -Tpdf erd.dot -o erd.pdf
+
 cases.pdf: cases.tex
 	pdflatex cases.tex
 
