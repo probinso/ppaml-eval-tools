@@ -140,7 +140,7 @@ def dircommonprefix(li):
     from os.path import commonprefix, split
     cp = commonprefix(map(os.path.dirname, li))
     x, y = split(cp)
-    if y[:-1] == "dataset":
+    if y[:-1] == "dataset": # XXXPMR This is not okay and is hacky
         return x
     else:
         return cp
