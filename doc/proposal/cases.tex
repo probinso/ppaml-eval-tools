@@ -1,24 +1,19 @@
 %first_line
-\documentclass[11pt]{article} % letterpaper is american!
+\documentclass[8pt,letterpaper]{article} % letterpaper is american!
+\usepackage[letterpaper, margin=1in]{geometry}
+%\usepackage{showframe}
+\usepackage{multicol}
+\usepackage{enumerate}
 
 \usepackage[british,UKenglish,USenglish,english,american]{babel}
 \usepackage[pdftex]{graphicx}
-\usepackage{epstopdf}
+\usepackage{tikz,pgf,epstopdf}
+%\usepackage{amsfonts,amsmath,amsthm,amssymb}
 
-\usepackage{amsfonts,amsmath,amsthm,amssymb}
-
-%\usepackage[T1]{fontenc}
-
-\usepackage{tikz,pgf}
 \usetikzlibrary{fit}
 
 \pagestyle{empty}
 \setlength{\parindent}{0mm}
-\usepackage[letterpaper, margin=1in]{geometry}
-%\usepackage{showframe}
-
-\usepackage{multicol}
-\usepackage{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -27,7 +22,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setlength\columnsep{30pt} 
 % this is a hack needed to prevent \item counters from overlapping text
-
 \raggedcolumns
 \makeatletter
 \newcount\branch@start% as \setcounter isn't global
@@ -60,7 +54,6 @@
   frame=L,
 }
 
-
 \usepackage{xspace}
 \usepackage{url}
 \usepackage{cite}
@@ -72,15 +65,8 @@
 
 \newcommand{\Bold}{\mathbf}
 
-
-%\setlength{\parskip}{1em}
-%\setlength{\parindent}{1em}
-
-
 \title{Use cases for PPAML-Eval-Tools}
-
 \date{\today}
-
 
 \def\pmr{Philip Robinson\xspace}
 \def\ms{Matt Stottile\xspace}
@@ -96,21 +82,24 @@
 
 \newenvironment{mitemize}[1]{
   % designed to prevent labeled lists from being broken up over page or column boundries. 
-  \begin{minipage}{0.9\linewidth}
-  \subsubsection*{#1}
+  \begin{minipage}{\linewidth}
+  \subsection*{#1}
   \begin{slimlist}
-}{\end{slimlist}\end{minipage}}
-
+}{
+\end{slimlist}
+\end{minipage}
+\vspace{1em}
+}
 
 \begin{document}
 \pagestyle{empty}
-\clearpage\maketitle
-  
+\clearpage%\maketitle
 
 \newcommand{\form}[1]{{\em #1}\xspace}
 \def\ptk{\form{peval-toolkit}}
 \def\cp{\form{challenge problem}}
-\def\ev{\form{quantitative evaluator}}
+\def\tev{\form{quantitative evaluator}}
+\def\lev{\form{qualitative evaluator}}
 \def\rep{\form{report}}
 \def\ds{\form{dataset}}
 \def\ins{\form{instance}}
@@ -120,9 +109,15 @@
 \def\tm{\form{team}}
 \def\rn{\form{run}}
 \def\eng{\form{engine}}
+\def\t24{\form{TA2-4}}
+\def\de{\form{domain expert}}
+\def\desc{\form{INI File}}
 
 \def\G{\form{Galois}}
 \def\D{\form{DARPA}}
+\def\U{\form{UNKNOWN}}
+
+\begin{comment}
 
 \begin{mitemize}{\cp}
 \item add a \cp to \ptk
@@ -131,7 +126,7 @@
     \end{quote}
 \item register an \ins to a \cp
   \begin{quote}
-    A \sol will address a specific \ins. An \ins needs a description a human readable id$_\#$ a time-period index and an \ev. 
+    A \sol will address a specific \ins. An \ins needs a description a human readable id$_\#$ a time-period index and an \tev. 
     
     %You should be able to print number of \rn{s} from each \tm for each \ins. You should also be able to ask for all instances from one time period. 
   \end{quote}
@@ -156,25 +151,23 @@
     
     The return format should allow us to resolve gaps cleanly when possible. Also should be able to fairly skip missing \ds{s}.
   \end{quote}
-\item unpack \ds for use by \ev or \sol if on disk at location
+\item unpack \ds for use by \tev or \sol if on disk at location
 
 \item revise \ds
 \begin{quote}
   we should not need to revise unless we allow for automatic registration and need to update look-up, this is likely a case that is so infrequent that it can be ignored. 
 \end{quote}
 \end{mitemize}
+\end{comment}
 
-\def\t24{\form{TA2-4}}
-
-\begin{mitemize}{\eng}
+\begin{mitemize}{\t24}
 \item as \t24, I want to submit an \eng, so that it can be used by my \sol{s} in the evaluation process
   \begin{enumerate}
-  \item \t24 \tm develops an \eng
+  \item \t24 develops an \eng
   \item \t24 packages \eng for submission
     \begin{enumerate}
     \item \t24 needs packaging spec
       \begin{enumerate}
-        
       \item tar.bz2 of complete \eng (not partial directory trees)
       \item git url and tag
       \end{enumerate}
@@ -194,11 +187,14 @@
     \item our secure site
     \end{enumerate}
   \item \G installs and configures \eng
+    \begin{enumerate}
+    \item produce configuration script
+    \end{enumerate}
   
     \begin{branch}
     \item \G successfully executes \t24's smoke test manually 
-    \item \G adds \eng to \ptk's database 
-    \item ppaml use pps.ini -- {\bf to be discussed later after understanding cps submission}
+    \item \G registers \eng to \ptk
+    %\item ppaml use pps.ini -- {\bf to be discussed later after understanding cps submission}
     \item \G informs \t24 team of success smoke test results
       \begin{enumerate}
       \item e-mail
@@ -215,30 +211,129 @@
     \end{branch}
   \item this completes this use case
   \end{enumerate}
-\item as \G, I want to run an \eng against multiple \sol{s}, so that I can use a \ev
+
+\item as \t24, I want to submit a \sol, so that it can be evaluated
+  \begin{enumerate}
+  \item \t24 develops a \sol
+  \item \t24 packages the \sol
+    \begin{enumerate}
+    \item \t24 needs a packaging spec
+    \item \G needs execution instructions
+    \item \G needs a sample \desc
+    \item \G needs a smoketest.conf configuration file 
+    \end{enumerate}
+    \begin{branch}
+    \item \G successfully executes \t24's smoke manually
+    \item \G updates \desc to reflect their system environment
+      \newleaf
+    \item \G Fails to execute \t24's smoke
+    \item \t24 recieves failure notification from \G
+      \begin{enumerate}
+      \item e-mail
+      \item crash log
+      \end{enumerate}
+    \end{branch}
+  \end{enumerate}
+\item as \G, I want to run an \eng against multiple \sol{s}, so that I can use a \tev
   %\item as \G, I want to know which \eng{s} have been submitted within a time-period index, so that I can quickly check on \tm{s}' participation status
-  %\item as \t24 and \G, I want to run the \ev, so that I can generate \rep{s} and see my performance status
+  %\item as \t24 and \G, I want to run the \tev, so that I can generate \rep{s} and see my performance status
 \item[backlog::] extend running multiple \eng{s} against a \sol to \tm{s}
 \end{mitemize}
 
-\def\de{\form{domain expert}}
-\begin{mitemize}{\cp}
-\item as a \de, I have been selected to provide a \cp, so that it can be used in the evaluation process
+
+\begin{mitemize}{\de}
+\item as a \de, I have been selected to submit a \cp, so that it can be used in the evaluation process
   \begin{enumerate}
     
   \item as a \de, I want to 
     \begin{enumerate}
-    \item 
-      
-    \item \ds for testing, training, and evaluation
+    \item \ds
+      \begin{enumerate}
+      \item testing
+      \item training
+      \item evaluation
+      \end{enumerate}
     \item (optional) dataset  \gen
-    \item \ev description
-    \item \ev implementation
-    \item reference implemenation
-      
+    \item \tev description for \t24
+    \item \tev implementation for \G and \t24
+    \item reference implementation of \sol for \G 
+    \item reference materials for \t24 
     \end{enumerate}
-  \item 
+  \item \G with \de as a consultant will provide visualisation tools to \rep output from \tev{s}
+    \begin{enumerate}
+    \item \G needs ready access to \de
+    \end{enumerate}
   \end{enumerate}
 \end{mitemize}
-  % change enumeration to be engine.value
+% change enumeration to be engine.value
+
+\begin{mitemize}{\G}
+\item as \G or \t24 I want to run a \sol against a \ds for a \cp in \ptk, so that I can later run a \tev
+  \begin{enumerate}
+  \item \G takes inventory of prerequisites:
+    \begin{enumerate}
+    \item \de has provided a \cp with both public and private \ds{s}
+    \item \t24 has provided a tested and correctly formed \eng and \sol representing a specific \cp
+    \item \t24 has provided the \desc to describe 
+      \begin{enumerate}
+      \item \eng
+      \item \sol
+      \item \cp
+      \end{enumerate}
+    \end{enumerate}
+  \item Update the \desc so that I can execute the provided \sol from the \ptk
+    \begin{enumerate}
+    \item new `relative root directories'
+    \item possibly swap from public to private \ds
+    \item additional label information if needed
+    \end{enumerate}
+  \item using the \ptk run the \sol, and check there are no foreign artifacts so that, later, we can run all appropriate \sol:\ds pairs
+    
+    \begin{branch}
+    \item \sol terminates successfully
+      \newleaf
+    \item \sol inappropriately terminates
+      \begin{enumerate}
+      \item malformed \desc
+      \item program crash
+      \item watchdog terminates program
+      \item missing / mislabeled output or log
+      \end{enumerate}
+    \item send e-mail with termination info
+    \end{branch}
+    
+  \item This completes the use case
+  \end{enumerate}
+  
+\item as \G I want to run all appropriate \sol:\ds pairs that are registered to \ptk, so that I can have volumes of results ready for \tev 
+  \begin{enumerate}
+  \item \G retrieves all possible \sol:\ds pairs
+  \item \G sorts pairs for execution order
+  \item \G executes runs of \sol:\ds pairs
+  \end{enumerate}
+\item as \G I want to run a \tev with \ptk so that I can gather results for \rep
+  \begin{enumerate}
+  \item \G takes inventory of prerequisites:
+    \begin{enumerate}
+    \item existing \sol{s} have been run from within the \ptk
+    \item a \tev implementation has been provided and registered to \ptk
+    \item \ds{s} for \tev have been registered to \ptk
+    \end{enumerate}
+  \item \G retrieves list of runs associated with a specific \cp
+    \begin{branch}
+    \item \tev terminates successfuly
+    \item previous \tev results for runs are overwritten
+      \newleaf
+    \item \tev inaroppropriately terminates
+    \end{branch}
+
+  
+\item \G runs evaluator associated with \cp, overriding previous \tev results
+\end{enumerate}
+\item as \G I want to act as a \lev on a \sol so that I can have complete \rep
+  \begin{enumerate}
+  \item[] this is considered trivial and has been left as an exercise for the reader
+  \end{enumerate}
+  
+\end{mitemize}
 \end{document}
