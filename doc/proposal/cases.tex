@@ -227,17 +227,15 @@
     \item \G updates \desc to reflect their system environment
       \newleaf
     \item \G Fails to execute \t24's smoke
-    \item \t24 recieves failure notification from \G
+    \item \t24 receives failure notification from \G
       \begin{enumerate}
       \item e-mail
       \item crash log
       \end{enumerate}
     \end{branch}
   \end{enumerate}
-\item as \G, I want to run an \eng against multiple \sol{s}, so that I can use a \tev
   %\item as \G, I want to know which \eng{s} have been submitted within a time-period index, so that I can quickly check on \tm{s}' participation status
   %\item as \t24 and \G, I want to run the \tev, so that I can generate \rep{s} and see my performance status
-\item[backlog::] extend running multiple \eng{s} against a \sol to \tm{s}
 \end{mitemize}
 
 
@@ -245,7 +243,7 @@
 \item as a \de, I have been selected to submit a \cp, so that it can be used in the evaluation process
   \begin{enumerate}
     
-  \item as a \de, I want to 
+  \item as a \de, I will provide 
     \begin{enumerate}
     \item \ds
       \begin{enumerate}
@@ -259,10 +257,18 @@
     \item reference implementation of \sol for \G 
     \item reference materials for \t24 
     \end{enumerate}
-  \item \G with \de as a consultant will provide visualisation tools to \rep output from \tev{s}
+  \item \G reviews and approves the \cp and \ds{s}
+    \begin{enumerate}
+    \item \G links \cp information to the PPAML wiki
+    \item \G registers the \ds and \cp to \ptk
+    \item \G or \de uploads \ds to Midas
+    \item \G notifies \t24
+    \end{enumerate}
+  \item \G with \de as a consultant will provide visualization tools to \rep output from \tev{s}
     \begin{enumerate}
     \item \G needs ready access to \de
     \end{enumerate}
+  \item This completes the use case
   \end{enumerate}
 \end{mitemize}
 % change enumeration to be engine.value
@@ -321,15 +327,24 @@
     \end{enumerate}
   \item \G retrieves list of runs associated with a specific \cp
     \begin{branch}
-    \item \tev terminates successfuly
+    \item \tev terminates successfully
     \item previous \tev results for runs are overwritten
       \newleaf
-    \item \tev inaroppropriately terminates
+    \item \tev inappropriately terminates
+    \begin{enumerate}
+    \item wrong format/naming of \sol output
+    \item \tev is intolerant of formatting
+    \item \tev crashes
+    \end{enumerate}
+  \item email crash info to appropriate \tm
+
     \end{branch}
 
   
-\item \G runs evaluator associated with \cp, overriding previous \tev results
+\item this completes this use case
 \end{enumerate}
+
+\item as \G I want progress and status information over a given time period, so that I can harass the correct teams
 \item as \G I want to act as a \lev on a \sol so that I can have complete \rep
   \begin{enumerate}
   \item[] this is considered trivial and has been left as an exercise for the reader
