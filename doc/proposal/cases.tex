@@ -1,6 +1,6 @@
 %first_line
 \documentclass[8pt,letterpaper]{article} % letterpaper is american!
-\usepackage[letterpaper, margin=1in]{geometry}
+\usepackage[letterpaper, margin=.75in]{geometry}
 %\usepackage{showframe}
 \usepackage{multicol}
 \usepackage{enumerate}
@@ -82,13 +82,14 @@
 
 \newenvironment{mitemize}[1]{
   % designed to prevent labeled lists from being broken up over page or column boundries. 
-  \begin{minipage}{\linewidth}
+  %\begin{minipage}{\linewidth}
   \subsection*{#1}
   \begin{slimlist}
 }{
 \end{slimlist}
-\end{minipage}
+%\end{minipage}
 \vspace{1em}
+\pagebreak
 }
 
 \begin{document}
@@ -101,7 +102,8 @@
 \def\tev{\form{quantitative evaluator}}
 \def\lev{\form{qualitative evaluator}}
 \def\rep{\form{report}}
-\def\ds{\form{dataset}}
+\def\ds{\form{data-set}}
+\def\gs{\form{ground-truth}}
 \def\ins{\form{instance}}
 \def\sol{\form{solution}}
 \def\gen{\form{generator}}
@@ -188,7 +190,8 @@
     \end{enumerate}
   \item \G installs and configures \eng
     \begin{enumerate}
-    \item produce configuration script
+    \item \G produces \eng installation script
+    \item \G produces \eng configuration script
     \end{enumerate}
   
     \begin{branch}
@@ -219,12 +222,20 @@
     \begin{enumerate}
     \item \t24 needs a packaging spec
     \item \G needs execution instructions
-    \item \G needs a sample \desc
-    \item \G needs a smoketest.conf configuration file 
+    %\item \G needs a sample \desc
+    \item \G needs a smoketest configuration file
+    \item \G needs expected resource requirements for both smoke and normal runs
+      \begin{enumerate}
+      \item complete execution path
+      \item minimal iterations
+      \item estimated time and space requirements
+      \end{enumerate}
     \end{enumerate}
     \begin{branch}
     \item \G successfully executes \t24's smoke manually
-    \item \G updates \desc to reflect their system environment
+    \item \G is ready to run \sol against approved \ds
+    \item \G register \sol to \ptk
+    \item \G informs \t24 of time/space deltas for smoketest
       \newleaf
     \item \G Fails to execute \t24's smoke
     \item \t24 receives failure notification from \G
@@ -233,6 +244,7 @@
       \item crash log
       \end{enumerate}
     \end{branch}
+  \item this ends the use case
   \end{enumerate}
   %\item as \G, I want to know which \eng{s} have been submitted within a time-period index, so that I can quickly check on \tm{s}' participation status
   %\item as \t24 and \G, I want to run the \tev, so that I can generate \rep{s} and see my performance status
@@ -245,28 +257,31 @@
     
   \item as a \de, I will provide 
     \begin{enumerate}
-    \item \ds
+    \item \cp definition
+    \item \cp poster 
+    \item \ds and cooresponding \gs (expected results)
       \begin{enumerate}
       \item testing
       \item training
-      \item evaluation
       \end{enumerate}
     \item (optional) dataset  \gen
-    \item \tev description for \t24
-    \item \tev implementation for \G and \t24
-    \item reference implementation of \sol for \G 
-    \item reference materials for \t24 
+    \item \tev description for \G and \t24
+    \item \tev implementation (when applicable) for \G and \t24
+    \item reference implementation of \sol for \G
+    \item additional reference materials for \t24 
     \end{enumerate}
+  \item[{\bf see:}] \url{http://ppaml.galois.com/wiki/wiki/ChallengeProblems}
   \item \G reviews and approves the \cp and \ds{s}
     \begin{enumerate}
     \item \G links \cp information to the PPAML wiki
-    \item \G registers the \ds and \cp to \ptk
+    \item \G registers the \ds, \cp, and \tev to \ptk
     \item \G or \de uploads \ds to Midas
     \item \G notifies \t24
     \end{enumerate}
   \item \G with \de as a consultant will provide visualization tools to \rep output from \tev{s}
     \begin{enumerate}
-    \item \G needs ready access to \de
+    \item \G needs ready access to \de for evaluation support
+    \item \t24 needs ready access to \de for \cp support
     \end{enumerate}
   \item This completes the use case
   \end{enumerate}
@@ -289,7 +304,8 @@
     \end{enumerate}
   \item Update the \desc so that I can execute the provided \sol from the \ptk
     \begin{enumerate}
-    \item new `relative root directories'
+    \item[] This is done automatically and will require a 'registered artifacts' listing tool in the \ptk
+    \item new `relative root directories' ... 
     \item possibly swap from public to private \ds
     \item additional label information if needed
     \end{enumerate}
@@ -297,10 +313,11 @@
     
     \begin{branch}
     \item \sol terminates successfully
+    \item this saves  the run to the \ptk
       \newleaf
     \item \sol inappropriately terminates
       \begin{enumerate}
-      \item malformed \desc
+      \item[] a generated \desc can't be malformed
       \item program crash
       \item watchdog terminates program
       \item missing / mislabeled output or log
@@ -316,19 +333,25 @@
   \item \G retrieves all possible \sol:\ds pairs
   \item \G sorts pairs for execution order
   \item \G executes runs of \sol:\ds pairs
+  \item[] this has no failure case, because it has already passed the previous step
+  \item this completes the use case
   \end{enumerate}
-\item as \G I want to run a \tev with \ptk so that I can gather results for \rep
+
+\item as \G I want to execute a \tev with \ptk so that I can gather results for \rep
   \begin{enumerate}
   \item \G takes inventory of prerequisites:
     \begin{enumerate}
     \item existing \sol{s} have been run from within the \ptk
     \item a \tev implementation has been provided and registered to \ptk
-    \item \ds{s} for \tev have been registered to \ptk
+    \item \gs for \tev have been registered to \ptk
     \end{enumerate}
-  \item \G retrieves list of runs associated with a specific \cp
+  \item \G executes \tev over a run associated with a specific \cp, \ds, \gs, and \sol
+    \begin{enumerate}
+    \item \G needs run-id or tag
+    \end{enumerate}
     \begin{branch}
     \item \tev terminates successfully
-    \item previous \tev results for runs are overwritten
+    \item \tev report info is captured by the \ptk
       \newleaf
     \item \tev inappropriately terminates
     \begin{enumerate}
