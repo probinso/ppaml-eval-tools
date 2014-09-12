@@ -1,0 +1,164 @@
+\documentclass[8pt,letterpaper]{article} % letterpaper is american!
+\usepackage[letterpaper, margin=.75in]{geometry}
+%\usepackage{showframe}
+\usepackage{multicol}
+\usepackage{enumerate}
+
+\usepackage[british,UKenglish,USenglish,english,american]{babel}
+\usepackage[pdftex]{graphicx}
+\usepackage{tikz,pgf,epstopdf}
+%\usepackage{amsfonts,amsmath,amsthm,amssymb}
+
+\usetikzlibrary{fit}
+
+\pagestyle{empty}
+\setlength{\parindent}{0mm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlength\columnsep{30pt} 
+% this is a hack needed to prevent \item counters from overlapping text
+\raggedcolumns
+\makeatletter
+\newcount\branch@start% as \setcounter isn't global
+\newcount\branch@end
+\newenvironment{branch}[1][2]{\begin{multicols}{#1}%
+  \branch@start\c@enumi% save value of enumi for subsequent leaves
+  \branch@end\c@enumi%   need to keep track of largest enumi in all leaves
+  }{%set enumi to largest value in the leaves and close multicols
+  \ifnum\c@enumi<\branch@end%
+    \global\c@enumi\branch@end% we NEED this to take effect globally
+  \fi%
+\end{multicols}}
+\newcommand\newleaf{%
+  \columnbreak%
+  \ifnum\c@enumi>\branch@end%
+    \global\branch@end\c@enumi%
+  \fi%
+  \setcounter{enumi}{\branch@start}%
+}
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{color}
+\usepackage{verbatim}
+\usepackage{listings}
+\lstset{
+  basicstyle=\scriptsize\ttfamily,
+  backgroundcolor=\color{lightgray},
+  language=bash,
+  frame=L,
+}
+
+\usepackage{xspace}
+\usepackage{url}
+\usepackage{cite}
+
+\usepackage{titlesec}
+\titlespacing*{\subsubsection}{0pt}{*0}{*0}
+\titlespacing*{\subsection}{0pt}{0pt}{*0}
+\titlespacing*{\section}{0pt}{0pt}{*0}
+
+\newcommand{\Bold}{\mathbf}
+
+\title{Use cases for PPAML-Eval-Tools}
+\date{\today}
+
+\def\pmr{Philip Robinson\xspace}
+\def\ms{Matt Stottile\xspace}
+\def\cf{Chris Fahlbusch\xspace}
+
+\newenvironment{slimlist}{
+  \begin{itemize}
+    \setlength{\topsep}{0pt}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parsep}{0pt}
+    \setlength{\parskip}{0pt}
+}{\end{itemize}}
+
+\newenvironment{mitemize}[1]{
+  % designed to prevent labeled lists from being broken up over page or column boundries. 
+  %\begin{minipage}{\linewidth}
+  \subsection*{#1}
+  \begin{slimlist}
+}{
+\end{slimlist}
+%\end{minipage}
+\vspace{1em}
+\pagebreak
+}
+
+\begin{document}
+\pagestyle{empty}
+\clearpage%\maketitle
+
+\newcommand{\form}[1]{{\em #1}\xspace}
+\def\ptk{\form{peval-toolkit}}
+\def\cp{\form{challenge problem}}
+\def\tev{\form{quantitative evaluator}}
+\def\lev{\form{qualitative evaluator}}
+\def\rep{\form{report}}
+\def\ds{\form{data-set}}
+\def\gs{\form{ground-truth}}
+\def\ins{\form{instance}}
+\def\sol{\form{solution}}
+\def\gen{\form{generator}}
+\def\out{\form{output}}
+\def\tm{\form{team}}
+\def\rn{\form{run}}
+\def\eng{\form{engine}}
+\def\t24{\form{TA2-4}}
+\def\de{\form{domain expert}}
+\def\desc{\form{INI File}}
+
+\def\G{\form{Galois}}
+\def\D{\form{DARPA}}
+\def\U{\form{UNKNOWN}}
+
+
+
+\begin{mitemize}{\cp}
+\item add a \cp to \ptk
+  \begin{quote}
+    This is effectively a place holder, the purpose of a \cp is to allow us to index more abstractly into an \ins. A \cp should be stored as a description and/or site-reference. 
+    \end{quote}
+\item register an \ins to a \cp
+  \begin{quote}
+    A \sol will address a specific \ins. An \ins needs a description a human readable id$_\#$ a time-period index and an \tev. 
+    
+    %You should be able to print number of \rn{s} from each \tm for each \ins. You should also be able to ask for all instances from one time period. 
+  \end{quote}
+\item register a \ds to a \ins
+  \begin{quote}
+    A \ds should have fetch/\gen instructions (seed needed if produced by \gen). We should be able to verify a \ds's uniqueness and existence separately.
+    
+    register can also be used to update a \ds{s} directory link. If this is done correctly, we should be able to automatically register \ds{s} that are used (... this may not be true wrt description and retrieval ...)
+
+    {\em\footnotesize also if we are using digests for naming, then we will likely want to have a blocked name as defined by digest of empty directory.}
+  \end{quote}
+\item unregister \ds, \ins
+  \begin{quote}
+    If anything is unregistered then we should remove corresponding \rn{s}. The reason to unregister anything is if it was incorrect and needs to be purged. (if we need more disk space we physically delete directory rather than unregister)
+  \end{quote}
+  
+\item look-up a \cp's description and site reference
+\item look-up a \ds's fetch/generator instructions
+\item look-up which \ins and \ds status 
+  \begin{quote}
+    Print the \tm{s} that have provided a \sol (and number of \rn{s}) for each \ds in a time-period index or \ins .
+    
+    The return format should allow us to resolve gaps cleanly when possible. Also should be able to fairly skip missing \ds{s}.
+  \end{quote}
+\item unpack \ds for use by \tev or \sol if on disk at location
+
+\item revise \ds
+\begin{quote}
+  we should not need to revise unless we allow for automatic registration and need to update look-up, this is likely a case that is so infrequent that it can be ignored. 
+\end{quote}
+\end{mitemize}
+
+
+\end{document}
