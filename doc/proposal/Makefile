@@ -1,5 +1,11 @@
 default: cases.pdf
 
+requirements.pdf: requirements.tex
+	pdflatex requirements.tex
+
+notes.pdf: notes.tex
+	pdflatex notes.tex
+
 erd.pdf: erd.dot
 	dot -Tpdf erd.dot -o erd.pdf
 

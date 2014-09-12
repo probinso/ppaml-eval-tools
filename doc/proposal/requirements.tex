@@ -1,0 +1,151 @@
+\documentclass[8pt,letterpaper]{article} % letterpaper is american!
+\usepackage[letterpaper, margin=.75in]{geometry}
+%\usepackage{showframe}
+\usepackage{multicol}
+\usepackage{enumerate}
+
+\usepackage[british,UKenglish,USenglish,english,american]{babel}
+\usepackage[pdftex]{graphicx}
+\usepackage{tikz,pgf,epstopdf}
+%\usepackage{amsfonts,amsmath,amsthm,amssymb}
+
+\usetikzlibrary{fit}
+
+\pagestyle{empty}
+\setlength{\parindent}{0mm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlength\columnsep{30pt} 
+% this is a hack needed to prevent \item counters from overlapping text
+\raggedcolumns
+\makeatletter
+\newcount\branch@start% as \setcounter isn't global
+\newcount\branch@end
+\newenvironment{branch}[1][2]{\begin{multicols}{#1}%
+  \branch@start\c@enumi% save value of enumi for subsequent leaves
+  \branch@end\c@enumi%   need to keep track of largest enumi in all leaves
+  }{%set enumi to largest value in the leaves and close multicols
+  \ifnum\c@enumi<\branch@end%
+    \global\c@enumi\branch@end% we NEED this to take effect globally
+  \fi%
+\end{multicols}}
+\newcommand\newleaf{%
+  \columnbreak%
+  \ifnum\c@enumi>\branch@end%
+    \global\branch@end\c@enumi%
+  \fi%
+  \setcounter{enumi}{\branch@start}%
+}
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{color}
+\usepackage{verbatim}
+\usepackage{listings}
+\lstset{
+  basicstyle=\scriptsize\ttfamily,
+  backgroundcolor=\color{lightgray},
+  language=bash,
+  frame=L,
+}
+
+\usepackage{xspace}
+\usepackage{url}
+\usepackage{cite}
+
+\usepackage{titlesec}
+\titlespacing*{\subsubsection}{0pt}{*0}{*0}
+\titlespacing*{\subsection}{0pt}{0pt}{*0}
+\titlespacing*{\section}{0pt}{0pt}{*0}
+
+\newcommand{\Bold}{\mathbf}
+
+\title{Use cases for PPAML-Eval-Tools}
+\date{\today}
+
+\def\pmr{Philip Robinson\xspace}
+\def\ms{Matt Stottile\xspace}
+\def\cf{Chris Fahlbusch\xspace}
+
+\newenvironment{slimlist}{
+  \begin{enumerate}
+    \setlength{\topsep}{0pt}
+    \setlength{\itemsep}{1pt}
+    \setlength{\parsep}{0pt}
+    \setlength{\parskip}{0pt}
+}{\end{enumerate}}
+
+\newenvironment{mitemize}[1]{
+  % designed to prevent labeled lists from being broken up over page or column boundries. 
+  %\begin{minipage}{\linewidth}
+  \subsection*{#1}
+  \begin{slimlist}
+}{
+\end{slimlist}
+%\end{minipage}
+\vspace{1em}
+\pagebreak
+}
+
+\newcommand{\form}[1]{{\em #1}\xspace}
+\newcommand{\pair}[2]{(#1:#2) pairs\xspace}
+\def\ptk{\form{peval-toolkit}}
+\def\cp{\form{challenge problem}}
+\def\tev{\form{quantitative evaluator}}
+\def\lev{\form{qualitative evaluator}}
+\def\rep{\form{report}}
+\def\ds{\form{data-set}}
+\def\gs{\form{ground-truth}}
+\def\ins{\form{instance}}
+\def\sol{\form{solution}}
+\def\gen{\form{generator}}
+\def\out{\form{output}}
+\def\tm{\form{team}}
+\def\rn{\form{run}}
+\def\eng{\form{engine}}
+\def\t24{\form{TA2-4}}
+\def\de{\form{domain expert}}
+\def\desc{\form{INI File}}
+
+\def\G{\form{Galois}}
+\def\D{\form{DARPA}}
+\def\U{\form{UNKNOWN}}
+
+\begin{document}
+\pagestyle{empty}
+\clearpage%\maketitle
+
+\begin{mitemize}{requirements}
+\item we must be able to independently register
+  \begin{enumerate}
+  \item \cp to \ptk
+  \item \tev to \cp
+  \item \pair{\ds}{\gs} to \cp
+  \item \eng to \ptk
+  \item \sol to \pair{\eng}{\cp}
+  \end{enumerate}
+\item we must be able to ship \ptk with registered database entries of
+  \begin{quote}
+    this is likely going to be accomplished through Jem's setup package
+  \end{quote}
+  \begin{enumerate}
+  \item \cp to \ptk
+  \item \tev to \cp
+  \item[{\bf(perhaps)}] \pair{\ds}{\gs} to \cp
+  \end{enumerate}
+\item executing a \sol through \ptk, must produce representative \desc for debugging purposes
+\item designating a \sol to execute must be possible with and without \desc
+\item we must be able to query for listings of registered artifacts in the \ptk
+  \begin{enumerate}
+  \item able to prune our listing, because this is likely a large list
+  \item help specify which run criteria are needing to be executed
+  \item help to identify submission status for teams
+  \item help to identify which runs have not been executed, but we have the resources to populate
+  \end{enumerate}
+\item 
+\end{mitemize}
+\end{document}
