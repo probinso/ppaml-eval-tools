@@ -125,13 +125,15 @@
   \item \t24 develops an \eng
   \item \t24 packages \eng for submission
     \begin{enumerate}
-    \item \t24 needs packaging spec
+    \item \G needs configuration instructions of the system
       \begin{enumerate}
-      \item tar.bz2 of complete \eng (not partial directory trees)
-      \item git url and tag
+      \item Environment Variables
+      \item Library/Packages Requirements
       \end{enumerate}
     \item \G needs installation instructions
-    \item \G needs configuration instructions
+      \begin{enumerate}
+      \item It is expected that installation will only write to relative root directory
+      \end{enumerate}
     \item \G needs a smoke test
       \begin{enumerate}
       \item minimal code to verify \eng installation and configuration
@@ -142,8 +144,12 @@
     \end{enumerate}
   \item \t24 submits \eng to \G
     \begin{enumerate}
-    \item git repository with tagged releases
-    \item our secure site
+    \item must include entire PPS and be in a single root directory
+      \begin{enumerate}
+      \item naming convention $<$engine-name$>$-$<$version$>$
+      \item git repository with tagged releases
+      \item tar.bz uploaded our secure site
+      \end{enumerate}
     \end{enumerate}
   \item \G installs and configures \eng
     \begin{enumerate}
@@ -157,7 +163,7 @@
     %\item ppaml use pps.ini -- {\bf to be discussed later after understanding cps submission}
     \item \G informs \t24 team of success smoke test results
       \begin{enumerate}
-      \item e-mail
+      \item e-mail (manually)
       \end{enumerate}
       
       \newleaf
@@ -165,7 +171,7 @@
     \item \G cannot successfully execute \t24's smoke test
     \item \t24 receives failure notification from \G
       \begin{enumerate}
-      \item e-mail
+      \item e-mail (manually)
       \item crash log
       \end{enumerate}
     \end{branch}
@@ -177,20 +183,30 @@
   \item \t24 develops a \sol
   \item \t24 packages the \sol
     \begin{enumerate}
-    \item \t24 needs a packaging spec
-    \item \G needs execution instructions
-    %\item \G needs a sample \desc
-    \item \G needs a smoketest configuration file
-    \item \G needs expected resource requirements for both smoke and normal runs
+    \item \G needs conformant run.sh
       \begin{enumerate}
-      \item complete execution path
+      \item ./run.sh $<$config-file$>$  $<$input-dir$>$  $<$output-dir$>$  $<$log-file$>$ 
+      \item FOR $<$config-file$>$ WE WILL NO LONGER ACCEPT /dev/null, ONLY EXISTING FILES
+      \item run.sh must use \eng environment variables
+      \item \G guarantees environment variables
+        \begin{enumerate}
+        \item \eng root directory  of \eng at location \$\{ENGROOT\}
+        \item temporary work space \$\{ENGTMP\}
+        \end{enumerate}
+      \end{enumerate}
+    \item \G needs a \sol-smoketest configuration file
+      \begin{enumerate}
       \item minimal iterations
+      \item estimated time and space requirements
+      \end{enumerate}
+    \item \G needs a configuration file to be used in evaluations
+      \begin{enumerate}
       \item estimated time and space requirements
       \end{enumerate}
     \end{enumerate}
     \begin{branch}
     \item \G successfully executes \t24's smoke manually
-    \item \G is ready to run \sol against approved \ds
+    %\item \G is ready to run \sol against approved \ds
     \item \G register \sol to \ptk
     \item \G informs \t24 of time/space deltas for smoketest
       \newleaf
@@ -211,7 +227,6 @@
 \begin{mitemize}{\de}
 \item as a \de, I have been selected to submit a \cp, so that it can be used in the evaluation process
   \begin{enumerate}
-    
   \item as a \de, I will provide 
     \begin{enumerate}
     \item \cp definition
@@ -231,8 +246,9 @@
   \item \G reviews and approves the \cp and \ds{s}
     \begin{enumerate}
     \item \G links \cp information to the PPAML wiki
-    \item \G registers the \ds, \cp, and \tev to \ptk
     \item \G or \de uploads \ds to Midas
+    \item \G registers the \cp, and \tev to \ptk
+    \item \G runs updatadataset.sh to registers the new \ds{s} to \ptk from Midas
     \item \G notifies \t24
     \end{enumerate}
   \item \G with \de as a consultant will provide visualization tools to \rep output from \tev{s}
@@ -252,21 +268,14 @@
     \begin{enumerate}
     \item \de has provided a \cp with both public and private \ds{s}
     \item \t24 has provided a tested and correctly formed \eng and \sol representing a specific \cp
-    \item \t24 has provided the \desc to describe 
-      \begin{enumerate}
-      \item \eng
-      \item \sol
-      \item \cp
-      \end{enumerate}
     \end{enumerate}
-  \item Update the \desc so that I can execute the provided \sol from the \ptk
     \begin{enumerate}
     \item[] This is done automatically and will require a 'registered artifacts listing tool in the \ptk
     \item new `relative root directories' ... 
     \item possibly swap from public to private \ds
     \item additional label information if needed
     \end{enumerate}
-  \item using the \ptk run the \sol, and check there are no foreign artifacts so that, later, we can run all appropriate \sol:\ds pairs
+  \item using the \ptk run the \sol, so that later, we can run all appropriate \sol:\ds pairs
     
     \begin{branch}
     \item \sol terminates successfully
@@ -274,12 +283,12 @@
       \newleaf
     \item \sol inappropriately terminates
       \begin{enumerate}
-      \item[] a generated \desc can't be malformed
       \item program crash
       \item watchdog terminates program
       \item missing / mislabeled output or log
       \end{enumerate}
     \item send e-mail with termination info
+    \item save generated \desc for debugging purposes
     \end{branch}
     
   \item This completes the use case
