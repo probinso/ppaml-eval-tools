@@ -8,9 +8,5 @@
 # Python
 *.pyc
 
-# Distutils
-MANIFEST
-dist/
-
-#patch file
-ppaml_client/fingerprint.patch
+# specific file to ignore
+eval-tools.tar.bz2
