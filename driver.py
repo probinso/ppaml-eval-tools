@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# model.py -- database operations                  -*- coding: us-ascii -*-
+# driver.py -- query toy, not clean             -*- coding: us-ascii -*-
 # Copyright (C) 2014  Galois, Inc.
 #
 # Redistribution and use in source and binary forms, with or without
