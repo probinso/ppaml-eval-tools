@@ -269,7 +269,7 @@ def register_configuration(solution_hash, full_path, basename):
         configuration_hash, configuration_hash_path = utility.prepare_resource(full_path, tmpdir)
 
         if mod.DBE:
-            register_solution_db(
+            register_configuration_db(
                 solution_hash,
                 configuration_hash,
                 basename
@@ -281,7 +281,8 @@ def register_configuration(solution_hash, full_path, basename):
 
 
 @mod.pny.db_session
-def register_configuration_db(solution_hash, configuration_hash, basename):
+def register_configuration_db(solution_id, configuration_hash, basename):
+    s = mod.Solution.get(id=solution_id)
     pass
 
 
