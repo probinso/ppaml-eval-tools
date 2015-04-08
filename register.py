@@ -285,7 +285,7 @@ def register_configuration_db(solution_hash, configuration_hash, basename):
     pass
 
 
-def configuration(subparsers):
+def configuration_subparser(subparsers):
     parser = subparsers.add_parser('configuration')
 
     parser.add_argument('solution_hash', type=str,
