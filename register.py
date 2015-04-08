@@ -158,7 +158,6 @@ def register_dataset_db(
       rel_evalpath=rel_eval,
       challenge_problems=cp
     )
-    
 
 
 def dataset_subparser(subparsers):
@@ -190,7 +189,6 @@ def register_solution_cli(arguments):
     return register_solution(engine_hash, full_path, major, minor, revision, configs)
 
 
-
 def register_solution(engine_hash, full_path, major, minor, revision, configs):
     with utility.TemporaryDirectory() as tmpdir:
         solution_hash, solution_hash_path = utility.prepare_resource(full_path, tmpdir)
@@ -205,6 +203,7 @@ def register_solution(engine_hash, full_path, major, minor, revision, configs):
         utility.commit_resource(solution_hash_path)
 
     return solution_hash
+
 
 @mod.pny.db_session
 def register_solution_db(engine_id, major, minor, revision, solution_hash, configs):
@@ -246,6 +245,56 @@ def solution_subparser(subparsers):
       help="list of configuration files usable by solution")
 
     parser.set_defaults(func=register_solution_cli)
+
+
+#####################################
+##         CONFIGURATIONS
+#####################################
+
+def register_configuration_cli(arguments):
+    solution_hash = arguments.solution_hash
+    assert(osp.exists(utility.get_resource(fname=solution_hash)))
+
+    full_path = solve_path(arguments.config_path)
+
+    # just in case basename is a symlink, we don't want to confuse the user
+    #   by changing the expected name to the realpath's basename
+    base_name = osp.basename(arguments.config_path)
+
+    return register_configuration(solution_hash, full_path, basename)
+
+
+def register_configuration(solution_hash, full_path, basename):
+    with utility.TemporaryDirectory() as tmpdir:
+        configuration_hash, configuration_hash_path = utility.prepare_resource(full_path, tmpdir)
+
+        if mod.DBE:
+            register_solution_db(
+                solution_hash,
+                configuration_hash,
+                basename
+            )
+
+        utility.commit_resource(configuration_hash_path)
+
+    return configuration_hash
+
+
+@mod.pny.db_session
+def register_configuration_db(solution_hash, configuration_hash, basename):
+    pass
+
+
+def configuration(subparsers):
+    parser = subparsers.add_parser('configuration')
+
+    parser.add_argument('solution_hash', type=str,
+      help="solution's unique identifier")
+
+    parser.add_argument('config_path', type=str,
+      help="path to configuration artifact")
+
+    parser.set_defaults(func=register_configuration_cli)
 
 
 #####################################
@@ -315,6 +364,7 @@ def generate_parser(parser):
     # initialize subparsers
     engine_subparser(subparsers)
     solution_subparser(subparsers)
+    configuration_subparser(subparsers)
     dataset_subparser(subparsers)
     evaluator_subparser(subparsers)
 
