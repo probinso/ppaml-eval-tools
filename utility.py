@@ -214,9 +214,8 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
 
 
 def dircommonprefix(li):
-    from os.path import commonprefix, split
-    cp = commonprefix(map(osp.dirname, li))
-    x, y = split(cp)
+    cp = osp.commonprefix(map(osp.dirname, li))
+    x, y = osp.split(cp)
     if y[:-1] == "dataset": # XXXPMR This is not okay and is hacky
         return x
     else:
