@@ -42,6 +42,7 @@ import shutil
 import hashlib
 
 import os
+import os.path as osp
 import glob
 import tarfile
 import tempfile
@@ -60,7 +61,7 @@ def location_resource(
   fname='.',
   location=xdg.BaseDirectory.save_data_path('ppaml')
   ):
-    return os.path.join(location, fname)
+    return osp.join(location, fname)
 
 
 def get_resource(fname='.'):
@@ -68,7 +69,7 @@ def get_resource(fname='.'):
     return test_path(path)
 
 def commit_resource(full_path):
-    srcdir, fname = os.path.split(test_path(resolve_path(full_path)))
+    srcdir, fname = osp.split(test_path(resolve_path(full_path)))
     copy_directory_files(srcdir, location_resource(), [fname])
     return True
 
@@ -82,7 +83,7 @@ def write(message):
         from sys import __stderr__ as std
         _lineno = inspect.currentframe().f_back.f_lineno
         _name = inspect.currentframe().f_back.f_code.co_filename
-        _name = os.path.split(_name)[1]
+        _name = osp.split(_name)[1]
         std.write('% '+str(_lineno)+'-'+_name+' : '+str(message)+'\n')
     return message
 
@@ -137,7 +138,7 @@ def untar_to_directory(src, dest):
     with tarfile.open(src) as tar:
         li = map(lambda x: x.path, tar.getmembers())
         tar.extractall(test_path(dest))
-        return os.path.join(dest, dircommonprefix(li))
+        return osp.join(dest, dircommonprefix(li))
 
 
 def unpack_parts(dest, *args):
@@ -146,7 +147,7 @@ def unpack_parts(dest, *args):
     retval = []
     for (key, value) in args:
         if not value:
-            path = os.path.join(os.path.realpath(dest), key)
+            path = osp.join(osp.realpath(dest), key)
         else:
             path = unpack_part(value, dest, key)
         retval.append(path)
@@ -157,12 +158,12 @@ def unpack_part(unique_id, dest, label):
     """
     """
     fname = get_resource(unique_id)
-    dstdir = os.path.join(dest, label)
+    dstdir = osp.join(dest, label)
     return untar_to_directory(fname, dstdir)
 
 
-def resolve_path(path):
-    return os.path.realpath(os.path.expanduser(path))
+def resolve_path(path, allow_symbol=False):
+    return osp.realpath(osp.expanduser(path))
 
 
 def prepare_resource(inpath, dstdir):
@@ -173,19 +174,19 @@ def prepare_resource(inpath, dstdir):
     inpath, dstdir = resolve_path(inpath), resolve_path(dstdir)
     perf = inpath
 
-    if os.path.isdir(inpath):
+    if osp.isdir(inpath):
         contents = path_walk(inpath)
     else:
         contents = [inpath]
-        perf = os.path.dirname(perf)
+        perf = osp.dirname(perf)
 
-    contents = map(os.path.abspath, contents)
+    contents = map(osp.abspath, contents)
 
     unique_name = digest_paths(contents)+".tar.bz2"
     tmpbz = "ppaml-tmp.tar.bz2"
     tmpbz = tarball_list(contents, perf, tmpbz, perf)
 
-    final_path = os.path.join(dstdir, unique_name)
+    final_path = osp.join(dstdir, unique_name)
     shutil.move(tmpbz, final_path)
 
     return unique_name, final_path
@@ -197,12 +198,12 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
       then returns the path to RESULT as a tar.bz2 archive
 
       if prefix undefined, then defaults to not remove any of the path
-      if prefix is set to None then os.path.commonprefix is removed
+      if prefix is set to None then osp.commonprefix is removed
     """
 
     contents = simple_list(contents)
 
-    path = os.path.join(destpath, RESULT)
+    path = osp.join(destpath, RESULT)
     with tarfile.open(path, "w:bz2") as tar:
         for item in contents:
             if prefix: assert(item.startswith(prefix))
@@ -214,7 +215,7 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
 
 def dircommonprefix(li):
     from os.path import commonprefix, split
-    cp = commonprefix(map(os.path.dirname, li))
+    cp = commonprefix(map(osp.dirname, li))
     x, y = split(cp)
     if y[:-1] == "dataset": # XXXPMR This is not okay and is hacky
         return x
@@ -233,12 +234,12 @@ def path_walk(srcpath, suffix='*'):
     """
 
     # glob ignores hidden filesx.
-    paths = glob.glob(os.path.join(srcpath, suffix)) + \
-            glob.glob(os.path.join(srcpath, "." + suffix))
+    paths = glob.glob(osp.join(srcpath, suffix)) + \
+            glob.glob(osp.join(srcpath, "." + suffix))
 
-    [others, files] = split_filter(paths, os.path.isfile)
+    [others, files] = split_filter(paths, osp.isfile)
 
-    for directory in filter(os.path.isdir, others):
+    for directory in filter(osp.isdir, others):
         files += path_walk(directory)
 
     # XXX: we do not actually want to return srcpath aswell
@@ -250,8 +251,8 @@ def copy_directory_files(srcdir, dstdir, filenames):
       copies [filenames] from srcdir to dstdir
     """
     for filename in filenames:
-        srcpath = os.path.join(srcdir, filename)
-        dstpath = os.path.join(dstdir, filename)
+        srcpath = osp.join(srcdir, filename)
+        dstpath = osp.join(dstdir, filename)
         shutil.copyfile(srcpath, dstpath)
 
 
@@ -264,21 +265,22 @@ def expand_path_list(paths, prefix='.', test=False):
 
       TODO: incorperate 'existance testing'
     """
-    prefix = os.path.expanduser(prefix)
+    prefix = osp.expanduser(prefix)
 
     complete_path = \
-    lambda elm: os.path.join(prefix, elm) if not os.path.isabs(elm) else elm
+    lambda elm: osp.join(prefix, elm) if not osp.isabs(elm) else elm
 
     paths = map(complete_path, paths)
     for i, path in enumerate(paths):
         if path[-1] == '*':
-            d, f = os.path.split(path)
+            d, f = osp.split(path)
             paths[i] = path_walk(d, suffix=f)
         else:
             paths[i] = glob.glob(path)
-        paths[i] = map(os.path.abspath, paths[i])
+        paths[i] = map(osp.abspath, paths[i])
 
     return simple_list(reduce(lambda a,b: a+b, paths))
+
 
 """"""
 def digest_paths(paths):
@@ -296,7 +298,7 @@ def digest_paths(paths):
     """
     SHAhash = hashlib.sha1()
 
-    filetypes = lambda n: os.path.islink(n) or os.lstat(n).st_size == 0
+    filetypes = lambda n: osp.islink(n) or os.lstat(n).st_size == 0
     [real_paths, sym_or_empty] = split_filter(paths, filetypes)
 
     for filename in simple_list(real_paths):
@@ -309,7 +311,7 @@ def digest_paths(paths):
         f.close()
 
     # handle symlinks and empty files by digesting over filename instead
-    for filename in [os.path.basename(name) for name in sym_or_empty]:
+    for filename in [osp.basename(name) for name in sym_or_empty]:
         buf = filename
         SHAhash.update(hashlib.sha1(buf).hexdigest())
 
@@ -332,7 +334,7 @@ class FormatedError(FatalError):
 
 
 def test_path(path):
-    if not (path or os.path.exists(path)):
+    if not (path or osp.exists(path)):
         raise FormatedError("""\
           File error: artifac file
           "{}" is invalid : Does Not Exist""", path)
