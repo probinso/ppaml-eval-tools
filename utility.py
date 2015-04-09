@@ -283,18 +283,36 @@ def expand_path_list(paths, prefix='.', test=False):
 """"""
 def digest_paths(paths):
     """
-      takes in a list of paths that exist and are readable
+      takes in a list containing paths to files
       returns digest SHA hash to be used as identifier over the whole list
+
+      if the file is empty or is a symbolic link, then the file's name is used
+      for the digest rather than it's contents.
+
+      the reason that we don't digest over the contents of
+        os.open(f,'O_NOFOLLOW')
+      instead is that multiple symlinks may point to the same file, but not have
+      the same name.
     """
     SHAhash = hashlib.sha1()
-    for filename in simple_list(paths):
+
+    filetypes = lambda n: os.path.islink(n) or os.lstat(n).st_size == 0
+    [real_paths, sym_or_empty] = split_filter(paths, filetypes)
+
+    for filename in simple_list(real_paths):
         f = open(filename, 'rb')
         while True:
-            # Read files as little chunks to prevent wierd ram usage
+            # Read files as little chunks to prevent large ram usage
             buf = f.read(4096)
             if not buf : break
             SHAhash.update(hashlib.sha1(buf).hexdigest())
         f.close()
+
+    # handle symlinks and empty files by digesting over filename instead
+    for filename in [os.path.basename(name) for name in sym_or_empty]:
+        buf = filename
+        SHAhash.update(hashlib.sha1(buf).hexdigest())
+
     return SHAhash.hexdigest()
 
 """"""
