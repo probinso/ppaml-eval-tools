@@ -290,9 +290,9 @@ def digest_paths(paths):
       for the digest rather than it's contents.
 
       the reason that we don't digest over the contents of
-        os.open(f,'O_NOFOLLOW')
+        os.open(f, os.O_NOFOLLOW)
       instead is that multiple symlinks may point to the same file, but not have
-      the same name.
+      the same name. (this may be a strong assumption, but satisfies for now)
     """
     SHAhash = hashlib.sha1()
 
