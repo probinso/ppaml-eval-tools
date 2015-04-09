@@ -10,3 +10,5 @@
 
 # specific file to ignore
 eval-tools.tar.bz2
+clean
+filesizes
