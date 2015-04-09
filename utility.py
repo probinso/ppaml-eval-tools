@@ -33,14 +33,10 @@
     Also can be run interactive mode to clearly test functionality
 """
 
-
-# __init__.py ensured Python 2.6 or 2.7 is running.
-
 from __future__ import (absolute_import, division, print_function)
 
 import contextlib
 
-#import tempfile
 import shutil
 
 import hashlib
