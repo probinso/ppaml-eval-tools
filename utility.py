@@ -50,6 +50,7 @@ import xdg.BaseDirectory
 
 
 SUCC_RUN = True
+DEBUG = True
 
 def failed_run():
     global SUCC_RUN
@@ -76,7 +77,7 @@ def write(message):
     """
       debugging tool prints out message and other helper data
     """
-    DEBUG = True
+    global DEBUG
     if DEBUG:
         from sys import __stderr__ as std
         _lineno = inspect.currentframe().f_back.f_lineno
@@ -227,7 +228,8 @@ def dircommonprefix(li):
 
 def path_walk(srcpath, suffix='*'):
     """
-      Takes in dirpath and returns list of files and subdirectories (includes hidden)
+      Takes in dirpath and returns list of files and subdirectories
+      (includes hidden)
     """
 
     # glob ignores hidden filesx.
