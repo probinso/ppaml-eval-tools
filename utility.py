@@ -73,7 +73,6 @@ def commit_resource(full_path):
     copy_directory_files(srcdir, location_resource(), [fname])
     return True
 
-
 def write(message):
     """
       debugging tool prints out message and other helper data
@@ -98,6 +97,27 @@ def simple_list(li, cond=cmp):
         # handle edgecase where only one element not in list form is passd in.
         # would like same behaviour even if this function is missused.
         return [li]
+
+
+def file_from_tree(tstname, dir_path):
+    """
+      given a tstname and a directory path, this function returns the first
+      instance of tstname from a directory walk of the path
+    """
+    if osp.isdir(dirpath):
+        this_file = next(ifilter(
+            lambda x: osp.basename(x) == tstname,
+            path_walk(dir_path)),
+            None
+        )# check if None
+
+    if not this_file:
+        raise FormatedError(
+          "'{}' script does not exist in '{}'",
+          tstname, solpath
+        )
+
+    return this_file
 
 
 def split_filter(li, cond, op=lambda x:x):
@@ -163,7 +183,10 @@ def unpack_part(unique_id, dest, label):
 
 
 def resolve_path(path, allow_symbol=False):
-    return osp.realpath(osp.expanduser(path))
+    path = osp.expanduser(path)
+    if allow_symbol:
+        return path
+    return osp.realpath(path)
 
 
 def prepare_resource(inpath, dstdir):
@@ -216,7 +239,7 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
 def dircommonprefix(li):
     cp = osp.commonprefix(map(osp.dirname, li))
     x, y = osp.split(cp)
-    if y[:-1] == "dataset": # XXXPMR This is not okay and is hacky
+    if y[:-1] == "dataset": # XXX PMR This is not okay and is hacky
         return x
     else:
         return cp

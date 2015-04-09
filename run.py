@@ -138,16 +138,7 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
     utility.test_path(solpath)
     os.chdir(solpath)
 
-    tstname = 'run.sh'
-    if osp.isdir(solpath):
-        this_exec = next(ifilter(
-            lambda x: osp.basename(x) == tstname,
-            utility.path_walk(solpath)),
-            None
-        )# check if None
-
-    if not this_exec:
-        raise utility.FormatedError("'{}' script does not exist in '{}'", tstname, solpath)
+    this_exec = utility.file_from_tree('run.sh', solpath)
 
     start_t = time.time()
 

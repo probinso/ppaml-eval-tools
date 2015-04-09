@@ -98,18 +98,7 @@ def hash_to_paths(run_id, dest):
 def evaluate_run(result_path, ground_path, eval_path, output_path):
     utility.test_path(eval_path)
 
-    tstname = 'eval.sh'
-
-    this_exec = None
-    if osp.isdir(eval_path):
-        this_exec = next(ifilter(
-            lambda x: osp.basename(x) == tstname,
-            utility.path_walk(eval_path)),
-            None
-        ) # check if None
-
-    if not this_exec:
-        raise utility.FormatedError("'{}' script does not exist in '{}'", tstname, eval_path)
+    this_exec = utility.file_from_tree('eval.sh', eval_path)
 
     proc = subprocess.Popen(
         [
