@@ -210,6 +210,7 @@ def tarball_list(contents, destpath, RESULT, prefix=""):
 
     return path
 
+
 def dircommonprefix(li):
     from os.path import commonprefix, split
     cp = commonprefix(map(os.path.dirname, li))
@@ -230,7 +231,8 @@ def path_walk(srcpath, suffix='*'):
     """
 
     # glob ignores hidden filesx.
-    paths = glob.glob(os.path.join(srcpath, suffix)) + glob.glob(os.path.join(srcpath, "." + suffix))
+    paths = glob.glob(os.path.join(srcpath, suffix)) + \
+            glob.glob(os.path.join(srcpath, "." + suffix))
 
     [others, files] = split_filter(paths, os.path.isfile)
 
@@ -310,6 +312,7 @@ def digest_paths(paths):
         SHAhash.update(hashlib.sha1(buf).hexdigest())
 
     return SHAhash.hexdigest()
+
 
 """"""
 class FatalError(Exception):
