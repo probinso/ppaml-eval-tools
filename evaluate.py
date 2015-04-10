@@ -93,7 +93,7 @@ def hash_to_paths(run_id, dest):
       ('evaluator', eval_hash),
       ('output', None)
     )
-    
+
 
 def evaluate_run(result_path, ground_path, eval_path, output_path):
     utility.test_path(eval_path)
