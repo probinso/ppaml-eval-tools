@@ -41,14 +41,6 @@ def register_stub(*arguments):
 ##         LOCAL HELPERS
 #####################################
 
-def solve_path(path):
-    path = utility.resolve_path(path)
-    ret = osp.realpath(path) if osp.exists(path) else None
-    if ret and osp.isdir(ret):
-        ret += osp.sep
-    # add safety check full_path == None
-    return ret
-
 
 def solve_cp_id(cp_id):
     ret = map(int, utility.safesplit(cp_id, '-')) + [ 0, 0, 0 ] 
@@ -64,7 +56,7 @@ def solve_cp_id(cp_id):
 #####################################
 def register_engine_cli(arguments):
     eng_team_id = arguments.eng_team_id
-    full_path = solve_path(arguments.full_path)
+    full_path = utility.resolve_path(arguments.full_path)
 
     return register_engine(eng_team_id, full_path)
 
@@ -116,7 +108,8 @@ def engine_subparser(subparsers):
 def register_dataset_cli(arguments):
 
     [major, minor, revision] = solve_cp_id(arguments.cp_id)
-    [rel_in, rel_eval] = map(utility.resolve_path, [arguments.in_path, arguments.eval_path])
+    rel_in   = utility.resolve_path(arguments.in_path)
+    rel_eval = utility.resolve_path(arguments.eval_path)
 
     return register_dataset(major, minor, revision, rel_in, rel_eval)
 
@@ -184,14 +177,15 @@ def register_solution_cli(arguments):
     assert(osp.exists(utility.get_resource(fname=engine_hash)))
 
     [major, minor, revision] = solve_cp_id(arguments.cp_id)
-    full_path = solve_path(arguments.full_path)
+    full_path = utility.resolve_path(arguments.full_path)
     configs = arguments.configs
     return register_solution(engine_hash, full_path, major, minor, revision, configs)
 
 
 def register_solution(engine_hash, full_path, major, minor, revision, configs):
     with utility.TemporaryDirectory() as tmpdir:
-        solution_hash, solution_hash_path = utility.prepare_resource(full_path, tmpdir)
+        solution_hash, solution_hash_path = \
+          utility.prepare_resource(full_path, tmpdir)
 
         if mod.DBE:
             register_solution_db(
@@ -255,7 +249,7 @@ def register_configuration_cli(arguments):
     solution_hash = arguments.solution_hash
     assert(osp.exists(utility.get_resource(fname=solution_hash)))
 
-    full_path = solve_path(arguments.config_path)
+    full_path = utility.resolve_path(arguments.config_path)
 
     # just in case basename is a symlink, we don't want to confuse the user
     #   by changing the expected name to the realpath's basename
@@ -317,7 +311,7 @@ def evaluator_subparser(subparsers):
 def register_evaluator_cli(arguments):
 
     [major, minor, revision] = solve_cp_id(arguments.cp_id)
-    full_path = solve_path(arguments.full_path)
+    full_path = utility.resolve_path(arguments.full_path)
 
     return register_evaluator(full_path, major, minor, revision)
 
@@ -325,7 +319,8 @@ def register_evaluator_cli(arguments):
 def register_evaluator(full_path, major, minor, revision):
 
     with utility.TemporaryDirectory() as tmpdir:
-        evaluator_hash, evaluator_hash_path = utility.prepare_resource(full_path, tmpdir)
+        evaluator_hash, evaluator_hash_path = \
+          utility.prepare_resource(full_path,tmpdir)
 
         if mod.DBE:
             register_evaluator_db(major, minor, revision, evaluator_hash)
