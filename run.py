@@ -106,7 +106,7 @@ def hash_to_paths(dest, engine_hash, solution_hash, dataset_hash):
     out_path = new_path("output")
     log_file = new_path("log")
 
-    return eng_path, sol_path, config_labels, inp_path, out_path, log_file
+    return eng_path, sol_path, config_paths, inp_path, out_path, log_file
 
 
 """
