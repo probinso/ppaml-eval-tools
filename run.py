@@ -97,6 +97,7 @@ def hash_to_paths(dest, engine_hash, solution_hash, dataset_hash):
     inp_path = utility.unpack_part(dataset_hash, dest, "input")
 
     config_labels = retrieve_configurations(solution_hash)
+    config_paths = map(lambda x: utility.unpack_part(x, dest), config_labels)
     """
     if not osp.isabs(config_label):
         config_label = osp.join(sol_path, config_label)

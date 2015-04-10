@@ -158,7 +158,7 @@ def untar_to_directory(src, dest):
     with tarfile.open(src) as tar:
         li = map(lambda x: x.path, tar.getmembers())
         tar.extractall(test_path(dest))
-        return osp.join(dest, dircommonprefix(li))
+        return osp.join(dest, dircommonprefix(li) if len(li) != 1 else li[0])
 
 
 def unpack_parts(dest, *args):
@@ -174,7 +174,7 @@ def unpack_parts(dest, *args):
     return retval
 
 
-def unpack_part(unique_id, dest, label):
+def unpack_part(unique_id, dest, label=''):
     """
     """
     fname = get_resource(unique_id)

@@ -211,6 +211,7 @@ class Evaluation(db.Entity):
 class ConfiguredSolution(db.Entity):
     _table_ = "configured_solution"
     id = pny.Required(str)
+    filename = pny.Required(str)
     solution = pny.Required(Solution)
     runs = pny.Set(Run)
     pny.PrimaryKey(id, solution)

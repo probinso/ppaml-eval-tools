@@ -87,6 +87,13 @@ CREATE TABLE evaluator (
   ) ON DELETE CASCADE
 );
 
+-- PCFG
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(5, 'Probabilistic Context-Free-Grammar with Latent Annotation', 0, 0,
+    'https://github.com/GaloisInc/ppaml-cp5');
+
 
 --SLAM
 INSERT INTO 
@@ -324,6 +331,9 @@ CREATE TABLE evaluation (
 
 CREATE TABLE configured_solution (
   id TEXT NOT NULL,
+
+  filename TEXT NOT NULL,
+
   solution TEXT NOT NULL REFERENCES solution (id) ON DELETE CASCADE,
 
   meta_created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
