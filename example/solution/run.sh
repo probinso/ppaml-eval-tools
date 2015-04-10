@@ -10,6 +10,6 @@ mkdir -p $3;
 typeset -i variable=$(cat $1)
 for i in `seq 0 $variable`; do
     sleep 5;
-    $ENGROOT/enginefile >> $3/output;
+    cat $ENGROOT/enginefile >> $3/output;
 done;
 
