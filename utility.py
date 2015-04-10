@@ -183,10 +183,14 @@ def unpack_part(unique_id, dest, label):
 
 
 def resolve_path(path, allow_symbol=False):
+    """
+    """
     path = osp.expanduser(path)
-    if allow_symbol:
-        return path
-    return osp.realpath(path)
+    if not allow_symbol:
+        path = osp.realpath(path)
+    if osp.exists(path) and osp.isdir(path):
+        path.join(osp.sep)
+    return path
 
 
 def prepare_resource(inpath, dstdir):
