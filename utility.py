@@ -189,7 +189,7 @@ def resolve_path(path, allow_symbol=False):
     if not allow_symbol:
         path = osp.realpath(path)
     if osp.exists(path) and osp.isdir(path):
-        path.join(osp.sep)
+        path += osp.sep
     return path
 
 
