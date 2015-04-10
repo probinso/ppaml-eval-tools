@@ -226,7 +226,7 @@ INSERT INTO --this numbering order is preserved from the previous generation
   VALUES(1, 'Galois', 'Integrator');
 INSERT INTO
   'team' ('id', 'institution', 'description')
-  VALUES(3, 'BAE', 'Prob');
+  VALUES(3, 'BAE', 'gamble');
 INSERT INTO
   'team' ('id', 'institution', 'description')
   VALUES(4, 'Charles River Analytics', 'BLOG');
