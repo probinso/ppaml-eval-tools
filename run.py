@@ -75,7 +75,7 @@ def run_solution_cli(arguments):
                 log_hash, log_hash_path = utility.prepare_resource(logpath, sandbox)
             else:
                 log_hash, log_hash_path = None, None
-        
+
             out_hash, out_hash_path = utility.prepare_resource(outpath, sandbox)
             save_run(
               engine_id, solution_id, config_id, dataset_id,
@@ -99,7 +99,7 @@ def hash_to_paths(dest, engine_hash, solution_hash, dataset_hash):
     config_labels = retrieve_configurations(solution_hash)
 
     unpack_to_solution = lambda x: utility.unpack_part(x, dest, "solution")
-    sol_path = unpack_to_solution(solution_hash, dest, "solution")
+    sol_path = unpack_to_solution(solution_hash)
     config_paths = map(unpack_to_solution, config_labels)
 
     new_path = lambda x: osp.join(osp.realpath(dest), x)
