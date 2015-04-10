@@ -179,7 +179,8 @@ def register_solution_cli(arguments):
     [major, minor, revision] = solve_cp_id(arguments.cp_id)
     full_path = utility.resolve_path(arguments.full_path)
     configs = arguments.configs
-    return register_solution(engine_hash, full_path, major, minor, revision, configs)
+    return register_solution(engine_hash, full_path, major,
+      minor, revision, configs)
 
 
 def register_solution(engine_hash, full_path, major, minor, revision, configs):
@@ -196,11 +197,18 @@ def register_solution(engine_hash, full_path, major, minor, revision, configs):
 
         utility.commit_resource(solution_hash_path)
 
+        for config in configs:
+            config = utility.resolve_path(config, True)
+            register_configuration(solution_hash, config)
+
     return solution_hash
 
 
 @mod.pny.db_session
-def register_solution_db(engine_id, major, minor, revision, solution_hash, configs):
+def register_solution_db(
+      engine_id, major, minor, 
+      revision, solution_hash, configs
+    ):
     e = mod.Engine.get(id=engine_id)
     cp = mod.ChallengeProblem.get(
       id=major,
@@ -214,6 +222,7 @@ def register_solution_db(engine_id, major, minor, revision, solution_hash, confi
       challenge_problem=cp
     )
 
+    """
     #XXX PMR : cfile located in two places is irresponsable.
     utility.write(configs)
     for cfile in configs:
@@ -221,6 +230,7 @@ def register_solution_db(engine_id, major, minor, revision, solution_hash, confi
           id=cfile,
           solution=s
         )
+    """
 
 
 def solution_subparser(subparsers):
@@ -249,18 +259,19 @@ def register_configuration_cli(arguments):
     solution_hash = arguments.solution_hash
     assert(osp.exists(utility.get_resource(fname=solution_hash)))
 
-    full_path = utility.resolve_path(arguments.config_path)
+    full_path = utility.resolve_path(arguments.config_path, True)
 
+    return register_configuration(solution_hash, full_path)
+
+
+def register_configuration(solution_hash, full_path):
     # just in case basename is a symlink, we don't want to confuse the user
     #   by changing the expected name to the realpath's basename
-    base_name = osp.basename(arguments.config_path)
+    basename = osp.basename(full_path)
 
-    return register_configuration(solution_hash, full_path, basename)
-
-
-def register_configuration(solution_hash, full_path, basename):
     with utility.TemporaryDirectory() as tmpdir:
-        configuration_hash, configuration_hash_path = utility.prepare_resource(full_path, tmpdir)
+        configuration_hash, configuration_hash_path = \
+          utility.prepare_resource(full_path, tmpdir)
 
         if mod.DBE:
             register_configuration_db(
@@ -277,7 +288,12 @@ def register_configuration(solution_hash, full_path, basename):
 @mod.pny.db_session
 def register_configuration_db(solution_id, configuration_hash, basename):
     s = mod.Solution.get(id=solution_id)
-    pass
+
+    c = mod.ConfiguredSolution(
+      id=configuration_hash,
+      filename=basename,
+      solution=s
+    )
 
 
 def configuration_subparser(subparsers):
