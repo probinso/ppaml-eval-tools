@@ -32,7 +32,6 @@ import sys
 import model as mod
 import os.path as osp
 import utility
-from itertools import ifilter
 import subprocess, os, psutil
 
 
