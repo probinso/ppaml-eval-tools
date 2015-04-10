@@ -40,6 +40,7 @@ import contextlib
 import shutil
 
 import hashlib
+from itertools import ifilter
 
 import os
 import os.path as osp

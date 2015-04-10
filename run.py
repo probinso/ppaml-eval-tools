@@ -37,7 +37,6 @@ import os.path as osp
 import os, psutil, subprocess
 import time
 import utility
-from itertools import ifilter
 from datetime import datetime
 
 
