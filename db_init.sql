@@ -87,6 +87,13 @@ CREATE TABLE evaluator (
   ) ON DELETE CASCADE
 );
 
+-- STUB
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(0, 'galois-stub', 0, 0,
+    'https://ppaml.galois.com');
+
 -- PCFG
 INSERT INTO
   'challenge_problem' ('id', 'description', 'revision_major',
