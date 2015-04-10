@@ -104,7 +104,7 @@ def file_from_tree(tstname, dir_path):
       given a tstname and a directory path, this function returns the first
       instance of tstname from a directory walk of the path
     """
-    if osp.isdir(dirpath):
+    if osp.isdir(dir_path):
         this_file = next(ifilter(
             lambda x: osp.basename(x) == tstname,
             path_walk(dir_path)),
