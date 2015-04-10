@@ -96,7 +96,7 @@ def hash_to_paths(dest, engine_hash, solution_hash, dataset_hash):
     sol_path = utility.unpack_part(solution_hash, dest, "solution")
     inp_path = utility.unpack_part(dataset_hash, dest, "input")
 
-    config_labels = map(lambda s: s.encode('ascii'),retrieve_configurations(solution_hash))
+    config_labels = retrieve_configurations(solution_hash)
     """
     if not osp.isabs(config_label):
         config_label = osp.join(sol_path, config_label)
@@ -206,7 +206,7 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
 @mod.pny.db_session
 def retrieve_configurations(solution_id):
     s = mod.Solution.get(id=solution_id)
-    cs = [c.id for c in s.configurations]
+    cs = [c.id.encode('ascii') for c in s.configurations]
     return cs
 
 
