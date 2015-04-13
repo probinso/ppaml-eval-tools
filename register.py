@@ -260,6 +260,7 @@ def register_configuration_cli(arguments):
     assert(osp.exists(utility.get_resource(fname=solution_hash)))
 
     full_path = utility.resolve_path(arguments.config_path, True)
+    utility.write(full_path)
 
     return register_configuration(solution_hash, full_path)
 
@@ -268,10 +269,11 @@ def register_configuration(solution_hash, full_path):
     # just in case basename is a symlink, we don't want to confuse the user
     #   by changing the expected name to the realpath's basename
     basename = osp.basename(full_path)
+    utility.write(basename)
 
     with utility.TemporaryDirectory() as tmpdir:
         configuration_hash, configuration_hash_path = \
-          utility.prepare_resource(full_path, tmpdir)
+          utility.prepare_resource(full_path, tmpdir, True)
 
         if mod.DBE:
             register_configuration_db(
@@ -387,7 +389,6 @@ def main():
     parser = argparse.ArgumentParser()
     arguments = generate_parser(parser).parse_args()
     sys.exit(arguments.func(arguments))
-    #sys.exit()
 
 
 if __name__ == "__main__":
