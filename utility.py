@@ -204,19 +204,21 @@ def resolve_path(path, allow_symbol=False):
     return path
 
 
-def prepare_resource(inpath, dstdir):
+def prepare_resource(inpath, dstdir, allow_symbol=False):
     """
       Take inpath and dstdir then produces inpath.tar.bz2, 
       renames to its digest, moves to dstdir. returns digest.tar.bz2
+
+      allow_symbol determines if inpath allows preservation of symlinks
     """
-    inpath, dstdir = resolve_path(inpath), resolve_path(dstdir)
+    inpath, dstdir = resolve_path(inpath, allow_symbol), resolve_path(dstdir)
     perf = inpath
 
     if osp.isdir(inpath):
         contents = path_walk(inpath)
     else:
         contents = [inpath]
-        perf = osp.dirname(perf)
+        perf = resolve_path(osp.dirname(perf))
 
     contents = map(osp.abspath, contents)
 
