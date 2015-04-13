@@ -32,6 +32,7 @@ import argcomplete, argparse
 import register
 import run
 import evaluate
+import unpackage
 import sys
 import utility
 
@@ -51,6 +52,12 @@ def run_parser(subparsers):
 def evaluate_parser(subparsers):
     parser = subparsers.add_parser('evaluate')
     evaluate.generate_parser(parser)
+    return parser
+
+
+def unpackage_parser(subparsers):
+    parser = subparsers.add_parser('unpackage')
+    unpackage.generate_parser(parser)
     return parser
 
 
