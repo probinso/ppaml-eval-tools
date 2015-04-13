@@ -386,8 +386,8 @@ def generate_parser(parser):
 def main():
     parser = argparse.ArgumentParser()
     arguments = generate_parser(parser).parse_args()
-    print arguments.func(arguments)
-    sys.exit()
+    sys.exit(arguments.func(arguments))
+    #sys.exit()
 
 
 if __name__ == "__main__":
