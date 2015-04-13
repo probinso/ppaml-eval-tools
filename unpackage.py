@@ -1,6 +1,5 @@
-"""
 #!/usr/bin/python
-# inspect.py -- inspect archive managed by database  -*- coding: us-ascii -*-
+# unpackage.py -- inspect archive managed by database  -*- coding: us-ascii -*-
 # Copyright (C) 2014  Galois, Inc.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -84,6 +83,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-"""
