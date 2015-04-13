@@ -77,8 +77,8 @@ def run_solution_cli(arguments):
                 log_hash, log_hash_path = None, None
 
             out_hash, out_hash_path = utility.prepare_resource(outpath, sandbox)
-            save_run(
-              engine_id, solution_id, config_id, dataset_id,
+            save_run( # XXX PMR :: config_id use likely to change
+              engine_id, solution_id, osp.basename(config_id), dataset_id,
               out_hash, log_hash, time, load, ram
             )
 
@@ -96,11 +96,16 @@ def hash_to_paths(dest, engine_hash, solution_hash, dataset_hash):
 
     # solutions have a special case, due to legacy support of symbolic links
     #   we must extract all config files to the 'solution' directory
-    config_labels = retrieve_configurations(solution_hash)
+    config_hashes = retrieve_configurations(solution_hash)
 
     unpack_to_solution = lambda x: utility.unpack_part(x, dest, "solution")
     sol_path = unpack_to_solution(solution_hash)
-    config_paths = map(unpack_to_solution, config_labels)
+
+    config_paths = []
+    for config_hash, config_filename in config_hashes:
+        config_dir = unpack_to_solution(config_hash)
+        config_path = utility.file_from_tree(config_filename, config_dir)
+        config_paths.append(config_path)
 
     new_path = lambda x: osp.join(osp.realpath(dest), x)
     out_path = new_path("output")
@@ -206,7 +211,8 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
 @mod.pny.db_session
 def retrieve_configurations(solution_id):
     s = mod.Solution.get(id=solution_id)
-    cs = [c.id.encode('ascii') for c in s.configurations]
+    config_info = lambda c: (c.id.encode('ascii'), c.filename.encode('ascii'))
+    cs = [config_info(c) for c in s.configurations]
     return cs
 
 
@@ -221,7 +227,7 @@ def save_run(
 
     cs = mod.ConfiguredSolution.get(
       solution = s,
-      id = config_label
+      filename = config_label # XXX PMR :: subject to behaviour change
     )
 
     d = mod.Dataset.get(in_digest=dataset_id)

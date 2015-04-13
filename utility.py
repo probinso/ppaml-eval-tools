@@ -134,8 +134,10 @@ def split_filter(li, cond, op=lambda x:x):
 
 
 def safesplit(s, c):
-    # input string and substring c
-    # return list of strings, divided on substring c
+    """
+      input string and substring c
+      return list of strings, divided on substring c
+    """
     return filter(lambda x: x, s.split(c)) if s.count(c) else s
 
 
@@ -159,12 +161,14 @@ def untar_to_directory(src, dest):
     with tarfile.open(src) as tar:
         li = map(lambda x: x.path, tar.getmembers())
         tar.extractall(test_path(dest))
-        return osp.join(dest, dircommonprefix(li) if len(li) != 1 else li[0])
+        return osp.join(dest, dircommonprefix(li))
 
 
 def unpack_parts(dest, *args):
     """
+      ???
     """
+    # XXX PMR :: I don't know why this exists, but it is used...
     retval = []
     for (key, value) in args:
         if not value:
@@ -177,6 +181,12 @@ def unpack_parts(dest, *args):
 
 def unpack_part(unique_id, dest, label=''):
     """
+      takes in hashed id, destination, and new directory label
+      returns root directory of extracted archive
+
+      retrieves resource path for id.tar.bz2
+      creates directory dest/label
+      untars id.tar.bz2 to dest/label/...
     """
     fname = get_resource(unique_id)
     dstdir = osp.join(dest, label)
