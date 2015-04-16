@@ -46,9 +46,9 @@ def valid_params(*args):
 
 
 def run_solution_cli(arguments):
-    engine_id, solution_id, dataset_id =\
-      arguments.engine, arguments.solution, arguments.dataset
-    valid_params(engine_id, solution_id, dataset_id)
+    engine_id, solution_id, config_id, dataset_id =\
+      arguments.engine, arguments.solution, arguments.config, arguments.dataset
+    valid_params(engine_id, solution_id, config_id, dataset_id)
 
     p_flag = arguments.persist
 
@@ -56,7 +56,7 @@ def run_solution_cli(arguments):
         engroot, solpath, configpaths, datapath, outpath, logpath =\
           hash_to_paths(
             sandbox, engine_id,
-            solution_id, dataset_id
+            solution_id, config_id, dataset_id
           )
 
         for config_id in configpaths:
@@ -88,7 +88,7 @@ def run_solution_cli(arguments):
             utility.commit_resource(out_hash_path)
 
 
-def hash_to_paths(dest, engine_hash, solution_hash, dataset_hash):
+def hash_to_paths(dest, engine_hash, solution_hash, config_hash, dataset_hash):
     """
     """
     eng_path = utility.unpack_part(engine_hash, dest, "engine")
@@ -102,10 +102,12 @@ def hash_to_paths(dest, engine_hash, solution_hash, dataset_hash):
     sol_path = unpack_to_solution(solution_hash)
 
     config_paths = []
-    for config_hash, config_filename in config_hashes:
-        config_dir = unpack_to_solution(config_hash)
+    for config_hash_check, config_filename in config_hashes:
+        config_dir = unpack_to_solution(config_hash_check)
         config_path = utility.file_from_tree(config_filename, config_dir)
-        config_paths.append(config_path)
+        if config_hash == config_hash_check:
+            config_paths.append(config_path)
+    assert(config_paths) # config_paths must not be empty
 
     new_path = lambda x: osp.join(osp.realpath(dest), x)
     out_path = new_path("output")
@@ -259,10 +261,9 @@ def generate_parser(parser):
     parser.add_argument('solution', type=str,
       help="hash solution identifier to be used as engine for solution")
 
-    """
     parser.add_argument('config', type=str,
       help="hash configuration identifier to be used for solution")
-    """
+
     parser.add_argument('dataset', type=str,
       help="dataset to run solution over")
 

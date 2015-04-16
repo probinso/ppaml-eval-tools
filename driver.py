@@ -35,10 +35,10 @@ from model import db, ChallengeProblem, Team, Dataset, Solution, Engine, Configu
 
 
 @pny.db_session
-def print_run(pps, cps, ds, comment=None):
+def print_run(pps, cps, config, ds, comment=None):
     if comment:
         print '# ', comment
-    print "peval run", pps.id, cps.id, ds.in_digest, '# ', pps.team.description, " ", cps.challenge_problem.id
+    print "peval run", pps.id, cps.id, config.id, ds.in_digest, '# ', pps.team.description, " ", cps.challenge_problem.id, config.filename
 
 @pny.db_session
 def thething():
@@ -63,24 +63,37 @@ def thething():
         s.id
     ) for s in Solution).show()
 
-    runs = pny.select((r.id, r.configured_solution.solution, r.dataset) for r in Run)
+    runs = pny.select(
+      (r.id, r.configured_solution.solution, r.configured_solution, r.dataset)
+      for r in Run
+    )
 
     combos = pny.select(
-        (s.engine, s, d)
-        for s in Solution for d in Dataset
-        if s.challenge_problem in d.challenge_problems
+        (c.solution.engine, c.solution, c, d)
+        for c in ConfiguredSolution for d in Dataset
+        if c.solution.challenge_problem in d.challenge_problems
     )
 
 
-    [ran, unran] = utility.split_filter(combos, lambda (pps, cps, ds): (cps, ds) not in [(r[1], r[2]) for r in runs])
+    [ran, unran] = utility.split_filter(
+      combos,
+      lambda (pps, cps, con, ds): (cps, con, ds) not in [(r[1], r[2], r[3]) for r in runs]
+      )
 
     print
     print
-    for pps, cps, ds in unran:
-        print_run(pps, cps, ds)
+    for pps, cps, con, ds in unran:
+        print_run(pps, cps, con, ds)
 
-    for pps, cps, ds in ran:
-        print_run(pps, cps, ds, pps.team.description + " " + str([(s[1],s[2]) for s in runs].count((cps, ds))))
+    for pps, cps, con, ds in ran:
+        print_run(
+          pps, cps, con, ds,
+          pps.team.description + \
+          " " + \
+          str(
+            [(s[1], s[2], s[3]) for s in runs].count((cps, con, ds))
+          )
+        )
 
     print
     print "\n\nI AM CHECKING ENGINES \n----------------------"
