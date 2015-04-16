@@ -155,8 +155,8 @@ def generate_parser(parser):
 
     # initialize subparsers
     run_subparser(subparsers)
-    challenge_problem_subparser(subparsers)
-    dataset_subparser(subparsers)
+    # challenge_problem_subparser(subparsers)
+    # dataset_subparser(subparsers)
 
     return parser
 
