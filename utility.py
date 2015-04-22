@@ -115,7 +115,7 @@ def file_from_tree(tstname, dir_path):
     if not this_file:
         raise FormatedError(
           "'{}' script does not exist in '{}'",
-          tstname, solpath
+          tstname, dir_path
         )
 
     return this_file
