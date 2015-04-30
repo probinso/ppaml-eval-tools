@@ -38,7 +38,7 @@ from model import db, ChallengeProblem, Team, Dataset, Solution, Engine, Configu
 def print_run(pps, cps, config, ds, comment=None):
     if comment:
         print '# ', comment
-    print "peval run", pps.id, cps.id, config.id, ds.in_digest, '# ', pps.team.description, " ", cps.challenge_problem.id, config.filename
+    print "peval run", pps.id, cps.id, config.id, ds.in_digest, '# ', pps.team.description, " ", cps.challenge_problem.id, cps.challenge_problem.revision_major, config.filename
 
 @pny.db_session
 def thething():
