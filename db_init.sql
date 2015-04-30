@@ -94,6 +94,68 @@ INSERT INTO
   VALUES(0, 'galois-stub', 0, 0,
     'https://ppaml.galois.com');
 
+-- CP4 Mini Challenge Problems
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(4, 'Bayesian Linear Regression', 1, 0,
+    'https://github.com/GaloisInc/ppaml-cp4/tree/master/problems/problem1');
+
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(4, 'Disease Diagnosis', 2, 0,
+    'https://github.com/GaloisInc/ppaml-cp4/tree/master/problems/problem2');
+
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(4, 'Discrete-time Discrete-observate HHM', 3, 0,
+    'https://github.com/GaloisInc/ppaml-cp4/tree/master/problems/problem3');
+
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(4, 'HDP-LDA Topic Model', 4, 0,
+    'https://github.com/GaloisInc/ppaml-cp4/tree/master/problems/problem4');
+
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(4, 'PCFG Sentence Completion', 5, 0,
+    'https://github.com/GaloisInc/ppaml-cp4/tree/master/problems/problem5');
+
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(4, 'Network Analysis Expressiveness Challenge', 6, 0,
+    'https://github.com/GaloisInc/ppaml-cp4/tree/master/problems/problem6');
+
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(4, 'Friends and Smokers', 7, 0,
+    'https://github.com/GaloisInc/ppaml-cp4/tree/master/problems/problem7');
+
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(4, 'Seismic 2-D', 8, 0,
+    'https://github.com/GaloisInc/ppaml-cp4/tree/master/problems/problem8');
+
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(4, 'Recursive Reasoning: Scalar Implicature', 9, 0,
+    'https://github.com/GaloisInc/ppaml-cp4/tree/master/problems/problem9');
+
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(4, 'Lifted Inference', 10, 0,
+    'https://github.com/GaloisInc/ppaml-cp4/tree/master/problems/problem10');
+
+
 -- PCFG
 INSERT INTO
   'challenge_problem' ('id', 'description', 'revision_major',
