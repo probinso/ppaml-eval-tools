@@ -4,8 +4,42 @@ The PPAML client tools are a set of libraries and scripts that allow PPAML [*]
 TA2–4 teams to evaluate their own probabilistic programming systems in the same
 way that we will at Galois.
 
-We are presently without documentation. To better understand the program's
-input parameters you may query it with ./peval -h
+peval is the Program Evaluator tool used in evaluation and system use profiles
+of submitted Artifacts. Submited Artifacts are required to have two parts, an
+  ENGINE
+that designates the required general resources for an artifact to run, and a
+  SOLUTION
+that performs some task using the resources in ENGINE.
+
+In order to keep track of who is providing artifacts, every team is assigned a
+number, as listed below ::
+
+  team.id|team.description
+  -------+----------------
+  1      |Integrator
+  3      |gamble
+  4      |BLOG
+  5      |{CH,D}imple
+  6      |Hakaru
+  7      |Venture
+  12     |Figaro
+
+For now teams are static, and cannot be added by use of the peval tool.
+
+
+The command ::
+  $ peval register engine <team-id> <engine-directory>
+
+will register the engine to a team, and print out a unique identifying hash
+that we will call ENG-HASH
+
+  $ peval register solution ENGHASH <problem-id> <solution-directory> \
+                   <config-path> [config-path ...]
+
+will register the solution to it's engine, and designate what problem number
+is associated with the solution.
+
+
 
 [*] http://ppaml.galois.com/
   
