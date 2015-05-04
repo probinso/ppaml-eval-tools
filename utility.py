@@ -341,7 +341,11 @@ def digest_paths(paths):
     [real_paths, sym_or_empty] = split_filter(paths, filetypes)
 
     for filename in simple_list(real_paths):
+        buf = filename
+        SHAhash.update(hashlib.sha1(buf).hexdigest())
+
         f = open(filename, 'rb')
+
         while True:
             # Read files as little chunks to prevent large ram usage
             buf = f.read(4096)
