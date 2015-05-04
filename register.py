@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# register.py -- create a dummy configuration file  -*- coding: us-ascii -*-
+# register.py -- handles registration to peval tool  -*- coding: us-ascii -*-
 # Copyright (C) 2014  Galois, Inc.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -144,13 +144,17 @@ def register_dataset_db(
 
     # we cast them to abspath at an earlier point
     full_path = osp.commonprefix([rel_in, rel_eval])
-    d = mod.Dataset(
-      in_digest=in_digest,
-      eval_digest=eval_digest,
-      rel_inpath=rel_in,
-      rel_evalpath=rel_eval,
-      challenge_problems=cp
-    )
+
+    d = mod.Dataset.get(in_digest=in_digest)
+    if not d:
+        d = mod.Dataset(
+          in_digest=in_digest,
+          eval_digest=eval_digest,
+          rel_inpath=rel_in,
+          rel_evalpath=rel_eval,
+        )
+
+    cp.datasets.add(d)
 
 
 def dataset_subparser(subparsers):
@@ -260,7 +264,6 @@ def register_configuration_cli(arguments):
     assert(osp.exists(utility.get_resource(fname=solution_hash)))
 
     full_path = utility.resolve_path(arguments.config_path, True)
-    utility.write(full_path)
 
     return register_configuration(solution_hash, full_path)
 
@@ -269,7 +272,6 @@ def register_configuration(solution_hash, full_path):
     # just in case basename is a symlink, we don't want to confuse the user
     #   by changing the expected name to the realpath's basename
     basename = osp.basename(full_path)
-    utility.write(basename)
 
     with utility.TemporaryDirectory() as tmpdir:
         configuration_hash, configuration_hash_path = \
