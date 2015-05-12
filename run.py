@@ -97,7 +97,6 @@ def hash_to_paths(dest, engine_hash, solution_hash, config_hash, dataset_hash):
     # solutions have a special case, due to legacy support of symbolic links
     #   we must extract all config files to the 'solution' directory
     config_hashes = retrieve_configurations(solution_hash)
-
     unpack_to_solution = lambda x: utility.unpack_part(x, dest, "solution")
     sol_path = unpack_to_solution(solution_hash)
 
@@ -145,13 +144,39 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
     utility.test_path(solpath)
     os.chdir(solpath)
 
-    this_exec = utility.file_from_tree('run.sh', solpath)
-
-    start_t = time.time()
-
     # setup environment variables
     proc_env = os.environ.copy()
     proc_env['ENGROOT'] = engroot
+
+    this_build = utility.file_from_tree('galois.sh', solpath, False)
+    # for now use `galois.sh` because we may not be able to reserve build.sh
+
+    if this_build:
+        # XXX PMR :: Needs to be refactored
+        """
+          This is evidence of a do -> finally that can be very powerful.
+        """
+        build_proc  = subprocess.Popen([this_build], env=proc_env)
+
+        build_entry = psutil.Process(build_proc.pid)
+
+        while True:
+            rc = build_proc.poll()
+            if rc is None:
+                continue
+            else:
+                break
+
+            try:
+                rc = build_entry.wait(timeout=0.1)
+            except psutil.TimeoutExpired:
+                pass
+            else:
+                break
+
+    this_exec = utility.file_from_tree('run.sh', solpath)
+
+    start_t = time.time()
 
     # define process
     proc = subprocess.Popen(

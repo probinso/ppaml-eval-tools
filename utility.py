@@ -100,7 +100,7 @@ def simple_list(li, cond=cmp):
         return [li]
 
 
-def file_from_tree(tstname, dir_path):
+def file_from_tree(tstname, dir_path, check=True):
     """
       given a tstname and a directory path, this function returns the first
       instance of tstname from a directory walk of the path
@@ -110,9 +110,9 @@ def file_from_tree(tstname, dir_path):
             lambda x: osp.basename(x) == tstname,
             path_walk(dir_path)),
             None
-        )# check if None
+        )
 
-    if not this_file:
+    if check and not this_file:
         raise FormatedError(
           "'{}' script does not exist in '{}'",
           tstname, dir_path
