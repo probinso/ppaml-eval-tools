@@ -95,8 +95,8 @@ def simple_list(li, cond=cmp):
     try:
         return sorted(set(li), cmp=cond)
     except TypeError:
-        # handle edgecase where only one element not in list form is passd in.
-        # would like same behaviour even if this function is missused.
+        # handle edgecase where only one element not in list form is passd
+        # in. would like same behaviour even if this function is missused.
         return [li]
 
 
@@ -211,7 +211,9 @@ def prepare_resource(inpath, dstdir, allow_symbol=False):
 
       allow_symbol determines if inpath allows preservation of symlinks
     """
-    inpath, dstdir = resolve_path(inpath, allow_symbol), resolve_path(dstdir)
+    inpath, dstdir = resolve_path(inpath, allow_symbol), \
+                     resolve_path(dstdir)
+
     perf = inpath
 
     if osp.isdir(inpath):
@@ -297,8 +299,9 @@ def copy_directory_files(srcdir, dstdir, filenames):
 
 def expand_path_list(paths, prefix='.', test=False):
     """
-      takes in list of relative path expressions, then expands them to abspaths
-      if abspaths are included in 'paths', the prefix is not prepended
+      takes in list of relative path expressions, then expands them to
+      abspaths if abspaths are included in 'paths', the prefix is not
+      prepended
 
       returns list that has no doubles, and is sorted alphabetically
 
@@ -327,13 +330,14 @@ def digest_paths(paths):
       takes in a list containing paths to files
       returns digest SHA hash to be used as identifier over the whole list
 
-      if the file is empty or is a symbolic link, then the file's name is used
-      for the digest rather than it's contents.
+      if the file is empty or is a symbolic link, then the file's name is
+      used for the digest rather than it's contents.
 
       the reason that we don't digest over the contents of
         os.open(f, os.O_NOFOLLOW)
-      instead is that multiple symlinks may point to the same file, but not have
-      the same name. (this may be a strong assumption, but satisfies for now)
+      instead is that multiple symlinks may point to the same file, but not
+      have the same name. (this may be a strong assumption, but satisfies
+      for now)
     """
     SHAhash = hashlib.sha1()
 
@@ -385,7 +389,7 @@ def test_path(path):
 
 
 @contextlib.contextmanager
-def TemporaryDirectory(suffix='', prefix='tmp', dir=None, persist=False):
+def TemporaryDirectory(suffix='', prefix='peval.', dir=None, persist=False):
     """
       Like tempfile.NamedTemporaryFile, but creates a directory.
 
