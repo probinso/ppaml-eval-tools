@@ -18,14 +18,6 @@ sbt clean;
 sbt compile;
 
 
-sqlite3 ~/.local/share/ppaml/index.db \
-  "pragma foreign_keys = ON;
-   delete from engine;
-   delete from solution;
-   delete from dataset;"
-
-rm -rf /tmp/ppaml*
-
 ENGHASH=$(peval register engine 12 $ENGROOT 2>&1 | tail -n 1)
 
 #special cases
@@ -43,7 +35,6 @@ for i in {1..9}; do
 
   cd $prob;
     CPID=04-0$i-00
-    mkdir -p data/forcework
     peval register dataset $CPID ./data ./data;
     rm -rf data;
     sed -i -- 's/..\/lib\/\*:..\/target\/scala-2.11\/classes/.\/classes/g' ./run.sh;
