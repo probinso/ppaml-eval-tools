@@ -46,13 +46,15 @@ def valid_params(*args):
 
 
 def run_solution_cli(arguments):
-    engine_id, solution_id, config_id, dataset_id =\
-      arguments.engine, arguments.solution, arguments.config, arguments.dataset
+    engine_id, solution_id, config_id, dataset_id = \
+      arguments.engine, arguments.solution, arguments.config, \
+      arguments.dataset
+
     valid_params(engine_id, solution_id, config_id, dataset_id)
 
     p_flag = arguments.persist
 
-    with utility.TemporaryDirectory(prefix='ppaml.', persist=p_flag) as sandbox:
+    with utility.TemporaryDirectory(persist=p_flag) as sandbox:
         engroot, solpath, configpaths, datapath, outpath, logpath =\
           hash_to_paths(
             sandbox, engine_id,
@@ -60,7 +62,9 @@ def run_solution_cli(arguments):
           )
 
         for config_id in configpaths:
-            configpath = config_id if osp.abspath(config_id) else osp.join(solpath, config_id)
+            configpath = config_id if osp.abspath(config_id) \
+                                   else osp.join(solpath, config_id)
+
             rc, ram, load, time =\
               run_solution(
                 engroot, solpath,
@@ -72,11 +76,14 @@ def run_solution_cli(arguments):
                 raise utility.FormatedError("solution execuution crashed")
 
             if osp.exists(logpath):
-                log_hash, log_hash_path = utility.prepare_resource(logpath, sandbox)
+                log_hash, log_hash_path = \
+                  utility.prepare_resource(logpath, sandbox)
             else:
                 log_hash, log_hash_path = None, None
 
-            out_hash, out_hash_path = utility.prepare_resource(outpath, sandbox)
+            out_hash, out_hash_path = \
+              utility.prepare_resource(outpath, sandbox)
+
             save_run( # XXX PMR :: config_id use likely to change
               engine_id, solution_id, osp.basename(config_id), dataset_id,
               out_hash, log_hash, time, load, ram
@@ -119,7 +126,7 @@ def hash_to_paths(dest, engine_hash, solution_hash, config_hash, dataset_hash):
   process helpers, likely to be moved to a different file
 """
 def sum_for_process_children(function, proc):
-    return function(proc) +\
+    return function(proc) + \
       sum(function(child) for child in proc.get_children(recursive=True))
 
 def sample_ram(proc):
