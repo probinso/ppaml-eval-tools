@@ -27,8 +27,7 @@ for i in {1..9}; do
 
   cd $prob;
     CPID=04-0$i-00
-
-    rm -rf data; ## insure solution isn't using local data directory
+    mv data ../$prob-data
     sed -i -- 's/..\/lib\/\*:..\/target\/scala-2.11\/classes/.\/classes/g' ./run.sh;
 
   cd -;
