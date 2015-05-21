@@ -43,11 +43,17 @@ def evaluate_run_cli(arguments):
     run_id = arguments.run_id
     p_flag = arguments.persist
 
-    with utility.TemporaryDirectory(prefix='ppaml.', persist=p_flag) as sandbox:
-        result_path, ground_path, eval_path, output_path = hash_to_paths(run_id, sandbox)
-        rc, output_path = evaluate_run(result_path, ground_path, eval_path, output_path)
+    with utility.TemporaryDirectory(persist=p_flag) as sandbox:
 
-        out_hash, out_hash_path = utility.prepare_resource(output_path, sandbox)
+        result_path, ground_path, eval_path, output_path = \
+          hash_to_paths(run_id, sandbox)
+
+        rc, output_path = \
+          evaluate_run(result_path, ground_path, eval_path, output_path)
+
+        out_hash, out_hash_path = \
+          utility.prepare_resource(output_path, sandbox)
+
         try:
             save_evaluation(run_id, out_hash)
         except mod.pny.core.ConstraintError as e:
@@ -63,7 +69,10 @@ def save_evaluation(run_id, out_hash):
 
     ev = r.configured_solution.solution.challenge_problem.evaluator
     if not ev:
-        raise utility.FormatedError("No registered evaluator for challenge problem {}", cp.cp_ids)
+        raise utility.FormatedError(
+          "No registered evaluator for challenge problem {}",
+          cp.cp_ids
+        )
 
     evaluation = mod.Evaluation(
         id = out_hash,
@@ -80,7 +89,10 @@ def hash_to_paths(run_id, dest):
 
     ev = r.configured_solution.solution.challenge_problem.evaluator
     if not ev:
-        raise utility.FormatedError("No registered evaluator for challenge problem {}", cp.cp_ids)
+        raise utility.FormatedError(
+          "No registered evaluator for challenge problem {}",
+          cp.cp_ids
+        )
 
     output_hash = r.output
     ground_hash = r.dataset.eval_digest
