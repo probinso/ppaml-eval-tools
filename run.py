@@ -148,92 +148,32 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
       all input parameters must be valid paths
     """
 
-    utility.test_path(solpath)
-    os.chdir(solpath)
+    for _, rc, _, _ in utility.process_watch(
+      solpath, ['galois.sh'], ENGROOT=engroot
+    ):
+        pass
 
-    # setup environment variables
-    proc_env = os.environ.copy()
-    proc_env['ENGROOT'] = engroot
-
-    this_build = utility.file_from_tree('galois.sh', solpath, False)
-    # for now use `galois.sh` because we may not be able to reserve build.sh
-
-    if this_build:
-        # XXX PMR :: Needs to be refactored
-        """
-          This is evidence of a do -> finally that can be very powerful.
-        """
-        build_proc  = subprocess.Popen([this_build], env=proc_env)
-
-        build_entry = psutil.Process(build_proc.pid)
-
-        while True:
-            rc = build_proc.poll()
-            if rc is None:
-                continue
-            else:
-                break
-
-            try:
-                rc = build_entry.wait(timeout=0.1)
-            except psutil.TimeoutExpired:
-                pass
-            else:
-                break
-
-    this_exec = utility.file_from_tree('run.sh', solpath)
-
-    start_t = time.time()
-
-    # define process
-    proc = subprocess.Popen(
-      [
-        this_exec, configpath,
-        datasetpath, outputdir,
-        logfile,
-      ],
-    env=proc_env
-    )
-
-    proc_entry = psutil.Process(proc.pid)
+    if rc != 0 and rc != None:
+        # XXX PMR :: This perhaps should be returning the error code
+        raise utility.FormatedError("Wasn't able to build in {}", solpath)
 
     ram_samples = []
     load_samples = []
-    rc = None
 
-    while True:
+    for proc_entry , rc, start_t, end_t in utility.process_watch(
+      solpath, ['run.sh', configpath, datasetpath, outputdir, logfile],
+      ENGROOT=engroot
+    ):
         try:
             curr_load_sample = sample_load(proc_entry)
             curr_ram_sample  = sample_ram(proc_entry)
         except (psutil.AccessDenied, psutil.NoSuchProcess):
-            # Polling failed.  This probably means that we've
-            # exited, but it could also mean that one of the
-            # artifact's children is a zombie.
-            rc = proc.poll()
-            if rc is None:
-                # We have not exited yet.  Discard the samples.
-                continue
-            else:
-                # We've actually exited.
-                break
-
+            utility.write("Process has probably exited but this could"
+            " also mean that one of the artifact's children is a zombie.")
+            continue
         load_samples.append(curr_load_sample)
         ram_samples.append(curr_ram_sample)
 
-        try:
-            rc = proc_entry.wait(timeout=0.1) # seconds
-        except psutil.TimeoutExpired:
-            # Our timeout expired, but the process still exists.
-            # Keep going.
-            pass
-        else:
-            # The timeout didn't expire--the process exited while we
-            # waited.  We're done.
-            break
-    end_t = time.time()
-
-    # insure that the return code of the called process is 0
-    # assert(rc == 0)
     maxavg = lambda li: (max(li), sum(li)/len(li))
 
     return rc,\

@@ -50,6 +50,9 @@ import tempfile
 import inspect
 import xdg.BaseDirectory
 
+import time
+import subprocess
+import psutil
 
 SUCC_RUN = True
 DEBUG = True
@@ -363,6 +366,69 @@ def digest_paths(paths):
         SHAhash.update(hashlib.sha1(buf).hexdigest())
 
     return SHAhash.hexdigest()
+
+
+def process_watch( base_dir, command, timeout=3.0, isfile=True,
+  **environment_variables
+):
+    """
+      This yields an iterator over
+        subprocess.Popen(cmd,env), return code, time_start, time_curr
+      so that the user may gain nessicary resources for tracking statisrics
+      in a simple loop.
+
+      Takes in a base directory as a new working directory, and a command
+      as a list of strings
+      Optional :: timeout provides a timestep for gathering use metrics
+               :: isfile is used to define whether this command is in the
+               local directory tree
+    """
+
+    pwd = os.getcwd() # previous working directory
+    test_path(base_dir)
+    os.chdir(base_dir)
+
+    proc_env = os.environ.copy()
+    for index in environment_variables:
+        proc_env[index] = environment_variables[index]
+
+    rc = None
+    proc_entry = None
+
+    if isfile:
+        command[0] = file_from_tree(command[0], base_dir, False)
+    #write(command[0])
+
+    start_t = time.time()
+    if command[0]:
+
+        proc = subprocess.Popen(command, env=proc_env)
+        proc_entry = psutil.Process(proc.pid)
+
+        while True:
+            # this program used to catch the following errors
+            # :: psutil.AccessDenied, psutil.NoSuchProcess
+            yield proc_entry, rc, start_t, time.time()
+
+            try:
+                rc = proc_entry.wait(timeout=timeout) # seconds
+                if rc is None:
+                    continue
+                else:
+                    break
+            except psutil.TimeoutExpired:
+                write("psutil.TimeoutExpired hit")
+                # Our timeout expired, but the process still exists.
+                # Keep going.
+                pass
+            else:
+                # The timeout didn't expire--the process exited while we
+                # waited.  We're done.
+                break
+
+    os.chdir(pwd)
+
+    yield proc_entry, rc, start_t, time.time()
 
 
 """"""

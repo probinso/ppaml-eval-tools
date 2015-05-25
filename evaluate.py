@@ -107,26 +107,12 @@ def hash_to_paths(run_id, dest):
 
 
 def evaluate_run(result_path, ground_path, eval_path, output_path):
-    utility.test_path(eval_path)
 
-    this_exec = utility.file_from_tree('eval.sh', eval_path)
-
-    proc = subprocess.Popen(
-        [
-            this_exec,
-            result_path,
-            ground_path,
-            output_path
-        ],
-        env = os.environ.copy()
-    )
-    proc_entry = psutil.Process(proc.pid)
-
-    rc = None
-    while True:
-        rc = proc.poll()
-        if rc is not None:
-            break
+    for _, rc, _, _ in utility.process_watch(
+      eval_path, ['eval.sh', result_path, ground_path, output_path],
+      ENGROOT=engroot
+    ):
+        pass
 
     return rc, output_path
 
