@@ -2,12 +2,12 @@
 
 set -x
 
-ename=figaro-3.1.0-1
+ename=figaro-3.2.0-1
 rm -rf $ename
 tar -vxjf $ename.tar.bz2
 export ENGROOT=$(readlink -m $ename/lib/)
 
-fname=figaro-CP04-2.0.0-0b2
+fname=figaro-CP04-2.0.0-0b4
 rm -rf $fname/
 tar -vxjf $fname.tar.bz2
 cd $fname/
