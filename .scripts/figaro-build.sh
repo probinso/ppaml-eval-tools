@@ -25,7 +25,7 @@ for i in $(ls problem-8-files/); do
   cp problem-8-files/$i prob08/data/;
 done;
 
-for i in {1..9}; do
+for i in {1..5} {7..8}; do
   prob=prob0$i;
   ldir=./$prob/classes/com/cra/appril;
   rdir=./target/scala-2.11/classes/com/cra/appril;
@@ -42,3 +42,8 @@ for i in {1..9}; do
   cd -;
 
 done;
+
+echo "
+  CP-4.6 CP-4.9 are expressiveness
+  CP-4.10 is not included in Figaro
+";
