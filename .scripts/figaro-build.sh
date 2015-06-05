@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-set -x
+# set -x # uncomment for debug
 
 if (( $# != 1 )); then
     printf "Usage: %s <figaro_challenge_problem_four.tar.bz2>" "$0" >&2
