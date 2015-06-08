@@ -397,7 +397,7 @@ def process_watch( base_dir, command, timeout=3.0, isfile=True,
 
     if isfile:
         command[0] = file_from_tree(command[0], base_dir, False)
-    #write(command[0])
+    write(command[0])
 
     start_t = time.time()
     if command[0]:
@@ -417,7 +417,7 @@ def process_watch( base_dir, command, timeout=3.0, isfile=True,
                 else:
                     break
             except psutil.TimeoutExpired:
-                write("psutil.TimeoutExpired hit")
+                # write("psutil.TimeoutExpired hit")
                 # Our timeout expired, but the process still exists.
                 # Keep going.
                 pass
