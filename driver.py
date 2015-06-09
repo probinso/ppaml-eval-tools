@@ -115,6 +115,7 @@ def thething():
     for x in pny.select((
             r.engine.team.description,
             r.configured_solution.solution.challenge_problem.id,
+            r.configured_solution.solution.challenge_problem.revision_major,
             r.duration,
             r.dataset.in_digest,
             r.output,
