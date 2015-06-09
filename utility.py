@@ -65,7 +65,7 @@ def failed_exec():
 """"""
 def signal_handler(signum, frame):
     failed_exec()
-    raise Formated_Error("Signal handler called with signal '{}'", signum)
+    raise FormatedError("Signal handler called with signal '{}'", signum)
 
 
 signals = map(
@@ -442,7 +442,7 @@ def process_watch( base_dir, command, timeout=3.0, isfile=True,
 
         yield proc_entry, rc, start_t, time.time()
     else:
-        yield None, -1, None, None
+        yield None, None, None, None
 
 """"""
 class FatalError(Exception):
