@@ -8,5 +8,5 @@ sqlite3 ~/.local/share/ppaml/index.db \
    delete from solution;
    delete from dataset;"
 
-rm -rf /tmp/ppaml*
+rm -rf /tmp/peval*
 
