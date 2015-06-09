@@ -485,6 +485,7 @@ def TemporaryDirectory(suffix='', prefix='peval.', dir=None, persist=False):
     finally:
         global SUCC_RUN
 
+        # XXX PMR :: perhaps good idea to have a '.INTERRUPT' state as well
         if SUCC_RUN:
             tree = base_tree + '.SUCCESS' 
         else:
