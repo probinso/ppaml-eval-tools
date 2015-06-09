@@ -148,6 +148,7 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
       all input parameters must be valid paths
     """
 
+    utility.write("attempt galois.sh")
     for _, rc, _, _ in utility.process_watch(
       solpath, ['galois.sh'], ENGROOT=engroot
     ):
@@ -160,6 +161,7 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
     ram_samples = []
     load_samples = []
 
+    utility.write("attempting run.sh")
     for proc_entry , rc, start_t, end_t in utility.process_watch(
       solpath, ['run.sh', configpath, datasetpath, outputdir, logfile],
       ENGROOT=engroot
