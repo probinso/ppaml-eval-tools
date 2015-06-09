@@ -53,13 +53,26 @@ import xdg.BaseDirectory
 import time
 import subprocess
 import psutil
+import signal # XXX PMR : this should probably not exist in utility
 
 SUCC_RUN = True
 DEBUG = True
 
-def failed_run():
+def failed_exec():
     global SUCC_RUN
     SUCC_RUN = False
+
+""""""
+def signal_handler(signum, frame):
+    failed_exec()
+    raise Formated_Error("Signal handler called with signal '{}'", signum)
+
+
+signals = map(
+  lambda x: signal.signal(x, signal_handler),
+  [signal.SIGINT, signal.SIGTERM]
+  ) # cannot catch signal.SIGKILL
+""""""
 
 def location_resource(
   fname='.',
@@ -110,7 +123,7 @@ def file_from_tree(tstname, dir_path, check=True):
     """
     if osp.isdir(dir_path):
         this_file = next(ifilter(
-            lambda x: osp.basename(x) == tstname,
+            lambda x: osp.basename(x) == osp.basename(tstname),
             path_walk(dir_path)),
             None
         )
@@ -397,10 +410,11 @@ def process_watch( base_dir, command, timeout=3.0, isfile=True,
 
     if isfile:
         command[0] = file_from_tree(command[0], base_dir, False)
-    write(command[0])
+    write(command)
 
     start_t = time.time()
-    if command[0]:
+
+    if command[0] is not None:
 
         proc = subprocess.Popen(command, env=proc_env)
         proc_entry = psutil.Process(proc.pid)
@@ -415,21 +429,20 @@ def process_watch( base_dir, command, timeout=3.0, isfile=True,
                 if rc is None:
                     continue
                 else:
+                    # The timeout didn't expire--the process exited while we
+                    # waited.  We're done.
                     break
             except psutil.TimeoutExpired:
                 # write("psutil.TimeoutExpired hit")
                 # Our timeout expired, but the process still exists.
                 # Keep going.
-                pass
-            else:
-                # The timeout didn't expire--the process exited while we
-                # waited.  We're done.
-                break
+                continue
 
-    os.chdir(pwd)
+        os.chdir(pwd)
 
-    yield proc_entry, rc, start_t, time.time()
-
+        yield proc_entry, rc, start_t, time.time()
+    else:
+        yield None, -1, None, None
 
 """"""
 class FatalError(Exception):
@@ -462,17 +475,26 @@ def TemporaryDirectory(suffix='', prefix='peval.', dir=None, persist=False):
       This object appears in Python 3 but is unfortunately absent from
       releases of Python 2.
     """
-    tree = tempfile.mkdtemp(suffix, prefix, dir)
+
+    base_tree = tempfile.mkdtemp(suffix, prefix, dir)
+    undecided_tree = base_tree + '.UNDECIDED'
+    os.rename(base_tree, undecided_tree)
+
     try:
-        yield tree
+        yield undecided_tree
     finally:
         global SUCC_RUN
-        if not SUCC_RUN:
-            newtree = tree + '.FAILED'
-            os.rename(tree, newtree)
-            tree = newtree
-        if not SUCC_RUN or persist:
-            print("Success : " + str(SUCC_RUN))
+
+        if SUCC_RUN:
+            tree = base_tree + '.SUCCESS' 
+        else:
+            tree = base_tree + '.FAILED'
+            persist = True
+
+        os.rename(undecided_tree, tree)
+        print("Success : " + str(SUCC_RUN))
+
+        if persist:
             print("data persists : " + tree)
         else:
             shutil.rmtree(tree)
