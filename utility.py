@@ -55,18 +55,28 @@ import subprocess
 import psutil
 import signal # XXX PMR : this should probably not exist in utility
 
-SUCC_RUN = True
+
+"""
+  ::SUCC_COMMENT
+  This is used below in the contextmanager for directories.
+"""
+RUN_STATE = ['.SUCCESS', '.FAILED', '.INTERRUPT', '.UNDECIDED']
+SUCC_RUN = 0
+
 DEBUG = True
 
 def failed_exec():
     global SUCC_RUN
-    SUCC_RUN = False
+    SUCC_RUN = 1
 
-""""""
 def signal_handler(signum, frame):
-    failed_exec()
+    global SUCC_RUN
+    SUCC_RUN = 2
     raise FormatedError("Signal handler called with signal '{}'", signum)
-
+"""
+  ::SUCC_COMMENT
+  This ends SUCC_COMMENT related data and modifications
+"""
 
 signals = map(
   lambda x: signal.signal(x, signal_handler),
@@ -477,23 +487,28 @@ def TemporaryDirectory(suffix='', prefix='peval.', dir=None, persist=False):
     """
 
     base_tree = tempfile.mkdtemp(suffix, prefix, dir)
-    undecided_tree = base_tree + '.UNDECIDED'
+    undecided_tree = base_tree + RUN_STATE[-1]
     os.rename(base_tree, undecided_tree)
 
     try:
         yield undecided_tree
     finally:
+        """
+          This is probably the most dangerous part of code. SUCC_RUN is a 
+            global variable used to track the terminating state of a peval
+            run. RUN_STATE is the array of strings denoting the human
+            readable name of that state. For more info, look for 
+          ::SUCC_COMMENT
+        """
         global SUCC_RUN
-
-        # XXX PMR :: perhaps good idea to have a '.INTERRUPT' state as well
-        if SUCC_RUN:
-            tree = base_tree + '.SUCCESS' 
-        else:
-            tree = base_tree + '.FAILED'
+        global RUN_STATE
+        
+        tree = base_tree + RUN_STATE[SUCC_RUN]
+        if SUCC_RUN != 0:
             persist = True
 
         os.rename(undecided_tree, tree)
-        print("Success : " + str(SUCC_RUN))
+        print("Success : " + RUN_STATE[SUCC_RUN])
 
         if persist:
             print("data persists : " + tree)
