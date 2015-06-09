@@ -72,7 +72,7 @@ def run_solution_cli(arguments):
                 datapath, outpath, logpath)
 
             if rc != 0:
-                utility.failed_run()
+                utility.failed_exec()
                 raise utility.FormatedError("solution execuution crashed")
 
             if osp.exists(logpath):
