@@ -1,0 +1,26 @@
+--- run.sh	2015-05-28 12:41:02.000000000 -0700
++++ ../../figaro-CP05-1.0.0-f2/run.sh	2015-06-12 18:30:41.869374000 -0700
+@@ -10,10 +10,19 @@ fi
+ if [ ! -d "$3" ]; then
+   mkdir -p $3
+ fi
+-if [ ! -d "$4" ]; then
+-  mkdir -p $4
+-fi
++#if [ ! -d "$4" ]; then
++#  mkdir -p $4
++#fi
+ 
+-CMD="scala -J-Xmx8g -cp $FIGARO:$CP com.cra.appril.pcfg.Solution $1 $2 $3 $4"
++CMD="scala -J-Xmx40g -cp $FIGARO:$CP com.cra.appril.pcfg.Solution $1 $2 $3 $4"
+ echo $CMD
+ $CMD
++RET=$?
++
++cd $3
++cat pcfgla.lexicon | cut -d ' ' -f 1,3,4 > new.lexicon
++mv new.lexicon pcfgla.lexicon
++cat pcfgla.states | tr ' ' '\t' > new.states
++mv new.states pcfgla.states
++
++exit $RET
