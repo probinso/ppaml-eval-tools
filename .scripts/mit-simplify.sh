@@ -1,11 +1,6 @@
 #!/bin/bash
 
-for pattern in pcfg;
-    rm -f $( ls -t | grep ${pattern} | tail -n +3);
-done
-
-
-for pattern in graphs hmm homophily lda lifted qmr recursion regression cp5 venture-0.3;
+for pattern in graphs hmm homophily lda lifted qmr recursion regression cp5 venture-0.3 pcfg-\[0-9\] pcfg-smc; do
     rm -f $( ls -t | grep ${pattern} | tail -n +2);
 done
 
