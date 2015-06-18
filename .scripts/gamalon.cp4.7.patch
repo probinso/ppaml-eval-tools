@@ -1,0 +1,14 @@
+--- run.sh.original	2015-06-18 16:25:44.526068136 -0700
++++ run.sh	2015-06-18 16:28:23.462068136 -0700
+@@ -64,7 +64,9 @@
+     exit 1
+ fi
+ 
++cat $3/problem-7-query-1-metric-1.csv | cut -d ',' -f 1,2 > $3/fixed.csv
++mv $3/fixed.csv $3/problem-7-query-1-metric-1.csv
+ 
+ # problem-7-observations is in the root directory of cp4_7
+ printf "Script completed\n"
+-exit 0
+\ No newline at end of file
++exit 0
