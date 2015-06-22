@@ -52,9 +52,10 @@ def thething():
             print y, divider, x.in_digest, divider, x.eval_digest, divider, x.rel_inpath
 
 
-    print 
-    print
-    pny.select((cp, pny.count(cp.datasets)) for cp in ChallengeProblem).show()
+    #print 
+    #print
+    #pny.select((cp, pny.count(cp.datasets)) for cp in ChallengeProblem).show()
+    """
     print
     print
     pny.select((
@@ -62,6 +63,7 @@ def thething():
         s.challenge_problem.id,
         s.id
     ) for s in Solution).show()
+    """
 
     runs = pny.select(
       (r.id, r.configured_solution.solution, r.configured_solution, r.dataset)
@@ -85,14 +87,15 @@ def thething():
     for pps, cps, con, ds in unran:
         print_run(pps, cps, con, ds)
 
+    print "COMPLETED RUNS"
     for pps, cps, con, ds in ran:
         print_run(
-          pps, cps, con, ds,
-          pps.team.description + \
-          " " + \
-          str(
-            [(s[1], s[2], s[3]) for s in runs].count((cps, con, ds))
-          )
+          pps, cps, con, ds #,
+          #pps.team.description + \
+          #" " + \
+          #str(
+          #  [(s[1], s[2], s[3]) for s in runs].count((cps, con, ds))
+          #)
         )
 
     print
@@ -105,7 +108,7 @@ def thething():
         print x.id, x.engine
 
     """
-
+    """
     print "\n\nI AM CHECKING evaluators \n----------------------"
     for x in pny.select(e for e in Evaluator):
         print x
@@ -121,6 +124,7 @@ def thething():
             r.output,
             r.log) for r in Run):
         print divider.join(map(str,list(x)))
+    """
 
 if __name__ == "__main__":
     thething()
