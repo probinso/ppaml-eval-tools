@@ -49,6 +49,7 @@ import tarfile
 import tempfile
 import inspect
 import xdg.BaseDirectory
+import stat
 
 import time
 import subprocess
@@ -420,6 +421,9 @@ def process_watch( base_dir, command, timeout=3.0, isfile=True,
 
     if isfile:
         command[0] = file_from_tree(command[0], base_dir, False)
+        st = os.stat(command[0])
+        os.chmod(command[0], st.st_mode | stat.S_IEXEC)
+
     write(command)
 
     start_t = time.time()
