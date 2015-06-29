@@ -36,9 +36,10 @@ from model import db, ChallengeProblem, Team, Dataset, Solution, Engine, Configu
 
 @pny.db_session
 def print_run(pps, cps, config, ds, comment=None):
+    print "peval run", pps.id, cps.id, config.id, ds.in_digest, '# ', pps.team.description, " ", cps.challenge_problem.id, cps.challenge_problem.revision_major, config.filename, 
     if comment:
-        print '# ', comment
-    print "peval run", pps.id, cps.id, config.id, ds.in_digest, '# ', pps.team.description, " ", cps.challenge_problem.id, cps.challenge_problem.revision_major, config.filename
+        print '# ', comment,
+    print ""
 
 @pny.db_session
 def thething():
@@ -90,13 +91,12 @@ def thething():
     print "COMPLETED RUNS"
     for pps, cps, con, ds in ran:
         print_run(
-          pps, cps, con, ds #,
-          #pps.team.description + \
-          #" " + \
-          #str(
-          #  [(s[1], s[2], s[3]) for s in runs].count((cps, con, ds))
-          #)
+          pps, cps, con, ds,
+          " This Ran " + str(
+            [(s[1], s[2], s[3]) for s in runs].count((cps, con, ds))
+          ) + " times."
         )
+
 
     print
     print "\n\nI AM CHECKING ENGINES \n----------------------"
