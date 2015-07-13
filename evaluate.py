@@ -109,8 +109,7 @@ def hash_to_paths(run_id, dest):
 def evaluate_run(result_path, ground_path, eval_path, output_path):
 
     for _, rc, _, _ in utility.process_watch(
-      eval_path, ['eval.sh', result_path, ground_path, output_path],
-      ENGROOT=engroot
+      eval_path, ['eval.sh', result_path, ground_path, output_path]
     ):
         pass
 
