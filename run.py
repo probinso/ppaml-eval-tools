@@ -127,16 +127,16 @@ def hash_to_paths(dest, engine_hash, solution_hash, config_hash, dataset_hash):
 """
 def sum_for_process_children(function, proc):
     return function(proc) + \
-      sum(function(child) for child in proc.get_children(recursive=True))
+      sum(function(child) for child in proc.children(recursive=True))
 
 def sample_ram(proc):
     def get_ram_usage(process):
-        return process.get_memory_info().vms >> 10 # bytes -> KiB
+        return process.memory_info().vms >> 10 # bytes -> KiB
     return sum_for_process_children(get_ram_usage, proc)
 
 def sample_load(proc):
     def get_cpu_usage(process):
-        return 0.01 * psutil.Process.get_cpu_percent(process)
+        return 0.01 * psutil.Process.cpu_percent(process)
     return sum_for_process_children(get_cpu_usage, proc)
 """
   end process helpers
