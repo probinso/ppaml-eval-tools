@@ -74,6 +74,8 @@ def save_evaluation(run_id, out_hash):
           cp.cp_ids
         )
 
+    mod.delete(p for p in mod.Evaluation if p.run == r)
+
     evaluation = mod.Evaluation(
         id = out_hash,
         evaluator = ev,
