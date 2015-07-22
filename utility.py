@@ -61,7 +61,14 @@ import signal # XXX PMR : this should probably not exist in utility
   ::SUCC_COMMENT
   This is used below in the contextmanager for directories.
 """
-RUN_STATE = ['.SUCCESS', '.FAILED', '.INTERRUPT', '.UNDECIDED']
+RUN_STATE = ['.SUCCESS', '.FAILED', '.INTERRUPT', '.CRASH', '.UNDECIDED']
+"""
+SUCCESS   -> Run Successfuly terminates
+FAILED    -> Run Unsuccessfuly terminates
+INTERRUPT -> Sigint sent to peval
+CRASH     -> peval crashed
+UNDECIDED -> Presently running, exit status undecided
+"""
 SUCC_RUN = 0
 
 DEBUG = True
@@ -494,9 +501,14 @@ def TemporaryDirectory(suffix='', prefix='peval.', dir=None, persist=False):
     base_tree = tempfile.mkdtemp(suffix, prefix, dir)
     undecided_tree = base_tree + RUN_STATE[-1]
     os.rename(base_tree, undecided_tree)
+    global SUCC_RUN
+    global RUN_STATE
 
     try:
         yield undecided_tree
+    except Exception as e:
+        SUCC_RUN = -2
+        raise e
     finally:
         """
           This is probably the most dangerous part of code. SUCC_RUN is a 
@@ -505,9 +517,7 @@ def TemporaryDirectory(suffix='', prefix='peval.', dir=None, persist=False):
             readable name of that state. For more info, look for 
           ::SUCC_COMMENT
         """
-        global SUCC_RUN
-        global RUN_STATE
-        
+
         tree = base_tree + RUN_STATE[SUCC_RUN]
         if SUCC_RUN != 0:
             persist = True
