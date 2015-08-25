@@ -506,9 +506,12 @@ def TemporaryDirectory(suffix='', prefix='peval.', dir=None, persist=False):
 
     try:
         yield undecided_tree
+
     except Exception as e:
-        SUCC_RUN = -2
+        if SUCC_RUN != 2: # insure not to squash .INTERRUPT
+            SUCC_RUN = -2
         raise e
+
     finally:
         """
           This is probably the most dangerous part of code. SUCC_RUN is a 
