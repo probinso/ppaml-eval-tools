@@ -31,7 +31,7 @@
 from datetime import datetime
 import pony.orm as pny
 import os.path as osp
-import utility
+from . import utility
 
 DB_LOC = utility.location_resource(fname='index.db')
 DBE = osp.exists(DB_LOC)

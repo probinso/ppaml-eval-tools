@@ -29,8 +29,8 @@
 
 import argparse
 import sys
-import model as mod
-import utility
+from . import model as mod
+from . import utility
 
 
 def register_stub_cli(arguments):
