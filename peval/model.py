@@ -36,7 +36,7 @@ from . import utility
 DB_LOC = utility.location_resource(fname='index.db')
 DBE = osp.exists(DB_LOC)
 
-db = pny.Database("sqlite", DB_LOC if DBE else ':memory:', create_db=True)
+db = pny.Database("sqlite", DB_LOC if DBE else ':memory:', create_db=False)
 
 
 class Team(db.Entity):
