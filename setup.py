@@ -14,7 +14,7 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 setup(
-  name     = 'peval',
+  name         = 'peval',
   version      = '1.0',
   description  = 'Program Evaluator Harness',
   author       = 'Philip Robinson',
@@ -43,6 +43,16 @@ setup(
 
   url          = 'https://www.github.com/GaloisInc/ppaml-eval-tools/',
   packages     = ['peval'],
+  entry_points = { # enable cmd-line access
+    "console_scripts": [
+      'peval = peval.peval:main',
+      # 'driver.py = peval.driver',
+      # 'evil.py = peval.evil',
+    ] 
+    },
+  scripts = ['scripts/driver.py', 'scripts/evil.py'],
+  package_data={'peval': ['db_init.sql']},
+  data_files=[('share/%s/%s' % ('peval', x[0]), map(lambda y: x[0]+'/'+y, x[2])) for x in os.walk('example/')],
   long_description=read('README'),
   install_requires = [
     'argcomplete',
