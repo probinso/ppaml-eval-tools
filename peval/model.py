@@ -52,7 +52,6 @@ if not DBE:
     initialize()
 
 db = pny.Database("sqlite", DB_LOC, create_db=False)
-utility.write(DBE)
 
 class Team(db.Entity):
     _table_ = "team"
