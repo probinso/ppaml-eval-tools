@@ -243,4 +243,4 @@ class ConfiguredSolution(db.Entity):
 
 
 #pny.sql_debug(True)
-db.generate_mapping(check_tables=True, create_tables=false)
+db.generate_mapping(check_tables=True, create_tables=False)
