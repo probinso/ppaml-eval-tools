@@ -28,16 +28,28 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from __future__ import absolute_import
+
 # EXTERNAL PACKAGES
 import argcomplete, argparse 
 import sys
 
 # INTERNAL PACKAGES
+# import .
+"""
+import evaluate
+import register
+import run
+import unpackage
+import utility
+"""
+
 from . import evaluate
 from . import register
 from . import run
 from . import unpackage
 from . import utility
+""""""
 
 
 def register_parser(subparsers):

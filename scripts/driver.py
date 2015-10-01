@@ -29,9 +29,9 @@
 
 import datetime
 import pony.orm as pny
-import utility
+import peval.utility as utility
 import collections
-from model import db, ChallengeProblem, Team, Dataset, Solution, Engine, ConfiguredSolution, Run, Evaluator
+from peval.model import db, ChallengeProblem, Team, Dataset, Solution, Engine, ConfiguredSolution, Run, Evaluator
 
 
 @pny.db_session
