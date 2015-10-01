@@ -43,10 +43,14 @@ setup(
 
   url          = 'https://www.github.com/GaloisInc/ppaml-eval-tools/',
   packages     = ['peval'],
-  long_description=read('README')
+  long_description=read('README'),
   install_requires = [
     'argcomplete',
     'argparse',
+    'datetime',
+    'pony',
+    'psutil',
+    'pyxdg',
   ]
      )
 
