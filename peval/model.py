@@ -33,11 +33,26 @@ import pony.orm as pny
 import os.path as osp
 from . import utility
 
+import pkgutil
+
 DB_LOC = utility.location_resource(fname='index.db')
 DBE = osp.exists(DB_LOC)
 
-db = pny.Database("sqlite", DB_LOC if DBE else ':memory:', create_db=False)
+def initialize():
+    import sqlite3
+    connection = sqlite3.connect(DB_LOC)
+    cursor = connection.cursor()
+    cursor.executescript(pkgutil.get_data('peval', 'db_init.sql'))
+    connection.commit()
+    connection.close()
+    DBE = not DBE
+    del sqlite3
 
+if not DBE:
+    initialize()
+
+db = pny.Database("sqlite", DB_LOC, create_db=False)
+utility.write(DBE)
 
 class Team(db.Entity):
     _table_ = "team"
@@ -228,4 +243,4 @@ class ConfiguredSolution(db.Entity):
 
 
 #pny.sql_debug(True)
-db.generate_mapping(check_tables=True, create_tables=not DBE)
+db.generate_mapping(check_tables=True, create_tables=false)
