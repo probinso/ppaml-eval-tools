@@ -35,21 +35,11 @@ import argcomplete, argparse
 import sys
 
 # INTERNAL PACKAGES
-# import .
-"""
-import evaluate
-import register
-import run
-import unpackage
-import utility
-"""
-
 from . import evaluate
 from . import register
 from . import run
 from . import unpackage
 from . import utility
-""""""
 
 
 def register_parser(subparsers):
