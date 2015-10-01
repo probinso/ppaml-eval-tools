@@ -46,11 +46,9 @@ setup(
   entry_points = { # enable cmd-line access
     "console_scripts": [
       'peval = peval.peval:main',
-      # 'driver.py = peval.driver',
-      # 'evil.py = peval.evil',
     ] 
     },
-  scripts = ['scripts/driver.py', 'scripts/evil.py'],
+  scripts = ['scripts/driver-peval.py', 'scripts/evil-peval.py'],
   package_data={'peval': ['db_init.sql']},
   data_files=[('share/%s/%s' % ('peval', x[0]), map(lambda y: x[0]+'/'+y, x[2])) for x in os.walk('example/')],
   long_description=read('README'),
