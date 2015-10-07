@@ -39,6 +39,7 @@ DB_LOC = utility.location_resource(fname='index.db')
 DBE = osp.exists(DB_LOC)
 
 def initialize():
+    global DBE
     import sqlite3
     connection = sqlite3.connect(DB_LOC)
     cursor = connection.cursor()
