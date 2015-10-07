@@ -1,6 +1,5 @@
-#!/usr/bin/env python
-# PYTHON_ARGCOMPLETE_OK
-# peval.py -- create a dummy configuration file  -*- coding: us-ascii -*-
+#!/usr/bin/python
+# unpackage.py -- inspect archive managed by database  -*- coding: us-ascii -*-
 # Copyright (C) 2014  Galois, Inc.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,57 +27,58 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import argcomplete, argparse
-import register
-import run
-import evaluate
-import unpackage
+import argparse
 import sys
-import utility
+from . import model as mod
+from . import utility
 
 
-def register_parser(subparsers):
-    parser = subparsers.add_parser('register')
-    register.generate_parser(parser)
-    return parser
+def register_stub_cli(arguments):
+    pass
 
 
-def run_parser(subparsers):
-    parser = subparsers.add_parser('run')
-    run.generate_parser(parser)
-    return parser
+def engine_subparser(subparsers):
+    parser = subparsers.add_parser('engine')
+    parser.set_defaults(func=register_stub_cli)
 
 
-def evaluate_parser(subparsers):
-    parser = subparsers.add_parser('evaluate')
-    evaluate.generate_parser(parser)
-    return parser
+def solution_subparser(subparsers):
+    parser = subparsers.add_parser('solution')
+    parser.set_defaults(func=register_stub_cli)
 
 
-def unpackage_parser(subparsers):
-    parser = subparsers.add_parser('unpackage')
-    unpackage.generate_parser(parser)
-    return parser
+def configuration_subparser(subparsers):
+    parser = subparsers.add_parser('configuration')
+    parser.set_defaults(func=register_stub_cli)
+
+
+def dataset_subparser(subparsers):
+    parser = subparsers.add_parser('dataset')
+    parser.set_defaults(func=register_stub_cli)
+
+
+def evaluator_subparser(subparsers):
+    parser = subparsers.add_parser('evaluator')
+    parser.set_defaults(func=register_stub_cli)
 
 
 def generate_parser(parser):
     subparsers = parser.add_subparsers(help="subcommand")
 
-    register_parser(subparsers)
-    run_parser(subparsers)
-    evaluate_parser(subparsers)
+    # initialize subparsers
+    engine_subparser(subparsers)
+    solution_subparser(subparsers)
+    configuration_subparser(subparsers)
+    dataset_subparser(subparsers)
+    evaluator_subparser(subparsers)
+
     return parser
 
 
 def main():
     parser = argparse.ArgumentParser()
-    generate_parser(parser)
-    argcomplete.autocomplete(parser)
-    arguments = parser.parse_args()
-    try:
-        sys.exit(arguments.func(arguments))
-    except utility.FormatedError as e:
-        utility.write(e)
+    arguments = generate_parser(parser).parse_args()
+    sys.exit(arguments.func(arguments))
 
 
 if __name__ == "__main__":
