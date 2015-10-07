@@ -32,11 +32,11 @@
 
 import argparse
 import sys
-import model as mod
+from . import model as mod
 import os.path as osp
 import os, psutil, subprocess
 import time
-import utility
+from . import utility
 from datetime import datetime
 
 

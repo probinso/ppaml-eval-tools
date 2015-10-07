@@ -94,7 +94,7 @@ signals = map(
 
 def location_resource(
   fname='.',
-  location=xdg.BaseDirectory.save_data_path('ppaml')
+  location=xdg.BaseDirectory.save_data_path('peval')
   ):
     return osp.join(location, fname)
 

@@ -29,9 +29,9 @@
 
 import datetime
 #import pony.orm as pny
-import utility
+import peval.utility as utility
 import collections
-import model as mod
+import peval.model as mod
 
 ## XXX: 
 @mod.pny.db_session
