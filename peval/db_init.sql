@@ -160,7 +160,13 @@ INSERT INTO
 INSERT INTO
   'challenge_problem' ('id', 'description', 'revision_major',
   'revision_minor', 'url')
-  VALUES(5, 'Probabilistic Context-Free-Grammar with Latent Annotation', 0, 0,
+  VALUES(5, 'Probabilistic Context-Free-Grammar without Latent Annotation', 0, 0,
+    'https://github.com/GaloisInc/ppaml-cp5');
+
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(5, 'Probabilistic Context-Free-Grammar with Latent Annotation', 1, 0,
     'https://github.com/GaloisInc/ppaml-cp5');
 
 
