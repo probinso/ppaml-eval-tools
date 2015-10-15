@@ -1,0 +1,11 @@
+--- bayes_linear_regression.py.original	2015-06-16 20:34:20.986068136 -0700
++++ bayes_linear_regression.py	2015-06-16 20:42:10.658068136 -0700
+@@ -176,7 +176,7 @@
+             wr.writerow(res_proc_lists[i])
+         resultFile.close()
+         metric_writer.write(str(elapsed)+","+str(expected_squared_error)+"\n")
+-        os_java_command = "java -jar totalvar.jar problem-1-solution-samples.csv "+output_file+" > "+output_folder+"/temp_file"
++        os_java_command = "java -jar totalvar.jar "+input_folder+"/problem-1-solution-samples.csv "+output_file+" > "+output_folder+"/temp_file"
+         print os_java_command
+         os.system(os_java_command)
+ 
