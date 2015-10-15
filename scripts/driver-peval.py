@@ -36,10 +36,11 @@ from peval.model import db, ChallengeProblem, Team, Dataset, Solution, Engine, C
 
 @pny.db_session
 def print_run(pps, cps, config, ds, comment=None):
-    print "peval run", pps.id, cps.id, config.id, ds.in_digest, '# ', pps.team.description, " ", cps.challenge_problem.id, cps.challenge_problem.revision_major, config.filename, 
+    print '# ', pps.team.description, " ", cps.challenge_problem.id, cps.challenge_problem.revision_major, config.filename, cps.meta_updated,
     if comment:
-        print '# ', comment,
+        print '# ', comment
     print ""
+    print "peval run", pps.id, cps.id, config.id, ds.in_digest
 
 @pny.db_session
 def thething():
@@ -75,7 +76,7 @@ def thething():
         (c.solution.engine, c.solution, c, d)
         for c in ConfiguredSolution for d in Dataset
         if c.solution.challenge_problem in d.challenge_problems
-    )
+      ).order_by(lambda _e, _s, c, _d: c.meta_updated)
 
 
     [ran, unran] = utility.split_filter(
@@ -101,7 +102,7 @@ def thething():
     print
     print "\n\nI AM CHECKING ENGINES \n----------------------"
     for x in pny.select(e for e in Engine):
-        print x.team.description, "\t::\t", x.id
+        print x.team.description, "\t::\t", x.id, "\t", x.full_path
     """
     print "\n\nI AM CHECKING SOLUTIONS \n----------------------"
     for x in pny.select(s for s in Solution):
