@@ -56,7 +56,7 @@ def solve_cp_id(cp_id):
 #####################################
 def register_engine_cli(arguments):
     eng_team_id = arguments.eng_team_id
-    full_path = utility.resolve_path(arguments.full_path)
+    full_path = utility.resolve_path(arguments.eng_path)
 
     return register_engine(eng_team_id, full_path)
 
@@ -96,8 +96,8 @@ def engine_subparser(subparsers):
     parser.add_argument('eng_team_id', type=int,
       help="your engine-team number")
 
-    parser.add_argument('full_path', type=str, 
-      help="path to artifact")
+    parser.add_argument('eng_path', type=str,
+      help="path to engine")
 
     parser.set_defaults(func=register_engine_cli)
 
@@ -181,7 +181,7 @@ def register_solution_cli(arguments):
     assert(osp.exists(utility.get_resource(fname=engine_hash)))
 
     [major, minor, revision] = solve_cp_id(arguments.cp_id)
-    full_path = utility.resolve_path(arguments.full_path)
+    full_path = utility.resolve_path(arguments.solution_path)
     configs = arguments.configs
     return register_solution(engine_hash, full_path, major,
       minor, revision, configs)
@@ -246,8 +246,8 @@ def solution_subparser(subparsers):
     parser.add_argument('cp_id', type=str,
       help="challenge problem id Major-Minor-Version ex: 01-00-02")
 
-    parser.add_argument('full_path', type=str,
-      help="full path to artifact")
+    parser.add_argument('solution_path', type=str,
+      help="full path to solution")
 
     parser.add_argument('configs', type=str, nargs='+',
       help="list of configuration files usable by solution")
@@ -322,8 +322,8 @@ def evaluator_subparser(subparsers):
     parser.add_argument('cp_id', type=str,
       help="challenge problem id Major-Minor-Version ex: 01-00-02")
 
-    parser.add_argument('full_path', type=str,
-      help="dataset's unique identifier")
+    parser.add_argument('evaluator_path', type=str,
+      help="full path to evaluator")
 
     parser.set_defaults(func=register_evaluator_cli)
 
@@ -331,7 +331,7 @@ def evaluator_subparser(subparsers):
 def register_evaluator_cli(arguments):
 
     [major, minor, revision] = solve_cp_id(arguments.cp_id)
-    full_path = utility.resolve_path(arguments.full_path)
+    full_path = utility.resolve_path(arguments.evaluator_path)
 
     return register_evaluator(full_path, major, minor, revision)
 
