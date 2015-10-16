@@ -4,6 +4,16 @@ The PPAML client tools are a set of libraries and scripts that allow PPAML [*]
 TA2–4 teams to evaluate their own probabilistic programming systems in the same
 way that we will at Galois.
 
+INSTALL
+
+To install this program please use pip
+  pip install --user .
+
+Note that there are not yet version related restrictions found in the 
+required packages list.
+
+
+
 README IN PROGRESS
 
 peval is the Program Evaluator tool used in evaluation and system use profiles
