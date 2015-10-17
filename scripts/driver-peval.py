@@ -89,7 +89,9 @@ def thething():
     for pps, cps, con, ds in unran:
         print_run(pps, cps, con, ds)
 
+    print "-"*40
     print "COMPLETED RUNS"
+    print "-"*40
     for pps, cps, con, ds in ran:
         print_run(
           pps, cps, con, ds,
@@ -126,6 +128,9 @@ def thething():
             r.log) for r in Run):
         print divider.join(map(str,list(x)))
     """
+
+    print "\n", "-"*40
+    print "Max run id:", max(pny.select((r.id) for r in Run))
 
 if __name__ == "__main__":
     thething()
