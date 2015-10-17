@@ -76,7 +76,7 @@ def save_evaluation(run_id, out_hash):
 
     evaluation = mod.Evaluation.get(run=r)
     if evaluation:
-        delete(evaluation)
+        evaluation.delete()
     evaluation = mod.Evaluation()
 
     evaluation.id = out_hash
