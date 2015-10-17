@@ -77,11 +77,11 @@ def save_evaluation(run_id, out_hash):
     evaluation = mod.Evaluation.get(run=r)
     if evaluation:
         evaluation.delete()
-    evaluation = mod.Evaluation()
-
-    evaluation.id = out_hash
-    evaluation.evaluator = ev
-    evaluation.run = r
+    evaluation = mod.Evaluation(
+        id = out_hash,
+        evaluator = ev,
+        run = r
+    )
 
 
 @mod.pny.db_session
