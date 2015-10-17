@@ -1,6 +1,5 @@
-#!/usr/bin/env python
-# PYTHON_ARGCOMPLETE_OK
-# peval.py -- create a dummy configuration file  -*- coding: us-ascii -*-
+#!/usr/bin/python
+# unpackage.py -- inspect archive managed by database  -*- coding: us-ascii -*-
 # Copyright (C) 2014  Galois, Inc.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,63 +27,33 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from __future__ import absolute_import
-
-# EXTERNAL PACKAGES
-import argcomplete, argparse 
+import argparse
 import sys
-
-# INTERNAL PACKAGES
-from . import evaluate
-from . import register
-from . import run
+from . import model as mod
 from . import utility
-from . import inspect
 
 
-def register_parser(subparsers):
-    parser = subparsers.add_parser('register')
-    register.generate_parser(parser)
-    return parser
+def inspect_operation_cli(arguments):
+    unique_identifier = utility.get_resource(arguments.hash_tar_bz)
+    return register_stub(unique_identifier)
 
-
-def run_parser(subparsers):
-    parser = subparsers.add_parser('run')
-    run.generate_parser(parser)
-    return parser
-
-
-def evaluate_parser(subparsers):
-    parser = subparsers.add_parser('evaluate')
-    evaluate.generate_parser(parser)
-    return parser
-
-
-def inspect_parser(subparsers):
-    parser = subparsers.add_parser('inspect')
-    inspect.generate_parser(parser)
-    return parser
-
+def inspect_operation(unique_identifier):
+    with utility.TemporaryDirectory(persist=True) as sandbox:
+        utility.unpack_part(unique_identifier, sandbox)
 
 def generate_parser(parser):
-    subparsers = parser.add_subparsers(help="subcommand")
 
-    register_parser(subparsers)
-    run_parser(subparsers)
-    evaluate_parser(subparsers)
-    inspect_parser(subparsers)
+    # initialize subparsers
+    parser.add_argument('hash_tar_bz', type=str, help="unique identifier hash")
+
+    parser.set_defaults(func=register_stub_cli)
     return parser
 
 
 def main():
     parser = argparse.ArgumentParser()
-    generate_parser(parser)
-    argcomplete.autocomplete(parser)
-    arguments = parser.parse_args()
-    try:
-        sys.exit(arguments.func(arguments))
-    except utility.FormatedError as e:
-        utility.write(e)
+    arguments = generate_parser(parser).parse_args()
+    sys.exit(arguments.func(arguments))
 
 
 if __name__ == "__main__":
