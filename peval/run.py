@@ -247,16 +247,3 @@ def generate_parser(parser):
     parser.set_defaults(func=run_solution_cli)
 
     return parser
-
-
-def main():
-    if not mod.DBE:
-        utility.write("NO DATABASE PRESENT")
-
-    parser = argparse.ArgumentParser()
-    arguments = generate_parser(parser).parse_args()
-    sys.exit(arguments.func(arguments))
-
-
-if __name__ == "__main__":
-    main()

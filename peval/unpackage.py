@@ -74,12 +74,3 @@ def generate_parser(parser):
 
     return parser
 
-
-def main():
-    parser = argparse.ArgumentParser()
-    arguments = generate_parser(parser).parse_args()
-    sys.exit(arguments.func(arguments))
-
-
-if __name__ == "__main__":
-    main()
