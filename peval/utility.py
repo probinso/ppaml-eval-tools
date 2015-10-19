@@ -482,7 +482,7 @@ class FormatedError(FatalError):
 
 
 def test_path(path):
-    if not (path or osp.exists(path)):
+    if not osp.exists(path):
         raise FormatedError("""\
           File error: artifac file
           "{}" is invalid : Does Not Exist""", path)

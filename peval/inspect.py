@@ -33,44 +33,18 @@ from . import model as mod
 from . import utility
 
 
-def register_stub_cli(arguments):
-    pass
+def inspect_operation_cli(arguments):
+    unique_identifier = utility.get_resource(arguments.hash_tar_bz)
+    return register_stub(unique_identifier)
 
-
-def engine_subparser(subparsers):
-    parser = subparsers.add_parser('engine')
-    parser.set_defaults(func=register_stub_cli)
-
-
-def solution_subparser(subparsers):
-    parser = subparsers.add_parser('solution')
-    parser.set_defaults(func=register_stub_cli)
-
-
-def configuration_subparser(subparsers):
-    parser = subparsers.add_parser('configuration')
-    parser.set_defaults(func=register_stub_cli)
-
-
-def dataset_subparser(subparsers):
-    parser = subparsers.add_parser('dataset')
-    parser.set_defaults(func=register_stub_cli)
-
-
-def evaluator_subparser(subparsers):
-    parser = subparsers.add_parser('evaluator')
-    parser.set_defaults(func=register_stub_cli)
-
+def inspect_operation(unique_identifier):
+    with utility.TemporaryDirectory(persist=True) as sandbox:
+        utility.unpack_part(unique_identifier, sandbox)
 
 def generate_parser(parser):
-    subparsers = parser.add_subparsers(help="subcommand")
 
     # initialize subparsers
-    engine_subparser(subparsers)
-    solution_subparser(subparsers)
-    configuration_subparser(subparsers)
-    dataset_subparser(subparsers)
-    evaluator_subparser(subparsers)
+    parser.add_argument('hash_tar_bz', type=str, help="unique identifier hash")
 
+    parser.set_defaults(func=register_stub_cli)
     return parser
-

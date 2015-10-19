@@ -38,8 +38,8 @@ import sys
 from . import evaluate
 from . import register
 from . import run
-from . import unpackage
 from . import utility
+from . import inspect
 
 
 def register_parser(subparsers):
@@ -60,9 +60,9 @@ def evaluate_parser(subparsers):
     return parser
 
 
-def unpackage_parser(subparsers):
-    parser = subparsers.add_parser('unpackage')
-    unpackage.generate_parser(parser)
+def inspect_parser(subparsers):
+    parser = subparsers.add_parser('inspect')
+    inspect.generate_parser(parser)
     return parser
 
 
@@ -72,6 +72,7 @@ def generate_parser(parser):
     register_parser(subparsers)
     run_parser(subparsers)
     evaluate_parser(subparsers)
+    inspect_parser(subparsers)
     return parser
 
 
