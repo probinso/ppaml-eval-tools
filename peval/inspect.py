@@ -48,13 +48,3 @@ def generate_parser(parser):
 
     parser.set_defaults(func=register_stub_cli)
     return parser
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    arguments = generate_parser(parser).parse_args()
-    sys.exit(arguments.func(arguments))
-
-
-if __name__ == "__main__":
-    main()
