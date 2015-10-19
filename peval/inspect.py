@@ -35,7 +35,7 @@ from . import utility
 
 def inspect_operation_cli(arguments):
     unique_identifier = utility.get_resource(arguments.hash_tar_bz)
-    return register_stub(unique_identifier)
+    return inpsect_operator(unique_identifier)
 
 def inspect_operation(unique_identifier):
     with utility.TemporaryDirectory(persist=True) as sandbox:
@@ -46,5 +46,5 @@ def generate_parser(parser):
     # initialize subparsers
     parser.add_argument('hash_tar_bz', type=str, help="unique identifier hash")
 
-    parser.set_defaults(func=register_stub_cli)
+    parser.set_defaults(func=inspect_operation_cli)
     return parser
