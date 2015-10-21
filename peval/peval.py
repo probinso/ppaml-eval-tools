@@ -40,6 +40,7 @@ from . import register
 from . import run
 from . import utility
 from . import inspect
+from . import delete
 
 
 def register_parser(subparsers):
@@ -66,6 +67,12 @@ def inspect_parser(subparsers):
     return parser
 
 
+def delete_parser(subparsers):
+    parser = subparsers.add_parser('delete')
+    delete.generate_parser(parser)
+    return parser
+
+
 def generate_parser(parser):
     subparsers = parser.add_subparsers(help="subcommand")
 
@@ -73,6 +80,7 @@ def generate_parser(parser):
     run_parser(subparsers)
     evaluate_parser(subparsers)
     inspect_parser(subparsers)
+    delete_parser(subparsers)
     return parser
 
 

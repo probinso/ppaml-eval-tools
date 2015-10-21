@@ -40,6 +40,7 @@ import contextlib
 import shutil
 
 import hashlib
+from distutils.util import strtobool
 from itertools import ifilter
 
 import os
@@ -50,6 +51,7 @@ import tempfile
 import inspect
 import xdg.BaseDirectory
 import stat
+import sys
 
 import time
 import subprocess
@@ -532,4 +534,15 @@ def TemporaryDirectory(suffix='', prefix='peval.', dir=None, persist=False):
             print("data persists : " + tree)
         else:
             shutil.rmtree(tree)
+
+
+def prompt(query):
+  sys.stdout.write('%s [y/n]: ' % query)
+  val = raw_input()
+  try:
+      ret = strtobool(val)
+  except ValueError:
+      sys.stdout.write('Please answer with a y/n\n')
+      return prompt(query)
+  return ret
 
