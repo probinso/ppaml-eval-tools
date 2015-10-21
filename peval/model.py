@@ -75,8 +75,8 @@ class Engine(db.Entity):
     team = pny.Required(Team)
     meta_created = pny.Required(datetime, default=datetime.utcnow)
     meta_updated = pny.Required(datetime, default=datetime.utcnow)
-    solutions = pny.Set("Solution")
-    runs = pny.Set("Run")
+    solutions = pny.Set("Solution",cascade_delete=True)
+    runs = pny.Set("Run",cascade_delete=True)
 
     @property
     def digest(self):
@@ -93,7 +93,7 @@ class Dataset(db.Entity):
     meta_created = pny.Required(datetime, default=datetime.utcnow)
     meta_updated = pny.Required(datetime, default=datetime.utcnow)
     challenge_problems = pny.Set("ChallengeProblem")
-    runs = pny.Set("Run")
+    runs = pny.Set("Run",cascade_delete=True)
 
     @property
     def full_path(self):
@@ -116,7 +116,7 @@ class Solution(db.Entity):
     challenge_problem = pny.Required("ChallengeProblem")
     meta_created = pny.Required(datetime, default=datetime.utcnow)
     meta_updated = pny.Required(datetime, default=datetime.utcnow)
-    configurations = pny.Set("ConfiguredSolution")
+    configurations = pny.Set("ConfiguredSolution",cascade_delete=True)
 
     @property
     def digest(self):
@@ -152,7 +152,7 @@ class Evaluator(db.Entity):
     challenge_problem = pny.Required(ChallengeProblem)
     meta_created = pny.Required(datetime, default=datetime.utcnow)
     meta_updated = pny.Required(datetime, default=datetime.utcnow)
-    evaluations = pny.Set("Evaluation")
+    evaluations = pny.Set("Evaluation",cascade_delete=True)
 
     @property
     def digest(self):
@@ -177,7 +177,7 @@ class Run(db.Entity):
     ram_average = pny.Required(float)
     ram_max = pny.Required(float)
 
-    evaluation = pny.Optional("Evaluation")
+    evaluation = pny.Optional("Evaluation",cascade_delete=True)
     
     meta_created = pny.Required(datetime, default=datetime.utcnow)
     meta_updated = pny.Required(datetime, default=datetime.utcnow)
@@ -228,7 +228,7 @@ class ConfiguredSolution(db.Entity):
     id = pny.Required(str)
     filename = pny.Required(str)
     solution = pny.Required(Solution)
-    runs = pny.Set(Run)
+    runs = pny.Set(Run,cascade_delete=True)
     pny.PrimaryKey(id, solution)
     meta_created = pny.Required(datetime, default=datetime.utcnow)
     meta_updated = pny.Required(datetime, default=datetime.utcnow)
