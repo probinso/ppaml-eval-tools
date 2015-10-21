@@ -131,8 +131,8 @@ def solution_subparser(subparsers):
 
 # XXX MAH Is it unclear to say both "configuration" & "configured_solution"?
 def delete_configuration_cli(arguments):
-    identifier = arguments.configuration_hash
-    obj_getter = lambda identifier: mod.ConfiguredSolution.get(id=identifier)
+    identifier = (arguments.configuration_hash, arguments.solution_hash)
+    obj_getter = lambda (ident,sol): mod.ConfiguredSolution.get(id=ident,solution=sol)
     name = "configuration"
     deps_finder = find_configured_solution_deps
     return delete_db_parameterized(identifier,obj_getter,name,deps_finder)
@@ -143,6 +143,9 @@ def configuration_subparser(subparsers):
 
     parser.add_argument('configuration_hash', type=str,
       help="a configuration's unique identifier")
+
+    parser.add_argument('solution_hash', type=str,
+      help="the unique identifier of the solution being configured")
 
     parser.set_defaults(func=delete_configuration_cli)
 
@@ -246,11 +249,13 @@ def find_solution_deps(sol_id):
     cs_deps = mod.ConfiguredSolution.select(lambda x: x.solution.id == sol_id)
     total_deps = set(cs_deps)
     for x in cs_deps:
-      total_deps |= find_configured_solution_deps(x.id)
+      total_deps |= find_configured_solution_deps((x.id,sol_id))
     return total_deps
 
-def find_configured_solution_deps(cs_id):
-    run_deps = mod.Run.select(lambda x: x.configured_solution.id == cs_id)
+def find_configured_solution_deps(cs_pair):
+    (cs_id, cs_sol) = cs_pair
+    run_deps = mod.Run.select(lambda x: x.configured_solution.id == cs_id and
+                                        x.configured_solution.solution.id == cs_sol)
     total_deps = set(run_deps)
     for x in run_deps:
       total_deps |= find_run_deps(x.id)
