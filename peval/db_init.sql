@@ -238,6 +238,14 @@ INSERT INTO
     'https://github.com/GaloisInc/ppaml-cp5');
 
 
+-- CRF
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(6, 'Conditional random fields', 0, 0,
+    'https://github.com/GaloisInc/ppaml-cp6');
+
+
 /*
 CREATE TABLE environment (
   environment_id INTEGER PRIMARY KEY AUTOINCREMENT,
