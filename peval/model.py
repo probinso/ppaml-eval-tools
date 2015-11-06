@@ -164,21 +164,21 @@ class Run(db.Entity):
     engine = pny.Required(Engine)
     configured_solution = pny.Required("ConfiguredSolution")
     dataset = pny.Required(Dataset)
-    
+
     output = pny.Required(pny.LongStr)
     log = pny.Optional(pny.LongStr)
-    
+
     started = pny.Required(datetime)
     duration = pny.Required(float)
-    
+
     load_average = pny.Required(float)
     load_max = pny.Required(float)
-    
+
     ram_average = pny.Required(float)
     ram_max = pny.Required(float)
 
     evaluation = pny.Optional("Evaluation")
-    
+
     meta_created = pny.Required(datetime, default=datetime.utcnow)
     meta_updated = pny.Required(datetime, default=datetime.utcnow)
 

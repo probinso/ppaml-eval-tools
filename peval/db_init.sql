@@ -55,14 +55,14 @@ CREATE TABLE challenge_problem (
   add trigger such that when an evaluator that gives a challenge_problem
   identification replaces this entry.
 
-  This is to insure that we can support old evaluators over new 
+  This is to insure that we can support old evaluators over new
   challenge_problem(s) assuming the only thing that has changed is input
   dataset. (because we are using digest as our identifier, and likey should)
 */
 
   meta_created DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   meta_updated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  evaluator INTEGER REFERENCES evaluator (id) ON DELETE CASCADE DEFAULT NULL, 
+  evaluator INTEGER REFERENCES evaluator (id) ON DELETE CASCADE DEFAULT NULL,
   PRIMARY KEY (id, revision_major, revision_minor)
 );
 
@@ -77,12 +77,12 @@ CREATE TABLE evaluator (
   meta_updated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   FOREIGN KEY (
-    challenge_problem_id, 
-    challenge_problem_revision_major, 
+    challenge_problem_id,
+    challenge_problem_revision_major,
     challenge_problem_revision_minor
   ) REFERENCES challenge_problem (
-    id, 
-    revision_major, 
+    id,
+    revision_major,
     revision_minor
   ) ON DELETE CASCADE
 );
@@ -93,6 +93,74 @@ INSERT INTO
   'revision_minor', 'url')
   VALUES(0, 'galois-stub', 0, 0,
     'https://ppaml.galois.com');
+
+
+--SLAM
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(1, 'SLAM WITH GPS WITHOUT OBSTICALS', 0, 0,
+    'http://ppaml.galois.com/wiki/wiki/CP1QuadRotor');
+
+INSERT INTO
+  'challenge_problem' ( 'id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(1, 'SLAM WITHOUT GPS WITH OBSTICALS', 0, 1,
+    'http://ppaml.galois.com/wiki/wiki/CP1QuadRotor');
+
+
+--BIRDS
+INSERT INTO
+-- ALL DATASETS, THIS IS RESERVERD FOR SOLUTIONS THAT ARE NOT SEPERABLE
+  'challenge_problem' ( 'id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(2, 'ALL BIRDS', 0, 0,
+    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
+
+INSERT INTO
+  'challenge_problem' ( 'id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(2, 'ONE BIRD', 1, 0,
+    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
+
+INSERT INTO
+  'challenge_problem' ( 'id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(2, 'THOUSANDS OF BIRDS', 2, 0,
+    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
+
+INSERT INTO
+  'challenge_problem' ( 'id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(2, 'MILLIONS OF BIRDS', 3, 0,
+    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
+
+
+INSERT INTO
+-- ALL DATASETS, THIS IS RESERVERD FOR SOLUTIONS THAT ARE NOT SEPERABLE
+  'challenge_problem' ( 'id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(2, 'ALL BIRDS', 0, 1,
+    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
+
+INSERT INTO
+  'challenge_problem' ( 'id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(2, 'ONE BIRD', 1, 1,
+    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
+
+INSERT INTO
+  'challenge_problem' ( 'id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(2, 'THOUSANDS OF BIRDS', 2, 1,
+    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
+
+INSERT INTO
+  'challenge_problem' ( 'id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(2, 'MILLIONS OF BIRDS', 3, 1,
+    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
+
 
 -- CP4 Mini Challenge Problems
 INSERT INTO
@@ -168,74 +236,6 @@ INSERT INTO
   'revision_minor', 'url')
   VALUES(5, 'Probabilistic Context-Free-Grammar with Latent Annotation', 1, 0,
     'https://github.com/GaloisInc/ppaml-cp5');
-
-
---SLAM
-INSERT INTO 
-  'challenge_problem' ('id', 'description', 'revision_major',
-  'revision_minor', 'url')
-  VALUES(1, 'SLAM WITH GPS WITHOUT OBSTICALS', 0, 0,
-    'http://ppaml.galois.com/wiki/wiki/CP1QuadRotor');
-
-INSERT INTO 
-  'challenge_problem' ( 'id', 'description', 'revision_major',
-  'revision_minor', 'url')
-  VALUES(1, 'SLAM WITHOUT GPS WITH OBSTICALS', 0, 1,
-    'http://ppaml.galois.com/wiki/wiki/CP1QuadRotor');
-
-
---BIRDS
-INSERT INTO
--- ALL DATASETS, THIS IS RESERVERD FOR SOLUTIONS THAT ARE NOT SEPERABLE
-  'challenge_problem' ( 'id', 'description', 'revision_major',
-  'revision_minor', 'url')
-  VALUES(2, 'ALL BIRDS', 0, 0,
-    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
-
-INSERT INTO 
-  'challenge_problem' ( 'id', 'description', 'revision_major',
-  'revision_minor', 'url')
-  VALUES(2, 'ONE BIRD', 1, 0,
-    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
-
-INSERT INTO
-  'challenge_problem' ( 'id', 'description', 'revision_major',
-  'revision_minor', 'url')
-  VALUES(2, 'THOUSANDS OF BIRDS', 2, 0,
-    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
-
-INSERT INTO
-  'challenge_problem' ( 'id', 'description', 'revision_major',
-  'revision_minor', 'url')
-  VALUES(2, 'MILLIONS OF BIRDS', 3, 0,
-    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
-
-
-
-INSERT INTO
--- ALL DATASETS, THIS IS RESERVERD FOR SOLUTIONS THAT ARE NOT SEPERABLE
-  'challenge_problem' ( 'id', 'description', 'revision_major',
-  'revision_minor', 'url')
-  VALUES(2, 'ALL BIRDS', 0, 1,
-    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
-
-INSERT INTO
-  'challenge_problem' ( 'id', 'description', 'revision_major',
-  'revision_minor', 'url')
-  VALUES(2, 'ONE BIRD', 1, 1,
-    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
-
-INSERT INTO
-  'challenge_problem' ( 'id', 'description', 'revision_major',
-  'revision_minor', 'url')
-  VALUES(2, 'THOUSANDS OF BIRDS', 2, 1,
-    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
-
-INSERT INTO
-  'challenge_problem' ( 'id', 'description', 'revision_major',
-  'revision_minor', 'url')
-  VALUES(2, 'MILLIONS OF BIRDS', 3, 1,
-    'http://ppaml.galois.com/wiki/wiki/CP2BirdMigration');
 
 
 /*
@@ -358,12 +358,12 @@ CREATE TABLE ChallengeProblem_Dataset (
   ),
 
   FOREIGN KEY (
-    challengeproblem_id, 
-    challengeproblem_revision_major, 
+    challengeproblem_id,
+    challengeproblem_revision_major,
     challengeproblem_revision_minor
   ) REFERENCES challenge_problem (
-    id, 
-    revision_major, 
+    id,
+    revision_major,
     revision_minor
   ) ON DELETE CASCADE
 );
@@ -383,8 +383,8 @@ CREATE TABLE solution (
   meta_updated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   FOREIGN KEY (
-    challenge_problem_id, 
-    challenge_problem_revision_major, 
+    challenge_problem_id,
+    challenge_problem_revision_major,
     challenge_problem_revision_minor
   ) REFERENCES challenge_problem (
     id, revision_major, revision_minor
@@ -438,7 +438,7 @@ CREATE TABLE Run (
   meta_updated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   FOREIGN KEY (
-    configured_solution_id, 
+    configured_solution_id,
     configured_solution_solution
   ) REFERENCES configured_solution (
     id, solution

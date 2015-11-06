@@ -9,7 +9,7 @@ INSTALL
 To install this program please use pip
   pip install --user .
 
-Note that there are not yet version related restrictions found in the 
+Note that there are not yet version related restrictions found in the
 required packages list.
 
 
@@ -54,4 +54,4 @@ is associated with the solution.
 
 
 [*] http://ppaml.galois.com/
-  
+

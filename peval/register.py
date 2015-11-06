@@ -43,7 +43,7 @@ def register_stub(*arguments):
 
 
 def solve_cp_id(cp_id):
-    ret = map(int, utility.safesplit(cp_id, '-')) + [ 0, 0, 0 ] 
+    ret = map(int, utility.safesplit(cp_id, '-')) + [ 0, 0, 0 ]
     return ret[:3]
 
 """
@@ -127,7 +127,7 @@ def register_dataset(major, minor, revision, rel_in, rel_eval):
 
         utility.commit_resource(in_hash_path)
         utility.commit_resource(eval_hash_path)
-    
+
     return in_hash
 
 
@@ -210,7 +210,7 @@ def register_solution(engine_hash, full_path, major, minor, revision, configs):
 
 @mod.pny.db_session
 def register_solution_db(
-      engine_id, major, minor, 
+      engine_id, major, minor,
       revision, solution_hash, configs
     ):
     e = mod.Engine.get(id=engine_id)

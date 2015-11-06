@@ -46,7 +46,7 @@ setup(
   entry_points = { # enable cmd-line access
     "console_scripts": [
       'peval = peval.peval:main',
-    ] 
+    ]
     },
   scripts = ['scripts/driver-peval.py', 'scripts/evil-peval.py'],
   package_data={'peval': ['db_init.sql']},
