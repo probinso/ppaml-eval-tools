@@ -23,6 +23,8 @@ that designates the required general resources for an artifact to run, and a
   SOLUTION
 that performs some task using the resources in ENGINE.
 
+
+# Teams
 In order to keep track of who is providing artifacts, every team is assigned a
 number, as listed below ::
 
@@ -39,6 +41,14 @@ number, as listed below ::
 For now teams are static, and cannot be added by use of the peval tool.
 
 
+# Challenge problems
+Challenge problems also cannot be added through any `peval` command. They must be
+added in `db_init.sql`. The database can then be updated with
+`sqlite3 $PATH_TO_index.db < ./peval/db_init.sql`, which will rerun the
+initialization commands. Due to uniqueness constraints, this should be idempotent.
+
+
+# Registering with `peval`
 The command ::
   $ peval register engine <team-id> <engine-directory>
 
@@ -50,7 +60,6 @@ that we will call ENG-HASH
 
 will register the solution to it's engine, and designate what problem number
 is associated with the solution.
-
 
 
 [*] http://ppaml.galois.com/
