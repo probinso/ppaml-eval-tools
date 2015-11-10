@@ -192,9 +192,11 @@ def untar_to_directory(src, dest):
     """
       Untars a tar.bz2 file to a directory then returns the appropriate dest
     """
+    if not (osp.exists(dest)):
+      os.mkdir(dest)
     with tarfile.open(src) as tar:
         li = map(lambda x: x.path, tar.getmembers())
-        tar.extractall(test_path(dest))
+        tar.extractall(dest)
         return osp.join(dest, dircommonprefix(li))
 
 
@@ -483,9 +485,7 @@ class FormatedError(FatalError):
 
 def test_path(path):
     if not osp.exists(path):
-        raise FormatedError("""\
-          File error: artifac file
-          "{}" is invalid : Does Not Exist""", path)
+        raise FormatedError("File error: {} does not exist", path)
     return path
 
 
