@@ -80,7 +80,7 @@ def failed_exec():
 def signal_handler(signum, frame):
     global SUCC_RUN
     SUCC_RUN = 2
-    raise FormatedError("Signal handler called with signal '{}'", signum)
+    raise FormattedError("Signal handler called with signal '{}'", signum)
 """
   ::SUCC_COMMENT
   This ends SUCC_COMMENT related data and modifications
@@ -147,7 +147,7 @@ def file_from_tree(tstname, dir_path, check=True):
         )
 
     if check and not this_file:
-        raise FormatedError(
+        raise FormattedError(
           "'{}' script does not exist in '{}'",
           tstname, dir_path
         )
@@ -476,7 +476,7 @@ class FatalError(Exception):
         self.exit_status = exit_status
 
 
-class FormatedError(FatalError):
+class FormattedError(FatalError):
     """An unrecoverable condition from which the program must exit."""
     def __init__(self, message, *elms):
        message = FormatMessage(message, *elms)
@@ -485,7 +485,7 @@ class FormatedError(FatalError):
 
 def test_path(path):
     if not osp.exists(path):
-        raise FormatedError("File error: {} does not exist", path)
+        raise FormattedError("File error: {} does not exist", path)
     return path
 
 

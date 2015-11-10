@@ -57,7 +57,7 @@ def evaluate_run_cli(arguments):
         try:
             save_evaluation(run_id, out_hash)
         except mod.pny.core.ConstraintError as e:
-            raise utility.FormatedError("Conflict : {}",  e)
+            raise utility.FormattedError("Conflict : {}",  e)
         utility.commit_resource(out_hash_path)
 
 
@@ -65,11 +65,11 @@ def evaluate_run_cli(arguments):
 def save_evaluation(run_id, out_hash):
     r = mod.Run.get(id=run_id)
     if not r:
-        raise utility.FormatedError("run_id {} not valid", run_id)
+        raise utility.FormattedError("run_id {} not valid", run_id)
 
     ev = r.configured_solution.solution.challenge_problem.evaluator
     if not ev:
-        raise utility.FormatedError(
+        raise utility.FormattedError(
           "No registered evaluator for challenge problem {}",
           cp.cp_ids
         )
@@ -88,11 +88,11 @@ def save_evaluation(run_id, out_hash):
 def hash_to_paths(run_id, dest):
     r = mod.Run.get(id=run_id)
     if not r:
-        raise utility.FormatedError("run_id {} not valid", run_id)
+        raise utility.FormattedError("run_id {} not valid", run_id)
 
     ev = r.configured_solution.solution.challenge_problem.evaluator
     if not ev:
-        raise utility.FormatedError(
+        raise utility.FormattedError(
           "No registered evaluator for challenge problem {}",
           cp.cp_ids
         )

@@ -42,7 +42,7 @@ from datetime import datetime
 
 def valid_params(*args):
     if None in args:
-        raise utility.FormatedError("Invalid input parameter",*args)
+        raise utility.FormattedError("Invalid input parameter",*args)
 
 
 def run_solution_cli(arguments):
@@ -73,7 +73,7 @@ def run_solution_cli(arguments):
 
             if rc != 0:
                 utility.failed_exec()
-                raise utility.FormatedError("solution execuution crashed")
+                raise utility.FormattedError("solution execution crashed")
 
             if osp.exists(logpath):
                 log_hash, log_hash_path = \
@@ -156,7 +156,7 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
 
     if rc != 0 and rc != None:
         # XXX PMR :: This perhaps should be returning the error code
-        raise utility.FormatedError("Wasn't able to build in {}", solpath)
+        raise utility.FormattedError("Wasn't able to build in {}", solpath)
 
     ram_samples = []
     load_samples = []
