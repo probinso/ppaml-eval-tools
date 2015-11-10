@@ -129,8 +129,12 @@ def thething():
         print divider.join(map(str,list(x)))
     """
 
-    print "\n", "-"*40
-    print "Max run id:", max(pny.select((r.id) for r in Run))
+    print "\n", "-"*40, "\n"
+    runs = pny.select((r.id) for r in Run)
+    if runs:
+      print "Max run id:", max(runs)
+    else:
+      print "No runs yet."
 
 if __name__ == "__main__":
     thething()
