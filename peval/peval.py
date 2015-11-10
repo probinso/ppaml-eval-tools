@@ -81,10 +81,7 @@ def main():
     generate_parser(parser)
     argcomplete.autocomplete(parser)
     arguments = parser.parse_args()
-    try:
-        sys.exit(arguments.func(arguments))
-    except utility.FormatedError as e:
-        utility.write(e)
+    sys.exit(arguments.func(arguments))
 
 
 if __name__ == "__main__":
