@@ -95,7 +95,7 @@ def thething():
     for pps, cps, con, ds in ran:
         print_run(
           pps, cps, con, ds,
-          " This Ran " + str(
+          " This ran " + str(
             [(s[1], s[2], s[3]) for s in runs].count((cps, con, ds))
           ) + " times."
         )

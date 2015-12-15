@@ -197,7 +197,7 @@ def untar_to_directory(src, dest):
     with tarfile.open(src) as tar:
         li = map(lambda x: x.path, tar.getmembers())
         tar.extractall(dest)
-        return osp.join(dest, dircommonprefix(li))
+        return dest
 
 
 def unpack_parts(dest, *args):
