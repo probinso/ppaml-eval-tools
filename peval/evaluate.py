@@ -51,6 +51,9 @@ def evaluate_run_cli(arguments):
         rc, output_path = \
           evaluate_run(result_path, ground_path, eval_path, output_path)
 
+	if rc:
+            raise utility.FormattedError("Evaluator returned nonzero exit code: " + str(rc))
+
         out_hash, out_hash_path = \
           utility.prepare_resource(output_path, sandbox)
 
