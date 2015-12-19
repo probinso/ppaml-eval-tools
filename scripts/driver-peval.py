@@ -117,17 +117,19 @@ def thething():
         print x
 
 
-    print "\n\nI AM RUNS configs \n----------------------"
-    for x in pny.select((
+    """
+    print "\n\nRUNS \n----------------------"
+    for fields in pny.select((
             r.engine.team.description,
             r.configured_solution.solution.challenge_problem.id,
             r.configured_solution.solution.challenge_problem.revision_major,
-            r.duration,
+            r.id,
             r.dataset.in_digest,
+            r.duration,
             r.output,
             r.log) for r in Run):
-        print divider.join(map(str,list(x)))
-    """
+        print "%15s - CP%d.%d.0 { run.id: %03d, dataset: %s, took: %10.4f secs, output: %s, log: %s}" % fields
+        #print divider.join(map(str,list(x)))
 
     print "\n", "-"*40, "\n"
     runs = pny.select((r.id) for r in Run)
