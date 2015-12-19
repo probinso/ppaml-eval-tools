@@ -31,7 +31,7 @@ import datetime
 import pony.orm as pny
 import peval.utility as utility
 import collections
-from peval.model import db, ChallengeProblem, Team, Dataset, Solution, Engine, ConfiguredSolution, Run, Evaluator
+from peval.model import db, ChallengeProblem, Team, Dataset, Solution, Engine, ConfiguredSolution, Run, Evaluator, Evaluation
 
 
 @pny.db_session
@@ -137,6 +137,15 @@ def thething():
       print "Max run id:", max(runs)
     else:
       print "No runs yet."
+
+    print "\n\nEVALUATIONS \n---------------"
+    for fields in pny.select((
+            e.id,
+            e.run.id,
+            e.meta_created) for e in Evaluation):
+        print "%s for run %03d at %s" % fields
+
+
 
 if __name__ == "__main__":
     thething()
