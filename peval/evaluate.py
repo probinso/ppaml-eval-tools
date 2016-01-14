@@ -70,7 +70,8 @@ def save_evaluation(run_id, out_hash):
     if not r:
         raise utility.FormattedError("run_id {} not valid", run_id)
 
-    ev = r.configured_solution.solution.challenge_problem.evaluator
+    cp = r.configured_solution.solution.challenge_problem
+    ev = cp.evaluator
     if not ev:
         raise utility.FormattedError(
           "No registered evaluator for challenge problem {}",
@@ -93,7 +94,8 @@ def hash_to_paths(run_id, dest):
     if not r:
         raise utility.FormattedError("run_id {} not valid", run_id)
 
-    ev = r.configured_solution.solution.challenge_problem.evaluator
+    cp = r.configured_solution.solution.challenge_problem
+    ev = cp.evaluator
     if not ev:
         raise utility.FormattedError(
           "No registered evaluator for challenge problem {}",
