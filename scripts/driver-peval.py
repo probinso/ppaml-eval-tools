@@ -142,7 +142,7 @@ def thething():
     for fields in pny.select((
             e.id,
             e.run.id,
-            e.meta_created) for e in Evaluation):
+            e.meta_created) for e in Evaluation).order_by(2):
         print "%s for run %03d at %s" % fields
 
 
