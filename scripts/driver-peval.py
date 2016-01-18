@@ -101,10 +101,6 @@ def thething():
         )
 
 
-    print
-    print "\n\nI AM CHECKING ENGINES \n----------------------"
-    for x in pny.select(e for e in Engine):
-        print x.team.description, "\t::\t", x.id, "\t", x.full_path
     """
     print "\n\nI AM CHECKING SOLUTIONS \n----------------------"
     for x in pny.select(s for s in Solution):
@@ -124,11 +120,11 @@ def thething():
             r.configured_solution.solution.challenge_problem.id,
             r.configured_solution.solution.challenge_problem.revision_major,
             r.id,
+            r.configured_solution.solution.id[:8],
             r.dataset.in_digest,
             r.duration,
-            r.output,
-            r.log) for r in Run):
-        print "%15s - CP%d.%d.0 { run.id: %03d, dataset: %s, took: %10.4f secs, output: %s, log: %s}" % fields
+            r.output[:8]) for r in Run):
+        print "%15s - CP%d.%d.0 { run.id: %03d, solution[:8]: %s, dataset: %s, took: %10.4f secs, ouput[:8]: %s }" % fields
         #print divider.join(map(str,list(x)))
 
     print "\n", "-"*40, "\n"
@@ -145,6 +141,9 @@ def thething():
             e.meta_created) for e in Evaluation).order_by(2):
         print "%s for run %03d at %s" % fields
 
+    print "\n\nEngines \n----------------------"
+    for x in pny.select(e for e in Engine):
+        print x.team.description, "\t::\t", x.id, "\t", x.full_path
 
 
 if __name__ == "__main__":
