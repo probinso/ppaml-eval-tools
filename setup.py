@@ -51,7 +51,7 @@ setup(
   scripts = ['scripts/driver-peval.py', 'scripts/evil-peval.py'],
   package_data={'peval': ['db_init.sql']},
   data_files=[('share/%s/%s' % ('peval', x[0]), map(lambda y: x[0]+'/'+y, x[2])) for x in os.walk('example/')],
-  long_description=read('README'),
+  long_description=read('README.md'),
   install_requires = [
     'argcomplete',
     'argparse',
