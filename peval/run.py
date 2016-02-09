@@ -148,15 +148,15 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
       all input parameters must be valid paths
     """
 
-    utility.write("attempt galois.sh")
+    utility.write("attempt pre_process.sh")
     for _, rc, _, _ in utility.process_watch(
-      solpath, ['galois.sh'], ENGROOT=engroot
+      solpath, ['pre_process.sh', configpath, datasetpath, outputdir, logfile], ENGROOT=engroot
     ):
         pass
 
-    if rc != 0 and rc != None:
+    if rc != None and rc != 0:
         # XXX PMR :: This perhaps should be returning the error code
-        raise utility.FormattedError("Wasn't able to build in {}", solpath)
+        raise utility.FormattedError("pre_process.sh returned exit code {}.", rc)
 
     ram_samples = []
     load_samples = []
@@ -175,6 +175,15 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
             continue
         load_samples.append(curr_load_sample)
         ram_samples.append(curr_ram_sample)
+
+    utility.write("attempt post_process.sh")
+    for _, rc, _, _ in utility.process_watch(
+      solpath, ['post_process.sh', configpath, datasetpath, outputdir, logfile], ENGROOT=engroot
+    ):
+        pass
+
+    if rc != None and rc != 0:
+        utility.write("post_process.sh returned exit code {}.", rc)
 
     maxavg = lambda li: (max(li), sum(li)/len(li))
 
