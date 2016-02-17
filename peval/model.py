@@ -209,6 +209,7 @@ class Evaluation(db.Entity):
     id = pny.Required(str)
     evaluator = pny.Required(Evaluator)
     run = pny.Required(Run)
+    did_succeed = pny.Required(bool)
     meta_created = pny.Required(datetime, default=datetime.utcnow)
     meta_updated = pny.Required(datetime, default=datetime.utcnow)
 

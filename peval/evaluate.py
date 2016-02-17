@@ -43,6 +43,9 @@ def evaluate_run_cli(arguments):
     run_id = arguments.run_id
     p_flag = arguments.persist
 
+    if not mod.Run.get(id=run_id):
+        raise utility.FormattedError("run_id {} not valid", run_id)
+
     with utility.TemporaryDirectory(persist=p_flag) as sandbox:
 
         result_path, ground_path, eval_path, output_path = \
@@ -51,21 +54,22 @@ def evaluate_run_cli(arguments):
         rc, output_path = \
           evaluate_run(result_path, ground_path, eval_path, output_path)
 
-	if rc:
+        if rc:
+            save_evaluation(run_id, out_hash, false)
             raise utility.FormattedError("Evaluator returned nonzero exit code: " + str(rc))
 
         out_hash, out_hash_path = \
           utility.prepare_resource(output_path, sandbox)
 
         try:
-            save_evaluation(run_id, out_hash)
+            save_evaluation(run_id, out_hash, true)
         except mod.pny.core.ConstraintError as e:
             raise utility.FormattedError("Conflict : {}",  e)
         utility.commit_resource(out_hash_path)
 
 
 @mod.pny.db_session
-def save_evaluation(run_id, out_hash):
+def save_evaluation(run_id, out_hash, did_succeed):
     r = mod.Run.get(id=run_id)
     if not r:
         raise utility.FormattedError("run_id {} not valid", run_id)
@@ -84,7 +88,8 @@ def save_evaluation(run_id, out_hash):
     evaluation = mod.Evaluation(
         id = out_hash,
         evaluator = ev,
-        run = r
+        run = r,
+        did_succeed = did_succeed
     )
 
 
