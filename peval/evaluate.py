@@ -27,7 +27,6 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from __future__ import print_function
 import argparse
 import sys
 import pony.orm as pny
@@ -39,10 +38,6 @@ import subprocess, os, psutil
 
 def register_stub(arguments):
     print("STUB FOUND :: ", arguments)
-
-def warning(*objs):
-    print("WARNING: ", *objs, file=sys.stderr)
-
 
 def evaluate_run_cli(arguments):
     run_id = arguments.run_id
@@ -61,8 +56,8 @@ def evaluate_run_cli(arguments):
         out_hash, out_hash_path = \
           utility.prepare_resource(output_path, sandbox)
 
-	if rc:
-            warning("Evaluator returned nonzero exit code: " + str(rc))
+        if rc:
+            utility.write("Evaluator returned nonzero exit code: " + str(rc))
             did_succeed = False
         else:
             did_succeed = True
@@ -94,7 +89,7 @@ def save_evaluation(run_id, out_hash, did_succeed):
 
     evaluation = mod.Evaluation.get(run=r)
     if evaluation:
-        warning("Old evaluation found, deleting it to save the new one.")
+        utility.write("Old evaluation found, deleting it to save the new one.")
         evaluation.delete()
         pny.flush()
     evaluation = mod.Evaluation(
