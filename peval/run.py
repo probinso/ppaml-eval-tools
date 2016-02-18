@@ -149,20 +149,20 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
     """
 
     utility.write("attempt pre_process.sh")
-    for _, rc, _, _ in utility.process_watch(
+    for _, rc_pre, _, _ in utility.process_watch(
       solpath, ['pre_process.sh', configpath, datasetpath, outputdir, logfile], ENGROOT=engroot
     ):
         pass
 
-    if rc != None and rc != 0:
+    if rc_pre != None and rc_pre != 0:
         # XXX PMR :: This perhaps should be returning the error code
-        raise utility.FormattedError("pre_process.sh returned exit code {}.", rc)
+        raise utility.FormattedError("pre_process.sh returned exit code {}.", rc_pre)
 
     ram_samples = []
     load_samples = []
 
     utility.write("attempting run.sh")
-    for proc_entry , rc, start_t, end_t in utility.process_watch(
+    for proc_entry , rc_run, start_t, end_t in utility.process_watch(
       solpath, ['run.sh', configpath, datasetpath, outputdir, logfile],
       ENGROOT=engroot
     ):
@@ -177,17 +177,17 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
         ram_samples.append(curr_ram_sample)
 
     utility.write("attempt post_process.sh")
-    for _, rc, _, _ in utility.process_watch(
+    for _, rc_post, _, _ in utility.process_watch(
       solpath, ['post_process.sh', configpath, datasetpath, outputdir, logfile], ENGROOT=engroot
     ):
         pass
 
-    if rc != None and rc != 0:
-        utility.write("post_process.sh returned exit code {}.", rc)
+    if rc_post != None and rc_post != 0:
+        utility.write("post_process.sh returned exit code {}.", rc_post)
 
     maxavg = lambda li: (max(li), sum(li)/len(li))
 
-    return rc,\
+    return rc_run,\
       maxavg(ram_samples),\
       maxavg(load_samples),\
       (start_t, end_t)
