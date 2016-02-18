@@ -27,8 +27,10 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from __future__ import print_function
 import argparse
 import sys
+import pony.orm as pny
 from . import model as mod
 import os.path as osp
 from . import utility
@@ -36,15 +38,17 @@ import subprocess, os, psutil
 
 
 def register_stub(arguments):
-    print "STUB FOUND :: ", arguments
+    print("STUB FOUND :: ", arguments)
+
+def warning(*objs):
+    print("WARNING: ", *objs, file=sys.stderr)
 
 
 def evaluate_run_cli(arguments):
     run_id = arguments.run_id
     p_flag = arguments.persist
 
-    if not mod.Run.get(id=run_id):
-        raise utility.FormattedError("run_id {} not valid", run_id)
+    check_run(run_id)
 
     with utility.TemporaryDirectory(persist=p_flag) as sandbox:
 
@@ -54,26 +58,32 @@ def evaluate_run_cli(arguments):
         rc, output_path = \
           evaluate_run(result_path, ground_path, eval_path, output_path)
 
-        if rc:
-            save_evaluation(run_id, out_hash, false)
-            raise utility.FormattedError("Evaluator returned nonzero exit code: " + str(rc))
-
         out_hash, out_hash_path = \
           utility.prepare_resource(output_path, sandbox)
 
+	if rc:
+            warning("Evaluator returned nonzero exit code: " + str(rc))
+            did_succeed = False
+        else:
+            did_succeed = True
+
         try:
-            save_evaluation(run_id, out_hash, true)
+            save_evaluation(run_id, out_hash, did_succeed)
         except mod.pny.core.ConstraintError as e:
             raise utility.FormattedError("Conflict : {}",  e)
         utility.commit_resource(out_hash_path)
 
+	if rc:
+            raise utility.FormattedError("Evaluator returned nonzero exit code: " + str(rc))
+
+@mod.pny.db_session
+def check_run(run_id):
+    if not mod.Run.get(id=run_id):
+        raise utility.FormattedError("run_id {} not valid", run_id)
 
 @mod.pny.db_session
 def save_evaluation(run_id, out_hash, did_succeed):
     r = mod.Run.get(id=run_id)
-    if not r:
-        raise utility.FormattedError("run_id {} not valid", run_id)
-
     cp = r.configured_solution.solution.challenge_problem
     ev = cp.evaluator
     if not ev:
@@ -84,7 +94,9 @@ def save_evaluation(run_id, out_hash, did_succeed):
 
     evaluation = mod.Evaluation.get(run=r)
     if evaluation:
+        warning("Old evaluation found, deleting it to save the new one.")
         evaluation.delete()
+        pny.flush()
     evaluation = mod.Evaluation(
         id = out_hash,
         evaluator = ev,
