@@ -35,7 +35,7 @@ from . import utility
 
 def inspect_operation_cli(arguments):
     unique_identifier = utility.get_resource(arguments.hash_tar_bz)
-    return inpsect_operator(unique_identifier)
+    return inspect_operation(unique_identifier)
 
 def inspect_operation(unique_identifier):
     with utility.TemporaryDirectory(persist=True) as sandbox:
