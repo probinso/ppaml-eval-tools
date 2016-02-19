@@ -151,29 +151,11 @@ def run_subparser(subparsers):
     parser.set_defaults(func=evaluate_run_cli)
 
 
-def challenge_problem_subparser(subparsers):
-    parser = subparsers.add_parser('challenge_problem')
-    parser.add_argument('cp_id', type=str,
-      help="challenge problem id Major-Minor-Version ex: 01-00-02")
-
-    parser.set_defaults(func=utility.write)
-
-
-def dataset_subparser(subparsers):
-    parser = subparsers.add_parser('dataset')
-    parser.add_argument('in_digest', type=str,
-      help="Unique identifier for the input dataset")
-
-    parser.set_defaults(func=utility.write)
-
-
 def generate_parser(parser):
     subparsers = parser.add_subparsers(help="subcommand")
 
     # initialize subparsers
     run_subparser(subparsers)
-    # challenge_problem_subparser(subparsers)
-    # dataset_subparser(subparsers)
 
     return parser
 
