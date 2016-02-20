@@ -141,6 +141,9 @@ def register_dataset_db(
       revision_major=minor,
       revision_minor=revision)
     # how does this react if there is no match?
+    if cp is None:
+        raise utility.FormattedError("Challenge problem {}-{}-{} not found"
+                                    , major, minor, revision)
 
     # we cast them to abspath at an earlier point
     full_path = osp.commonprefix([rel_in, rel_eval])
