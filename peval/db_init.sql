@@ -245,6 +245,12 @@ INSERT INTO
   VALUES(6, 'Conditional random fields', 0, 0,
     'https://github.com/GaloisInc/ppaml-cp6');
 
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(6, 'Conditional random fields with images tagged "structure"', 1, 0,
+    'https://github.com/GaloisInc/ppaml-cp6');
+
 
 /*
 CREATE TABLE environment (
