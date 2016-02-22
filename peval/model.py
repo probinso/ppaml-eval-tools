@@ -142,7 +142,7 @@ class ChallengeProblem(db.Entity):
         return (
           self.id,
           self.revision_major,
-          self.revision_major
+          self.revision_minor
         )
 
 
