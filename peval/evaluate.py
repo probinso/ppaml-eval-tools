@@ -39,10 +39,42 @@ import subprocess, os, psutil
 def register_stub(arguments):
     print("STUB FOUND :: ", arguments)
 
+
+def evaluate_all_cli(arguments):
+    unevaluated_run_ids = get_unevaluted_run_ids()
+    print("Preparing to evaluate runs {}".format(list(unevaluated_run_ids)))
+
+    exceptions   = []
+    for i in unevaluated_run_ids:
+        try:
+            evaluate_single_run(i, False)
+        except utility.FormattedError as e:
+            exceptions.append(e)
+
+    num_exns = len(exceptions)
+    num_ran = len(unevaluated_run_ids)
+    num_no_exns = num_exns - num_ran
+    if num_exns != 0:
+        pretty_exceptions = exceptions.join('\n')
+        raise utility.FormattedError(pretty_exceptions)
+
+    print("Evaluated {} runs. Succeeded: {}, failed: {}".format(num_ran, num_no_exns, num_exns))
+
+
+@mod.pny.db_session
+def get_unevaluted_run_ids():
+    run_ids      = pny.select(r.id for r in mod.Run)
+    eval_run_ids = pny.select(e.run.id for e in mod.Evaluation)
+    return set(run_ids) - set(eval_run_ids)
+
+
 def evaluate_run_cli(arguments):
     run_id = arguments.run_id
     p_flag = arguments.persist
+    evaluate_single_run(run_id, p_flag)
 
+
+def evaluate_single_run(run_id, p_flag):
     check_run(run_id)
 
     with utility.TemporaryDirectory(persist=p_flag) as sandbox:
@@ -68,7 +100,7 @@ def evaluate_run_cli(arguments):
             raise utility.FormattedError("Conflict : {}",  e)
         utility.commit_resource(out_hash_path)
 
-	if rc:
+        if rc:
             raise utility.FormattedError("Evaluator returned nonzero exit code: " + str(rc))
 
 @mod.pny.db_session
@@ -151,11 +183,17 @@ def run_subparser(subparsers):
     parser.set_defaults(func=evaluate_run_cli)
 
 
+def all_subparser(subparsers):
+    parser = subparsers.add_parser('all')
+    parser.set_defaults(func=evaluate_all_cli)
+
+
 def generate_parser(parser):
     subparsers = parser.add_subparsers(help="subcommand")
 
     # initialize subparsers
     run_subparser(subparsers)
+    all_subparser(subparsers)
 
     return parser
 
