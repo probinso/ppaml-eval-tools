@@ -44,8 +44,11 @@ def evaluate_all_cli(arguments):
     unevaluated_run_ids = get_unevaluted_run_ids()
     print("Preparing to evaluate runs {}".format(list(unevaluated_run_ids)))
 
-    exceptions   = []
+    exceptions = []
     for i in unevaluated_run_ids:
+        print("-"*80)
+        print("Evaluating run {}".format(i))
+        print("-"*80)
         try:
             evaluate_single_run(i, False)
         except utility.FormattedError as e:
