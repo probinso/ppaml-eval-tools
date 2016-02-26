@@ -50,3 +50,25 @@ $ peval register solution ENGHASH <problem-id> <solution-directory> \
                                   <config-path> [config-path ...]
 ```
 will register the solution to it's engine, and designate what problem number is associated with the solution.
+
+
+### Running with `peval`
+The command
+```
+$ peval run <engine_hash> <solution_hash> <config_hash> <dataset_hash>
+```
+will do a single "run". Available run commands can be found by calling `driver-peval.py`, which will list combinations of available solutions, configs, and datasets. The run will have a unique run id.
+
+
+### Evaluating with `peval`
+The command
+```
+$ peval evaluate all
+```
+will evaluate all runs which have not already been (successfully, or unsuccessfully) evaluated.
+
+The command
+```
+$ peval evaluate run <run_id>
+```
+will evaluate a single run. This can be used together with the `peval evaluate all` to evaluate a specific run.

@@ -29,6 +29,7 @@
 
 import argparse
 import sys
+import pony.orm as pny
 from . import model as mod
 import os.path as osp
 from . import utility
@@ -36,12 +37,48 @@ import subprocess, os, psutil
 
 
 def register_stub(arguments):
-    print "STUB FOUND :: ", arguments
+    print("STUB FOUND :: ", arguments)
+
+
+def evaluate_all_cli(arguments):
+    unevaluated_run_ids = get_unevaluted_run_ids()
+    print("Preparing to evaluate runs {}".format(list(unevaluated_run_ids)))
+
+    exceptions = []
+    for i in unevaluated_run_ids:
+        print("-"*80)
+        print("Evaluating run {}".format(i))
+        print("-"*80)
+        try:
+            evaluate_single_run(i, False)
+        except utility.FormattedError as e:
+            exceptions.append(e)
+
+    num_exns = len(exceptions)
+    num_ran = len(unevaluated_run_ids)
+    num_no_exns = num_exns - num_ran
+    if num_exns != 0:
+        pretty_exceptions = exceptions.join('\n')
+        raise utility.FormattedError(pretty_exceptions)
+
+    print("Evaluated {} runs. Succeeded: {}, failed: {}".format(num_ran, num_no_exns, num_exns))
+
+
+@mod.pny.db_session
+def get_unevaluted_run_ids():
+    run_ids      = pny.select(r.id for r in mod.Run)
+    eval_run_ids = pny.select(e.run.id for e in mod.Evaluation)
+    return set(run_ids) - set(eval_run_ids)
 
 
 def evaluate_run_cli(arguments):
     run_id = arguments.run_id
     p_flag = arguments.persist
+    evaluate_single_run(run_id, p_flag)
+
+
+def evaluate_single_run(run_id, p_flag):
+    check_run(run_id)
 
     with utility.TemporaryDirectory(persist=p_flag) as sandbox:
 
@@ -51,25 +88,32 @@ def evaluate_run_cli(arguments):
         rc, output_path = \
           evaluate_run(result_path, ground_path, eval_path, output_path)
 
-	if rc:
-            raise utility.FormattedError("Evaluator returned nonzero exit code: " + str(rc))
-
         out_hash, out_hash_path = \
           utility.prepare_resource(output_path, sandbox)
 
+        if rc:
+            utility.write("Evaluator returned nonzero exit code: " + str(rc))
+            did_succeed = False
+        else:
+            did_succeed = True
+
         try:
-            save_evaluation(run_id, out_hash)
+            save_evaluation(run_id, out_hash, did_succeed)
         except mod.pny.core.ConstraintError as e:
             raise utility.FormattedError("Conflict : {}",  e)
         utility.commit_resource(out_hash_path)
 
+        if rc:
+            raise utility.FormattedError("Evaluator returned nonzero exit code: " + str(rc))
 
 @mod.pny.db_session
-def save_evaluation(run_id, out_hash):
-    r = mod.Run.get(id=run_id)
-    if not r:
+def check_run(run_id):
+    if not mod.Run.get(id=run_id):
         raise utility.FormattedError("run_id {} not valid", run_id)
 
+@mod.pny.db_session
+def save_evaluation(run_id, out_hash, did_succeed):
+    r = mod.Run.get(id=run_id)
     cp = r.configured_solution.solution.challenge_problem
     ev = cp.evaluator
     if not ev:
@@ -80,11 +124,14 @@ def save_evaluation(run_id, out_hash):
 
     evaluation = mod.Evaluation.get(run=r)
     if evaluation:
+        utility.write("Old evaluation found, deleting it to save the new one.")
         evaluation.delete()
+        pny.flush()
     evaluation = mod.Evaluation(
         id = out_hash,
         evaluator = ev,
-        run = r
+        run = r,
+        did_succeed = did_succeed
     )
 
 
@@ -139,20 +186,9 @@ def run_subparser(subparsers):
     parser.set_defaults(func=evaluate_run_cli)
 
 
-def challenge_problem_subparser(subparsers):
-    parser = subparsers.add_parser('challenge_problem')
-    parser.add_argument('cp_id', type=str,
-      help="challenge problem id Major-Minor-Version ex: 01-00-02")
-
-    parser.set_defaults(func=utility.write)
-
-
-def dataset_subparser(subparsers):
-    parser = subparsers.add_parser('dataset')
-    parser.add_argument('in_digest', type=str,
-      help="Unique identifier for the input dataset")
-
-    parser.set_defaults(func=utility.write)
+def all_subparser(subparsers):
+    parser = subparsers.add_parser('all')
+    parser.set_defaults(func=evaluate_all_cli)
 
 
 def generate_parser(parser):
@@ -160,8 +196,7 @@ def generate_parser(parser):
 
     # initialize subparsers
     run_subparser(subparsers)
-    # challenge_problem_subparser(subparsers)
-    # dataset_subparser(subparsers)
+    all_subparser(subparsers)
 
     return parser
 
