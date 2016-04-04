@@ -251,6 +251,12 @@ INSERT INTO
   VALUES(6, 'Conditional random fields with images tagged "structure"', 1, 0,
     'https://github.com/GaloisInc/ppaml-cp6');
 
+-- Flu spread
+INSERT INTO
+  'challenge_problem' ('id', 'description', 'revision_major',
+  'revision_minor', 'url')
+  VALUES(7, 'Flu spread', 0, 0,
+    'https://github.com/GaloisInc/ppaml-cp7');
 
 /*
 CREATE TABLE environment (
