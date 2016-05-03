@@ -434,7 +434,8 @@ def process_watch( base_dir, command, timeout=3.0, isfile=True,
             st = os.stat(command[0])
             os.chmod(command[0], st.st_mode | stat.S_IEXEC)
 
-    write(command)
+    write("Command: " + str(command))
+    write("ENV: " + str(environment_variables))
 
     start_t = time.time()
 

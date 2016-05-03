@@ -82,11 +82,11 @@ def evaluate_single_run(run_id, p_flag):
 
     with utility.TemporaryDirectory(persist=p_flag) as sandbox:
 
-        result_path, ground_path, eval_path, output_path = \
+        result_path, ground_path, input_path, eval_path, output_path = \
           hash_to_paths(run_id, sandbox)
 
         rc, output_path = \
-          evaluate_run(result_path, ground_path, eval_path, output_path)
+          evaluate_run(result_path, ground_path, input_path, eval_path, output_path)
 
         out_hash, out_hash_path = \
           utility.prepare_resource(output_path, sandbox)
@@ -151,20 +151,23 @@ def hash_to_paths(run_id, dest):
 
     output_hash = r.output
     ground_hash = r.dataset.eval_digest
+    input_hash  = r.dataset.in_digest
     eval_hash   = ev.id
 
     return utility.unpack_parts(dest,
       ('result', output_hash),
       ('ground_truth', ground_hash),
+      ('input', input_hash),
       ('evaluator', eval_hash),
       ('output', None)
     )
 
 
-def evaluate_run(result_path, ground_path, eval_path, output_path):
+def evaluate_run(result_path, ground_path, input_path, eval_path, output_path):
 
     for _, rc, _, _ in utility.process_watch(
       eval_path, ['eval.sh', result_path, ground_path, output_path]
+               , INPUT_DIR=input_path
     ):
         pass
 
