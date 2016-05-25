@@ -73,7 +73,7 @@ def run_solution_cli(arguments):
 
             if rc != 0:
                 utility.failed_exec()
-                raise utility.FormattedError("solution execution crashed")
+                raise utility.FormattedError("solution execution exited with code %d" % rc)
 
             if osp.exists(logpath):
                 log_hash, log_hash_path = \
@@ -156,7 +156,7 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
 
     if rc_pre != None and rc_pre != 0:
         # XXX PMR :: This perhaps should be returning the error code
-        raise utility.FormattedError("pre_process.sh returned exit code {}.", rc_pre)
+        raise utility.FormattedError("pre_process.sh returned exit code %d.", rc_pre)
 
     ram_samples = []
     load_samples = []
@@ -183,7 +183,7 @@ def run_solution(engroot, solpath, configpath, datasetpath, outputdir, logfile):
         pass
 
     if rc_post != None and rc_post != 0:
-        utility.write("post_process.sh returned exit code {}.", rc_post)
+        utility.write("post_process.sh returned exit code %d.", rc_post)
 
     maxavg = lambda li: (max(li), sum(li)/len(li))
 
