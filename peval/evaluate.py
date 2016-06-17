@@ -52,16 +52,25 @@ def evaluate_all_cli(arguments):
         try:
             evaluate_single_run(i, False)
         except utility.FormattedError as e:
-            exceptions.append(e)
+            exceptions.append(str(e))
 
     num_exns = len(exceptions)
     num_ran = len(unevaluated_run_ids)
     num_no_exns = num_exns - num_ran
-    if num_exns != 0:
-        pretty_exceptions = exceptions.join('\n')
-        raise utility.FormattedError(pretty_exceptions)
 
+    print('-'*80)
+    print ("-- Results:")
+    print('-'*80)
     print("Evaluated {} runs. Succeeded: {}, failed: {}".format(num_ran, num_no_exns, num_exns))
+    print('-'*80)
+    print()
+
+    print('-'*80)
+    print ("-- Exceptions:")
+    print('-'*80)
+    if num_exns != 0:
+        pretty_exceptions = "\n".join(exceptions)
+        raise utility.FormattedError(pretty_exceptions)
 
 
 @mod.pny.db_session
