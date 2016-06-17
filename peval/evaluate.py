@@ -63,12 +63,12 @@ def evaluate_all_cli(arguments):
     print('-'*80)
     print("Evaluated {} runs. Succeeded: {}, failed: {}".format(num_ran, num_no_exns, num_exns))
     print('-'*80)
-    print()
+    print
 
-    print('-'*80)
-    print ("-- Exceptions:")
-    print('-'*80)
     if num_exns != 0:
+        print('-'*80)
+        print ("-- Exceptions:")
+        print('-'*80)
         pretty_exceptions = "\n".join(exceptions)
         raise utility.FormattedError(pretty_exceptions)
 
