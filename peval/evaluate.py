@@ -56,7 +56,7 @@ def evaluate_all_cli(arguments):
 
     num_exns = len(exceptions)
     num_ran = len(unevaluated_run_ids)
-    num_no_exns = num_exns - num_ran
+    num_no_exns = num_ran - num_exns
 
     print('-'*80)
     print ("-- Results:")
