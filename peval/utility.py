@@ -98,6 +98,12 @@ def location_resource(
   ):
     return osp.join(location, fname)
 
+def glob_resource(fname):
+    path = location_resource(fname=(fname + "*"))
+    candidates = glob.glob(path)
+    if len(candidates) != 1:
+        raise FormattedError("Identifier %s is not unique. Please specify further", path)
+    return test_path(candidates[0])
 
 def get_resource(fname='.'):
     path = location_resource(fname=fname)

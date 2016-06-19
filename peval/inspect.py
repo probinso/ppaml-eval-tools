@@ -34,17 +34,17 @@ from . import utility
 
 
 def inspect_operation_cli(arguments):
-    unique_identifier = utility.get_resource(arguments.hash_tar_bz)
-    return inspect_operation(unique_identifier)
+    identifier = utility.glob_resource(arguments.hash)
+    return inspect_operation(identifier)
 
-def inspect_operation(unique_identifier):
+def inspect_operation(identifier):
     with utility.TemporaryDirectory(persist=True) as sandbox:
-        utility.unpack_part(unique_identifier, sandbox)
+        utility.unpack_part(identifier, sandbox)
 
 def generate_parser(parser):
 
     # initialize subparsers
-    parser.add_argument('hash_tar_bz', type=str, help="unique identifier hash")
+    parser.add_argument('hash', type=str, help="unique identifier hash")
 
     parser.set_defaults(func=inspect_operation_cli)
     return parser
