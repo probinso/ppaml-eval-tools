@@ -185,7 +185,15 @@ def register_solution_cli(arguments):
 
     [major, minor, revision] = solve_cp_id(arguments.cp_id)
     full_path = utility.resolve_path(arguments.solution_path)
-    configs = arguments.configs
+
+    def validate_config(c):
+        if not osp.isfile(c):
+            raise utility.FormattedError(
+                "File error: '{}' is not a regular file (is it a directory perhaps?)",
+                c)
+        return osp.abspath(c)
+    configs = [validate_config(c) for c in arguments.configs]
+
     return register_solution(engine_hash, full_path, major,
       minor, revision, configs)
 
@@ -244,16 +252,16 @@ def solution_subparser(subparsers):
     parser = subparsers.add_parser('solution')
 
     parser.add_argument('engine_hash', type=str,
-      help="engine's unique identifier")
+      help="engine's unique identifier, e.g. '80f5daa5fdda76bb774429a0f07ae1e065af9493.tar.bz2'.")
 
     parser.add_argument('cp_id', type=str,
-      help="challenge problem id Major-Minor-Version ex: 01-00-02")
+      help="challenge problem id Major-Minor-Version, e.g. '01-00-02'. The challenge problem ID must already exist in the database. Edit 'db_init.sql' and update the DB as described in the README to add a new challenge problem ID.")
 
     parser.add_argument('solution_path', type=str,
-      help="full path to solution")
+      help="full path to solution directory.")
 
     parser.add_argument('configs', type=str, nargs='+',
-      help="list of configuration files usable by solution")
+      help="list of individual configuration files (not a directory containing configuration files) usable by solution.")
 
     parser.set_defaults(func=register_solution_cli)
 

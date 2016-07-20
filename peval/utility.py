@@ -492,7 +492,7 @@ class FormattedError(FatalError):
 
 def test_path(path):
     if not osp.exists(path):
-        raise FormattedError("File error: {} does not exist", path)
+        raise FormattedError("File error: '{}' does not exist", path)
     return path
 
 
