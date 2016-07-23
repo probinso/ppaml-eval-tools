@@ -54,7 +54,6 @@ import stat
 import time
 import subprocess
 import psutil
-import signal # XXX PMR : this should probably not exist in utility
 
 
 """
@@ -85,12 +84,6 @@ def signal_handler(signum, frame):
   ::SUCC_COMMENT
   This ends SUCC_COMMENT related data and modifications
 """
-
-signals = map(
-  lambda x: signal.signal(x, signal_handler),
-  [signal.SIGINT, signal.SIGTERM]
-  ) # cannot catch signal.SIGKILL
-""""""
 
 def location_resource(
   fname='.',
